@@ -58,7 +58,7 @@ private:
 
     void connect() {
         socket_.async_connect(
-                boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 31400),
+                boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 6666),
                 boost::bind(&Client::on_connect, this, boost::asio::placeholders::error));
     }
 
