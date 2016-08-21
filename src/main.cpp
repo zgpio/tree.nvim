@@ -67,7 +67,7 @@ private:
             std::cout << "connect failed: " << error.message() << std::endl;
         } else {
             std::cout << "connected" << std::endl;
-            send(0, 0);
+            send(79); //debug vim_del_current_line
         }
     }
     
@@ -84,14 +84,17 @@ private:
         pk.pack_array(sizeof...(t));
         detail::pack(pk, t...);
         
-        //std::string send_data = "echo \"hello world!\"";
-        /*
+        msgpack::object_handle oh = msgpack::unpack(sbuf.data(), sbuf.size());
+
+        msgpack::object deserialized = oh.get();
+
+        std::cout << "sbuf = " << deserialized << std::endl;
+        
         boost::asio::async_write(
                         socket_,
-                        boost::asio::buffer(str),
+                        boost::asio::buffer(std::string(sbuf.data())),
                         boost::bind(&Client::on_send, this, boost::asio::placeholders::error,
                                                             boost::asio::placeholders::bytes_transferred));
-        */
     }
 
     void on_send(const boost::system::error_code &error, size_t /*bytes_transferred*/) {
