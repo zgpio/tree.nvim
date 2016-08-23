@@ -67,7 +67,7 @@ private:
             std::cout << "connect failed: " << error.message() << std::endl;
         } else {
             std::cout << "connected" << std::endl;
-            send(79); //debug vim_del_current_line
+            send(0); //debug vim_del_current_line
         }
     }
     
@@ -78,8 +78,8 @@ private:
         msgpack::sbuffer sbuf;
         detail::Packer pk(&sbuf);
         pk.pack_array(4) << (uint64_t)REQUEST
-                         << 0 //id
-                         << method;
+                         << (uint64_t)0 //msgid
+                         << std::string("vim_del_current_line");
         
         pk.pack_array(sizeof...(t));
         detail::pack(pk, t...);
