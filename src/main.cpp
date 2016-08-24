@@ -92,7 +92,7 @@ private:
         
         boost::asio::async_write(
                         socket_,
-                        boost::asio::buffer(std::string(sbuf.data())),
+                        boost::asio::buffer(std::string(sbuf.data(), sbuf.size())),
                         boost::bind(&Client::on_send, this, boost::asio::placeholders::error,
                                                             boost::asio::placeholders::bytes_transferred));
     }
