@@ -32,6 +32,10 @@ namespace detail {
     }
 } // namespace detail
 
+void test(boost::asio::yield_context yield_context) {
+
+}
+
 class Client {
     boost::asio::io_service &io_service_;
     boost::asio::ip::tcp::socket socket_;
@@ -67,19 +71,19 @@ private:
             std::cout << "connect failed: " << error.message() << std::endl;
         } else {
             std::cout << "connected" << std::endl;
-            send(0); //debug vim_del_current_line
+            send(); //debug vim_del_current_line
         }
     }
     
     template<typename...T>
-    void send(uint64_t method, const T&...t) {
+    void send(const T&...t) {
         //msgpack::type::tuple<int, std::string, std::string> src(2, "vim_command", "vsplit");
 
         msgpack::sbuffer sbuf;
         detail::Packer pk(&sbuf);
         pk.pack_array(4) << (uint64_t)REQUEST
                          << (uint64_t)0 //msgid
-                         << std::string("vim_del_current_line");
+                         << std::string("vim_get_current_line");
         
         pk.pack_array(sizeof...(t));
         detail::pack(pk, t...);
@@ -89,14 +93,25 @@ private:
         msgpack::object deserialized = oh.get();
 
         std::cout << "sbuf = " << deserialized << std::endl;
-        
-        boost::asio::async_write(
-                        socket_,
-                        boost::asio::buffer(std::string(sbuf.data(), sbuf.size())),
-                        boost::bind(&Client::on_send, this, boost::asio::placeholders::error,
-                                                            boost::asio::placeholders::bytes_transferred));
+
+        boost::asio::spawn(io_service_, [this, &sbuf](boost::asio::yield_context yield_ctx){
+            boost::asio::async_write(socket_,
+                boost::asio::buffer(std::string(sbuf.data(), sbuf.size())), yield_ctx);
+            
+            boost::system::error_code ec;
+            boost::asio::streambuf response;
+
+            boost::asio::async_read(socket_, response,
+                boost::asio::transfer_at_least(1), yield_ctx[ec]);
+            
+            msgpack::object_handle oh = msgpack::unpack(
+                boost::asio::buffer_cast<const char *>(response.data()), response.size());
+            msgpack::object deserialized = oh.get();
+            std::cout << "res = " << deserialized << std::endl;
+        });
     }
 
+    
     void on_send(const boost::system::error_code &error, size_t /*bytes_transferred*/) {
         if(error) {
             std::cout << "send failed: " << error.message() << std::endl;
@@ -115,14 +130,7 @@ int main() {
     io_service.run();
 
     //boost::asio::io_service::strand strand = socket.get_io_service();
-
-    //boost::asio::spawn(io_service, [](boost::asio::yield_context yield){
-        //async_read(socket, asio::buffer(buffer_), yield);
-        //async_write(socket, asio::buffer(buffer_), yield);
-
-        //do something...
-    //});
-
+    
     msgpack::type::tuple<int, bool, std::string> src(1, true, "example");
 
     std::stringstream buffer;
