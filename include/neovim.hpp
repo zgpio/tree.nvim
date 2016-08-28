@@ -36,7 +36,7 @@ namespace detail {
 } // namespace detail
 
 class NeoVim {
-    boost::asio::io_service &io_service_;
+    boost::asio::io_service io_service_;
     boost::asio::ip::tcp::socket socket_;
     uint64_t msgid_;
     
@@ -47,9 +47,9 @@ class NeoVim {
     };
     
 public:
-    NeoVim(boost::asio::io_service &io_service)
-        : io_service_(io_service),
-          socket_(io_service),
+    NeoVim()
+        : io_service_(),
+          socket_(io_service_),
           msgid_(0)
     {
         connect();
@@ -71,6 +71,9 @@ private:
                 }
             }
         );
+        
+        std::cout << "run" << std::endl;
+        io_service_.run();
     }
 };
 
