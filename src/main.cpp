@@ -10,6 +10,8 @@ int main() {
     //client.send("vim_del_current_line");
     
     //sleep(1);
+    
+    for(;;) {}
 
     return 0;
 }
