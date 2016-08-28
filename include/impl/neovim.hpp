@@ -1,13 +1,34 @@
+namespace internal {
+    using Packer = msgpack::packer<msgpack::sbuffer>;
+
+    template<class X>
+        Packer& pack(Packer& pk, const X& x)
+        {
+              return pk << x;
+        }
+    template<class X, class Y, class...Z>
+        Packer& pack(Packer& pk, const X &x, const Y &y, const Z &...z)
+        {
+              return pack(pack(pk, x), y, z...);
+        }
+
+
+    static Packer& pack(Packer& pk)
+    {
+          return pk;
+    }
+} // namespace internal
+
 template<typename...T>
 void NeoVim::send(const std::string &method, const T&...t) {
     msgpack::sbuffer sbuf;
-    detail::Packer pk(&sbuf);
+    internal::Packer pk(&sbuf);
     pk.pack_array(4) << (uint64_t)REQUEST
                      << msgid_++
                      << method;
     
     pk.pack_array(sizeof...(t));
-    detail::pack(pk, t...);
+    internal::pack(pk, t...);
     
     msgpack::object_handle oh = msgpack::unpack(sbuf.data(), sbuf.size());
 
@@ -44,5 +65,22 @@ void NeoVim::send(const std::string &method, const T&...t) {
             result.zone().reset();
         }
     });
+}
+
+void NeoVim::connect() {
+    socket_.async_connect(
+        boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 6666),
+        [this](const boost::system::error_code &ec) {
+            if(ec) {
+                std::cout << "connect failed: " << ec.message() << std::endl;
+            } else {   
+                std::cout << "connected" << std::endl;
+                send("vim_list_runtime_paths");
+            }
+        }
+    );
+    
+    std::cout << "run" << std::endl;
+    io_service_.run();
 }
 

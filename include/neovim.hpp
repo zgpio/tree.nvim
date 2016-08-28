@@ -14,27 +14,6 @@
 #include <boost/asio/write.hpp>
 #include <boost/bind.hpp>
 
-namespace detail {
-    using Packer = msgpack::packer<msgpack::sbuffer>;
-
-    template<class X>
-        Packer& pack(Packer& pk, const X& x)
-        {
-              return pk << x;
-        }
-    template<class X, class Y, class...Z>
-        Packer& pack(Packer& pk, const X &x, const Y &y, const Z &...z)
-        {
-              return pack(pack(pk, x), y, z...);
-        }
-
-
-    static Packer& pack(Packer& pk)
-    {
-          return pk;
-    }
-} // namespace detail
-
 class NeoVim {
     boost::asio::io_service io_service_;
     boost::asio::ip::tcp::socket socket_;
@@ -59,22 +38,8 @@ public:
     void send(const std::string &method, const T&...t);
     
 private:
-    void connect() {
-        socket_.async_connect(
-            boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 6666),
-            [this](const boost::system::error_code &ec) {
-                if(ec) {
-                    std::cout << "connect failed: " << ec.message() << std::endl;
-                } else {   
-                    std::cout << "connected" << std::endl;
-                    send("vim_list_runtime_paths");
-                }
-            }
-        );
-        
-        std::cout << "run" << std::endl;
-        io_service_.run();
-    }
+    void connect();
+
 };
 
 #include "impl/neovim.hpp"
