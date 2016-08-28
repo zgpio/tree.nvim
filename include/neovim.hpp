@@ -102,9 +102,7 @@ private:
             if(ec) {
                 std::cout << "send failed: " << ec.message() << std::endl;
                 return;
-            } else {
-                std::cout << "send correct!" << std::endl;
-            }
+            } 
 
             msgpack::unpacker unpacker;
             unpacker.reserve_buffer(32*1024ul);
@@ -114,9 +112,7 @@ private:
             if(ec) {
                 std::cout << "read failed: " << ec.message() << std::endl;
                 return;
-            } else {
-                std::cout << "read correct!" << std::endl;
-            }
+            } 
 
             msgpack::unpacked result;
             unpacker.buffer_consumed(size);
