@@ -7,7 +7,7 @@ int main() {
     
     //sleep(2);
 
-    //client.send("vim_list_runtime_paths"); 
+    client.send("vim_list_runtime_paths"); 
 
     //boost::asio::io_service::strand strand = socket.get_io_service();
     /*

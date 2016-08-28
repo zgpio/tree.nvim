@@ -61,17 +61,16 @@ public:
 private:
     void connect() {
         socket_.async_connect(
-                boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 6666),
-                boost::bind(&NeoVim::on_connect, this, boost::asio::placeholders::error));
-    }
-
-    void on_connect(const boost::system::error_code &error) {
-        if(error) {
-            std::cout << "connect failed: " << error.message() << std::endl;
-        } else {
-            std::cout << "connected" << std::endl;
-            send("vim_list_runtime_paths"); 
-        }
+            boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 6666),
+            [this](const boost::system::error_code &ec) {
+                if(ec) {
+                    std::cout << "connect failed: " << ec.message() << std::endl;
+                } else {   
+                    std::cout << "connected" << std::endl;
+                    send("vim_list_runtime_paths");
+                }
+            }
+        );
     }
 };
 
