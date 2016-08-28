@@ -2,14 +2,15 @@
 
 int main() {
     boost::asio::io_service io_service;
-    Client client(io_service);
-
-    client.start();
-    //client.connect();
+    NeoVim client(io_service);
     io_service.run();
+    
+    //sleep(2);
+
+    //client.send("vim_list_runtime_paths"); 
 
     //boost::asio::io_service::strand strand = socket.get_io_service();
-    
+    /*
     msgpack::type::tuple<int, bool, std::string> src(1, true, "example");
 
     std::stringstream buffer;
@@ -27,6 +28,7 @@ int main() {
     
     msgpack::type::tuple<int, bool, std::string> dst;
     deserialized.convert(dst);
+    */
 
     sleep(5);
 
