@@ -7,6 +7,7 @@ find_package(Boost 1.55.0 REQUIRED COMPONENTS system coroutine context)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 include_directories(
+    include
     ${Boost_INCLUDE_DIR}
 )
 
