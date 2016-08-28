@@ -32,10 +32,6 @@ namespace detail {
     }
 } // namespace detail
 
-void test(boost::asio::yield_context yield_context) {
-
-}
-
 class Client {
     boost::asio::io_service &io_service_;
     boost::asio::ip::tcp::socket socket_;
@@ -83,7 +79,7 @@ private:
         detail::Packer pk(&sbuf);
         pk.pack_array(4) << (uint64_t)REQUEST
                          << (uint64_t)0 //msgid
-                         << std::string("vim_get_current_line");
+                         << std::string("vim_list_runtime_paths");
         
         pk.pack_array(sizeof...(t));
         detail::pack(pk, t...);
@@ -95,29 +91,38 @@ private:
         std::cout << "sbuf = " << deserialized << std::endl;
 
         boost::asio::spawn(io_service_, [this, &sbuf](boost::asio::yield_context yield_ctx){
-            boost::asio::async_write(socket_,
-                boost::asio::buffer(std::string(sbuf.data(), sbuf.size())), yield_ctx);
-            
             boost::system::error_code ec;
-            boost::asio::streambuf response;
+                
+            boost::asio::async_write(socket_,
+                boost::asio::buffer(std::string(sbuf.data(), sbuf.size())), yield_ctx[ec]);
+            
+            if(ec) {
+                std::cout << "send failed: " << ec.message() << std::endl;
+                return;
+            } else {
+                std::cout << "send correct!" << std::endl;
+            }
 
-            boost::asio::async_read(socket_, response,
+            msgpack::unpacker unpacker;
+            unpacker.reserve_buffer(32*1024ul);
+            size_t size = async_read(socket_, boost::asio::buffer(unpacker.buffer(), unpacker.buffer_capacity()),
                 boost::asio::transfer_at_least(1), yield_ctx[ec]);
             
-            msgpack::object_handle oh = msgpack::unpack(
-                boost::asio::buffer_cast<const char *>(response.data()), response.size());
-            msgpack::object deserialized = oh.get();
-            std::cout << "res = " << deserialized << std::endl;
-        });
-    }
+            if(ec) {
+                std::cout << "read failed: " << ec.message() << std::endl;
+                return;
+            } else {
+                std::cout << "read correct!" << std::endl;
+            }
 
-    
-    void on_send(const boost::system::error_code &error, size_t /*bytes_transferred*/) {
-        if(error) {
-            std::cout << "send failed: " << error.message() << std::endl;
-        } else {
-            std::cout << "send correct!" << std::endl;
-        }
+            msgpack::unpacked result;
+            unpacker.buffer_consumed(size);
+            while(unpacker.next(result)) {
+                const msgpack::object &obj = result.get();
+                std::cout << "res = " << obj << std::endl;
+                result.zone().reset();
+            }
+        });
     }
 };
 
@@ -148,6 +153,8 @@ int main() {
     
     msgpack::type::tuple<int, bool, std::string> dst;
     deserialized.convert(dst);
+
+    sleep(5);
 
     return 0;
 }
