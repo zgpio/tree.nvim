@@ -6,10 +6,7 @@ int main() {
     //client.send("vim_list_runtime_paths"); 
     
     sleep(1);
-    
-    //client.send("vim_del_current_line");
-    
-    //sleep(1);
+    client.send("vim_del_current_line");
     
     for(;;) {}
 
