@@ -8,17 +8,17 @@
 
 #include <boost/asio.hpp>
 #include <boost/asio/spawn.hpp>
-#include <boost/asio/yield.hpp>
+//#include <boost/asio/yield.hpp>
+#include <atomic>
+#include <thread>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/bind.hpp>
 
+#include <thread>
+
 class NeoVim {
-    boost::asio::io_service io_service_;
-    boost::asio::ip::tcp::socket socket_;
-    uint64_t msgid_;
-    
     enum {
         REQUEST  = 0,
         RESPONSE = 1,
@@ -27,10 +27,13 @@ class NeoVim {
     
 public:
     NeoVim()
-        : io_service_(),
-          socket_(io_service_),
+        : io_service_(new boost::asio::io_service()),
+          socket_(*io_service_),
+          work_(new boost::asio::io_service::work(*io_service_)),
+          thread_([=] { io_service_->run(); }),
           msgid_(0)
     {
+        
         connect();
     }
 
@@ -39,9 +42,16 @@ public:
     
 private:
     void connect();
+    
+    std::shared_ptr<boost::asio::io_service> io_service_;
+    boost::asio::ip::tcp::socket socket_;
+    std::unique_ptr<boost::asio::io_service::work> work_;
+    std::thread thread_;
+    uint64_t msgid_;
 
 };
 
 #include "impl/neovim.hpp"
 
 #endif //NEOVIM_HPP_
+
