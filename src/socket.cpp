@@ -1,0 +1,59 @@
+#include "socket.hpp"
+
+void Socket::connect(const std::string& host, 
+                     const std::string& service, double timeout_sec)
+{
+    tcp::resolver::query query(host, service);
+    tcp::resolver::iterator iter = tcp::resolver(io_service_).resolve(query);
+
+    deadline_.expires_from_now(boost::posix_time::seconds(timeout_sec));
+
+    boost::system::error_code ec;
+
+    for (; iter != tcp::resolver::iterator(); ++iter) {
+        socket_.close();
+        ec = boost::asio::error::would_block;
+        socket_.async_connect(iter->endpoint(), var(ec) = _1);
+
+        do io_service_.run_one(); while (ec == boost::asio::error::would_block);
+        if (!ec && socket_.is_open()) return;
+    }
+
+    throw boost::system::system_error(
+        ec ? ec : boost::asio::error::host_not_found);
+}
+
+size_t Socket::read(char *rbuf, size_t capacity, double timeout_sec) {
+    deadline_.expires_from_now(boost::posix_time::seconds(timeout_sec));
+    boost::system::error_code ec = boost::asio::error::would_block;
+    size_t rlen;
+    async_read(socket_, boost::asio::buffer(rbuf, capacity), 
+      boost::asio::transfer_at_least(1), 
+    [&ec, &rlen](boost::system::error_code e, size_t s) {ec = e; rlen = s;});
+
+    do io_service_.run_one(); while (ec == boost::asio::error::would_block);
+    if (ec) throw boost::system::system_error(ec);
+
+    return rlen;
+}
+
+void Socket::write(char *sbuf, size_t size, double timeout_sec) {
+    deadline_.expires_from_now(boost::posix_time::seconds(timeout_sec));
+    boost::system::error_code ec = boost::asio::error::would_block;
+    boost::asio::async_write(socket_, boost::asio::buffer(sbuf, size), var(ec) = _1);
+
+    do io_service_.run_one(); while (ec == boost::asio::error::would_block);
+
+    if (ec) throw boost::system::system_error(ec);
+}
+
+void Socket::check_deadline() {
+    if (deadline_.expires_at() <= deadline_timer::traits_type::now()) {
+        socket_.close();
+        deadline_.expires_at(boost::posix_time::pos_infin);
+    }
+
+    deadline_.async_wait(bind(&Socket::check_deadline, this));
+}
+
+
