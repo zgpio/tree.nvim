@@ -6,17 +6,15 @@
 #include <iostream>
 #include <sstream>
 
+/*
 #include <boost/asio.hpp>
 #include <boost/asio/spawn.hpp>
-//#include <boost/asio/yield.hpp>
 #include <atomic>
-#include <thread>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/io_service.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/bind.hpp>
+*/
 
-#include <thread>
+#include "socket.hpp"
 
 class NeoVim {
     enum {
@@ -26,28 +24,17 @@ class NeoVim {
     };
     
 public:
-    NeoVim()
-        : io_service_(new boost::asio::io_service()),
-          socket_(*io_service_),
-          work_(new boost::asio::io_service::work(*io_service_)),
-          thread_([=] { io_service_->run(); }),
-          msgid_(0)
-    {
-        
-        connect();
+    NeoVim() : 
+        msgid_(0) {
+        socket_.connect("127.0.0.1", "6666", 1.0);
     }
 
     template<typename...T>
     void send(const std::string &method, const T&...t);
     
 private:
-    void connect();
-    
-    std::shared_ptr<boost::asio::io_service> io_service_;
-    boost::asio::ip::tcp::socket socket_;
-    std::unique_ptr<boost::asio::io_service::work> work_;
-    std::thread thread_;
     uint64_t msgid_;
+    Socket socket_;
 
 };
 

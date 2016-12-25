@@ -11,7 +11,10 @@ include_directories(
     ${Boost_INCLUDE_DIR}
 )
 
-add_executable(test src/main.cpp)
+add_executable(test 
+    src/main.cpp
+    src/socket.cpp
+)
 
 target_link_libraries(test ${Boost_LIBRARIES})
 
