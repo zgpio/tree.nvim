@@ -1,39 +1,4 @@
-//
-// blocking_tcp_client.cpp
-// ~~~~~~~~~~~~~~~~~~~~~~~
-//
-// Copyright (c) 2003-2011 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
-
 #include "socket.hpp"
-
-//----------------------------------------------------------------------
-
-//
-// This class manages socket timeouts by applying the concept of a deadline.
-// Each asynchronous operation is given a deadline by which it must complete.
-// Deadlines are enforced by an "actor" that persists for the lifetime of the
-// client object:
-//
-//  +----------------+
-//  |                |     
-//  | check_deadline |<---+
-//  |                |    |
-//  +----------------+    | async_wait()
-//              |         |
-//              +---------+
-//
-// If the actor determines that the deadline has expired, the socket is closed
-// and any outstanding operations are consequently cancelled. The socket
-// operations themselves use boost::lambda function objects as completion
-// handlers. For a given socket operation, the client object runs the
-// io_service to block thread execution until the actor completes.
-//
-
-//----------------------------------------------------------------------
 
 int main(int argc, char* argv[])
 {
