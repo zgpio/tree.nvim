@@ -19,7 +19,7 @@ for f in unpacked_api['functions']:
     d['name'] = f['name']
     d['return'] = f['return_type']
     
-    d['args'] = [{'type': arg[0], 'name': arg[1]} if arg == f['parameters'][-1] else {'type': arg[0], 'name': arg[1] + ", "} for arg in f['parameters']]
+    d['args'] = [{'type': arg[0], 'name': arg[1]} for arg in f['parameters']]
     print d['args']
     #print d
     functions.append(d)

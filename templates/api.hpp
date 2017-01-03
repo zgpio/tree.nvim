@@ -16,8 +16,8 @@ class Nvim {
 
 public:
 {% for func in functions%}
-    {{func.return}} {{func.name}} ({% for arg in func.args %}{{arg.type}} {{arg.name}}{% endfor %}) { 
-        return client.send("{{func.name}}", {% for arg in func.args %}{{arg.name}}{% endfor %}); 
+    {{func.return}} {{func.name}} ({% for arg in func.args %}{{arg.type}} {{arg.name}}{% if not loop.last %}, {% endif %}{% endfor %}) { 
+        return client.send("{{func.name}}"{% for arg in func.args %}, {{arg.name}}{% endfor %}); 
     }
 {% endfor %}
 
