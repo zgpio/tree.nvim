@@ -10,8 +10,6 @@ class Nvim {
     using Buffer = int64_t;
     using Tabpage = int64_t;
     using Integer = int64_t;
-    using Boolean = bool;
-    using String = std::string;
     using Object = boost::any;
 
 public:
