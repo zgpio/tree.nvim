@@ -1,5 +1,17 @@
 #include "socket.hpp"
 
+#include <boost/lambda/bind.hpp>
+#include <boost/lambda/lambda.hpp>
+#include <boost/asio/write.hpp>
+#include <boost/asio/read.hpp>
+
+using boost::asio::deadline_timer;
+using boost::asio::ip::tcp;
+using boost::lambda::bind;
+using boost::lambda::var;
+using boost::lambda::_1;
+using boost::lambda::_2;
+
 void Socket::connect(const std::string& host, 
                      const std::string& service, double timeout_sec)
 {
@@ -28,8 +40,8 @@ size_t Socket::read(char *rbuf, size_t capacity, double timeout_sec) {
     boost::system::error_code ec = boost::asio::error::would_block;
     size_t rlen;
     async_read(socket_, boost::asio::buffer(rbuf, capacity), 
-      boost::asio::transfer_at_least(1), 
-    [&ec, &rlen](boost::system::error_code e, size_t s) {ec = e; rlen = s;});
+        boost::asio::transfer_at_least(1), 
+        [&ec, &rlen](boost::system::error_code e, size_t s) {ec = e; rlen = s;});
 
     do io_service_.run_one(); while (ec == boost::asio::error::would_block);
     if (ec) throw boost::system::system_error(ec);
