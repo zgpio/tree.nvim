@@ -14,18 +14,59 @@ namespace internal {
     static Packer& pack(Packer& pk) {
           return pk;
     }
+
 } // namespace internal
 
-template<typename...T>
-void NeoVim::send(const std::string &method, const T&...t) {
+template<typename T, typename...U>
+bool NvimRPC::send(const std::string &method, T& ret, const U&...u) {
+    Object v = do_send(method, u...);
+    std::cout << "T NvimRPC::send" << std::endl;
+    
+    //if(!v.is_nil()) return boost::get<T>(v);
+    ret = boost::get<T>(v);
+    return true;
+}
+
+template<typename...U>
+bool NvimRPC::send(const std::string &method, Integer& ret, const U& ...u) {
+    Object v = do_send(method, u...);
+    std::cout << "Integer NvimRPC::send" << std::endl;
+    
+    // int64_t is only for negative integer.
+    if(v.is_int64_t())       ret = v.as_int64_t();
+    else if(v.is_uint64_t()) ret = v.as_uint64_t();
+
+    return true;
+}
+
+template<typename...U>
+bool NvimRPC::send(const std::string &method, Object& ret, const U& ...u) {
+    Object v = do_send(method, u...);
+    std::cout << "Object NvimRPC::send" << std::endl;
+    
+    ret = ret;
+
+    return true;
+}
+
+template<typename...U>
+bool NvimRPC::send(const std::string &method, const U&...u) {
+    do_send(method, u...);
+    std::cout << "void NvimRPC::send" << std::endl;
+
+    return true;
+}
+
+template<typename...U>
+Object NvimRPC::do_send(const std::string &method, const U&...u) {
     msgpack::sbuffer sbuf;
     internal::Packer pk(&sbuf);
     pk.pack_array(4) << (uint64_t)REQUEST
                      << msgid_++
                      << method;
     
-    pk.pack_array(sizeof...(t));
-    internal::pack(pk, t...);
+    pk.pack_array(sizeof...(u));
+    internal::pack(pk, u...);
     
     msgpack::object_handle oh = msgpack::unpack(sbuf.data(), sbuf.size());
 
@@ -41,10 +82,21 @@ void NeoVim::send(const std::string &method, const T&...t) {
     size_t rlen = socket_.read(unpacker.buffer(), unpacker.buffer_capacity(), 5);
     msgpack::unpacked result;
     unpacker.buffer_consumed(rlen);
+    
+    /*
     while(unpacker.next(result)) {
         const msgpack::object &obj = result.get();
         std::cout << "res = " << obj << std::endl;
         result.zone().reset();
     }
+    */
+    
+    //TODO: full-state response handler should be implemented
+    unpacker.next(result);
+    const msgpack::object &obj = result.get();
+    std::cout << "res = " << obj << std::endl;
+    msgpack::type::tuple<int64_t, int64_t, Object, Object> dst;
+    obj.convert(dst);
+    return dst.get<3>();
 }
 
