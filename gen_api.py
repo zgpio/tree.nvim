@@ -33,7 +33,7 @@ def convert_type_to_native(nvim_t, enable_ref_op):
     
     obj = re.match(array_of, nvim_t)
     if obj:
-        ret = 'std::vector<%s>' % obj.groups()[0]
+        ret = 'std::vector<%s>' % convert_type_to_native(obj.groups()[0], False)
         return 'const ' + ret + '&' if enable_ref_op else ret
     
     if nvim_t in RENAME_T:
