@@ -18,43 +18,43 @@ namespace internal {
 } // namespace internal
 
 template<typename T, typename...U>
-bool NvimRPC::send(const std::string &method, T& ret, const U&...u) {
+void NvimRPC::send(const std::string &method, T& res, const U&...u) {
     Object v = do_send(method, u...);
     std::cout << "T NvimRPC::send" << std::endl;
     
     //if(!v.is_nil()) return boost::get<T>(v);
-    ret = boost::get<T>(v);
-    return true;
+    //ret = boost::get<T>(v);
+    //return true;
+
+    res = boost::get<T>(v);
 }
 
 template<typename...U>
-bool NvimRPC::send(const std::string &method, Integer& ret, const U& ...u) {
+void NvimRPC::send(const std::string &method, Integer& res, const U& ...u) {
     Object v = do_send(method, u...);
     std::cout << "Integer NvimRPC::send" << std::endl;
     
     // int64_t is only for negative integer.
-    if(v.is_int64_t())       ret = v.as_int64_t();
-    else if(v.is_uint64_t()) ret = v.as_uint64_t();
-
-    return true;
+    if(v.is_int64_t())       res = v.as_int64_t();
+    else if(v.is_uint64_t()) res = v.as_uint64_t();
+    else std::cout << "invalid response type" << std::endl; //TODO: add error handler
 }
 
 template<typename...U>
-bool NvimRPC::send(const std::string &method, Object& ret, const U& ...u) {
+void NvimRPC::send(const std::string &method, Object& res, const U& ...u) {
     Object v = do_send(method, u...);
     std::cout << "Object NvimRPC::send" << std::endl;
     
-    ret = ret;
-
-    return true;
+    res = v;
+    //return true;
 }
 
 template<typename...U>
-bool NvimRPC::send(const std::string &method, const U&...u) {
+void NvimRPC::send(const std::string &method, nullptr_t res, const U&...u) {
     do_send(method, u...);
     std::cout << "void NvimRPC::send" << std::endl;
 
-    return true;
+    //return true;
 }
 
 template<typename...U>

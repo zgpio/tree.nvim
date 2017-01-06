@@ -50,7 +50,7 @@ def convert_type_to_native(nvim_t, enable_ref_op):
 
 def main():
     env = Environment(loader=FileSystemLoader('templates', encoding='utf8'))
-    tpl = env.get_template('api.hpp')
+    tpl = env.get_template('nvim.hpp')
 
     api_info = subprocess.check_output(["nvim", '--api-info'])
     unpacked_api = msgpack.unpackb(api_info)
@@ -71,7 +71,7 @@ def main():
     api = tpl.render({'functions': functions})
     #print api.encode('utf-8')
 
-    with open(os.path.join("./", "auto"), 'w') as f:
+    with open(os.path.join("./", "nvim.hpp"), 'w') as f:
         f.write(api)
 
 if __name__ == '__main__':

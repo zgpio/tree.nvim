@@ -1,5 +1,5 @@
-#ifndef NEOVIM_HPP_
-#define NEOVIM_HPP_
+#ifndef NEOVIM_CPP__NVIM_RPC_HPP_
+#define NEOVIM_CPP__NVIM_RPC_HPP__
 
 #include "msgpack.hpp"
 #include <string>
@@ -28,18 +28,18 @@ public:
         msgid_(0) {
         socket_.connect("127.0.0.1", "6666", 1.0);
     }
-
+    
     template<typename T, typename...U>
-    bool send(const std::string &method, T& ret, const U&...u);
+    void send(const std::string &method, T& res, const U&...u);
     
     template<typename...U>
-    bool send(const std::string &method, Integer& ret, const U&...u);
+    void send(const std::string &method, Integer& res, const U&...u);
 
     template<typename...U>
-    bool send(const std::string &method, Object& ret, const U&...u);
-
+    void send(const std::string &method, Object& res, const U&...u);
+    
     template<typename...U>
-    bool send(const std::string &method, const U&...u);
+    void send(const std::string &method, nullptr_t res, const U&...u);
     
 private:
     template<typename...U>
@@ -50,7 +50,7 @@ private:
 
 };
 
-#include "impl/neovim.hpp"
+#include "impl/nvim_rpc.hpp"
 
-#endif //NEOVIM_HPP_
+#endif //NEOVIM_CPP__NVIM_RPC_HPP_
 
