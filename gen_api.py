@@ -20,6 +20,7 @@ RENAME_T = {
     'void': NativeType('void')
 }
 
+#TODO: remove
 REDEFINE_T = {
     'Window': NativeType('int64_t'),
     'Buffer': NativeType('int64_t'),
@@ -71,7 +72,7 @@ def main():
     api = tpl.render({'functions': functions})
     #print api.encode('utf-8')
 
-    with open(os.path.join("./", "nvim.hpp"), 'w') as f:
+    with open(os.path.join("./include", "nvim.hpp"), 'w') as f:
         f.write(api)
 
 if __name__ == '__main__':
