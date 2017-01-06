@@ -7,7 +7,8 @@ find_package(Boost 1.55.0 REQUIRED COMPONENTS system coroutine context thread)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")
 set(MSGPACK_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/msgpack-c)
 
-add_subdirectory(${MSGPACK_SOURCE_DIR})
+#add_subdirectory(${MSGPACK_SOURCE_DIR})
+set(CMAKE_CXX_FLAGS "-DMSGPACK_USE_BOOST ${CMAKE_CXX_FLAGS}") #TODO: import every flags directly from msgpack-c
 
 include_directories(
     include
@@ -22,4 +23,13 @@ add_executable(test
 
 target_link_libraries(test ${Boost_LIBRARIES})
 
-set(CMAKE_CXX_FLAGS "-DMSGPACK_USE_BOOST ${CMAKE_CXX_FLAGS}") #TODO: import every flags directly from msgpack-c
+find_package(PythonInterp)
+if (PYTHONINTERP_FOUND)
+    add_custom_target(auto_gen_api
+        COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/gen_api.py
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Start Auto Generation"
+    )
+endif()
+
+add_dependencies(test auto_gen_api)
