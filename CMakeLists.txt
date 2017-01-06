@@ -4,11 +4,15 @@ project(neovim_client_cpp)
 
 find_package(Boost 1.55.0 REQUIRED COMPONENTS system coroutine context thread)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")
+set(MSGPACK_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/msgpack-c)
+
+add_subdirectory(${MSGPACK_SOURCE_DIR})
 
 include_directories(
     include
     ${Boost_INCLUDE_DIR}
+    ${MSGPACK_SOURCE_DIR}/include
 )
 
 add_executable(test 
@@ -18,3 +22,4 @@ add_executable(test
 
 target_link_libraries(test ${Boost_LIBRARIES})
 
+set(CMAKE_CXX_FLAGS "-DMSGPACK_USE_BOOST ${CMAKE_CXX_FLAGS}") #TODO: import every flags directly from msgpack-c
