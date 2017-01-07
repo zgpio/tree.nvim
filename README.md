@@ -28,4 +28,4 @@ int main() {
 
 * implement message event dispatcher and asynchronous request/response handler
 
-* support neovim gui notification stuff (GUI implementation will be implemented as a separate package.)
+* support neovim gui notification stuff (GUI itself will be implemented as a separate package.)
