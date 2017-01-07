@@ -12,6 +12,8 @@ using boost::lambda::var;
 using boost::lambda::_1;
 using boost::lambda::_2;
 
+namespace nvim {
+
 void Socket::connect(const std::string& host, 
                      const std::string& service, double timeout_sec)
 {
@@ -68,4 +70,5 @@ void Socket::check_deadline() {
     deadline_.async_wait(bind(&Socket::check_deadline, this));
 }
 
+} //namespace nvim
 

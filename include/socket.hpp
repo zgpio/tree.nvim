@@ -11,6 +11,9 @@
 #include <iostream>
 #include <string>
 
+namespace nvim {
+
+//TODO Implement asynchronous response handler.
 class Socket {
 public:
     Socket() : 
@@ -35,5 +38,7 @@ public:
     boost::asio::deadline_timer deadline_;
     boost::asio::streambuf input_buffer_;
 };
+
+} //namespace nvim
 
 #endif //NEOVIM_CPP__SOCKET_HPP_

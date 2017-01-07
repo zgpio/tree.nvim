@@ -8,7 +8,8 @@
 
 #include "socket.hpp"
 
-//TODO: wrap as namespace;
+namespace nvim {
+
 using Integer = int64_t;
 using Window = Integer;
 using Buffer = Integer;
@@ -49,6 +50,8 @@ private:
     Socket socket_;
 
 };
+
+} //namespace nvim
 
 #include "impl/nvim_rpc.hpp"
 

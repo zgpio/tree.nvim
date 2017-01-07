@@ -5,6 +5,8 @@
 
 #include "nvim_rpc.hpp"
 
+namespace nvim {
+
 class Nvim {
 public:
 {% for func in functions%}
@@ -23,5 +25,7 @@ private:
     NvimRPC client;
 
 };
+
+} //namespace nvim
 
 #endif //NEOVIM_CPP__NVIM_HPP_
