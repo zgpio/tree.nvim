@@ -27,7 +27,11 @@ class NvimRPC {
 public:
     NvimRPC() : 
         msgid_(0) {
-        socket_.connect("127.0.0.1", "6666", 1.0);
+    }
+
+    void connect_tcp(const std::string &host, 
+            const std::string &service, double timeout_sec) {
+        socket_.connect_tcp(host, service, timeout_sec);
     }
     
     template<typename T, typename...U>

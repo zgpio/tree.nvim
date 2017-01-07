@@ -4,6 +4,7 @@
 #include <boost/lambda/lambda.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/asio/read.hpp>
+#include <boost/asio/ip/tcp.hpp>
 
 using boost::asio::deadline_timer;
 using boost::asio::ip::tcp;
@@ -14,7 +15,7 @@ using boost::lambda::_2;
 
 namespace nvim {
 
-void Socket::connect(const std::string& host, 
+void Socket::connect_tcp(const std::string& host, 
                      const std::string& service, double timeout_sec)
 {
     tcp::resolver::query query(host, service);
