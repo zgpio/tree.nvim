@@ -26,8 +26,6 @@ int main() {
 
 * provide various of connection interfaces
 
-* implement message event dispatcher
-
-* asynchronous request/response handling
+* implement message event dispatcher / asynchronous request/response handling
 
 * support neovim gui control stuff (GUI implementation will to be implemented as a separate package.)
