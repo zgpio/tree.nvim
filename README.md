@@ -1,5 +1,5 @@
 # neovim.cpp
 
-Client library for talking with NeoVim processes via it's msgpack-rpc API. (**in progress**)
+Boost::Asio based client library for talking with NeoVim process via it's msgpack-rpc API. (**in progress**)
 
-Depends on: [msgpack-c](https://github.com/msgpack/msgpack-c) and Jinja2
+Depends on: [msgpack-c](https://github.com/msgpack/msgpack-c), Jinja2, and Boost Libraries.
