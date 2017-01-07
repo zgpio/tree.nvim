@@ -28,7 +28,7 @@ if (PYTHONINTERP_FOUND)
     add_custom_target(auto_gen_api
         COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/gen_api.py
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Start Auto Generation"
+        COMMENT "Autogen nvim interface"
     )
 endif()
 
