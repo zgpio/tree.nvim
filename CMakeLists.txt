@@ -12,6 +12,7 @@ set(CMAKE_CXX_FLAGS "-DMSGPACK_USE_BOOST ${CMAKE_CXX_FLAGS}") #TODO: import ever
 
 include_directories(
     include
+    gen
     ${Boost_INCLUDE_DIR}
     ${MSGPACK_SOURCE_DIR}/include
 )
@@ -28,7 +29,7 @@ if (PYTHONINTERP_FOUND)
     add_custom_target(auto_gen_api
         COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/gen_api.py
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Start Auto Generation"
+        COMMENT "Autogen nvim interface"
     )
 endif()
 

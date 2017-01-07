@@ -13,20 +13,17 @@ class NativeType:
         self.name = name
         self.expect_ref = expect_ref
 
-RENAME_T = {
+REMAP_T = {
     'ArrayOf(Integer, 2)': NativeType('std::vector<Integer>', True),
     'Boolean': NativeType('bool'),
     'String': NativeType('std::string', True),
-    'void': NativeType('void')
-}
 
-#TODO: remove
-REDEFINE_T = {
-    'Window': NativeType('int64_t'),
-    'Buffer': NativeType('int64_t'),
-    'Tabpage': NativeType('int64_t'),
-    'Integer': NativeType('int64_t'),
-    'Object': NativeType('boost::any', True)
+    'void': NativeType('void'),
+    'Window': NativeType('Window'),
+    'Buffer': NativeType('Buffer'),
+    'Tabpage': NativeType('Tabpage'),
+    'Integer': NativeType('Integer'),
+    'Object': NativeType('Object', True)
 }
 
 def convert_type_to_native(nvim_t, enable_ref_op):
@@ -37,11 +34,9 @@ def convert_type_to_native(nvim_t, enable_ref_op):
         ret = 'std::vector<%s>' % convert_type_to_native(obj.groups()[0], False)
         return 'const ' + ret + '&' if enable_ref_op else ret
     
-    if nvim_t in RENAME_T:
-        native_t = RENAME_T[nvim_t]
+    if nvim_t in REMAP_T:
+        native_t = REMAP_T[nvim_t]
         return 'const ' + native_t.name + '&' if enable_ref_op and native_t.expect_ref else native_t.name
-    elif nvim_t in REDEFINE_T:
-        return 'const ' + nvim_t + '&' if enable_ref_op and REDEFINE_T[nvim_t].expect_ref else nvim_t
     else:
         print "unknown nvim type name: " + str(nvim_t)
         raise InvalidType()
@@ -72,7 +67,7 @@ def main():
     api = tpl.render({'functions': functions})
     #print api.encode('utf-8')
 
-    with open(os.path.join("./include", "nvim.hpp"), 'w') as f:
+    with open(os.path.join("./gen", "nvim.hpp"), 'w') as f:
         f.write(api)
 
 if __name__ == '__main__':

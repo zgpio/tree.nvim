@@ -1,3 +1,5 @@
+namespace nvim {
+
 namespace internal {
     using Packer = msgpack::packer<msgpack::sbuffer>;
 
@@ -100,3 +102,4 @@ Object NvimRPC::do_send(const std::string &method, const U&...u) {
     return dst.get<3>();
 }
 
+} //namespace nvim

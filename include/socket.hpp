@@ -3,7 +3,7 @@
 
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/io_service.hpp>
-#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/generic/stream_protocol.hpp>
 #include <boost/asio/read_until.hpp>
 #include <boost/asio/streambuf.hpp>
 #include <boost/system/system_error.hpp>
@@ -11,6 +11,9 @@
 #include <iostream>
 #include <string>
 
+namespace nvim {
+
+//TODO Implement asynchronous response handler.
 class Socket {
 public:
     Socket() : 
@@ -21,19 +24,21 @@ public:
         check_deadline();
     }
 
-    void connect(const std::string& host, 
+    void connect_tcp(const std::string& host, 
                const std::string& service, double timeout_sec);
 
     size_t read(char *rbuf, size_t capacity, double timeout_sec);
     void write(char *sbuf, size_t size, double timeout_sec);
 
-    private:
+private:
     void check_deadline();
 
     boost::asio::io_service io_service_;
-    boost::asio::ip::tcp::socket socket_;
+    boost::asio::generic::stream_protocol::socket socket_;
     boost::asio::deadline_timer deadline_;
     boost::asio::streambuf input_buffer_;
 };
+
+} //namespace nvim
 
 #endif //NEOVIM_CPP__SOCKET_HPP_
