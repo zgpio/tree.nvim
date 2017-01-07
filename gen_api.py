@@ -67,7 +67,7 @@ def main():
     api = tpl.render({'functions': functions})
     #print api.encode('utf-8')
 
-    with open(os.path.join("./include", "nvim.hpp"), 'w') as f:
+    with open(os.path.join("./gen", "nvim.hpp"), 'w') as f:
         f.write(api)
 
 if __name__ == '__main__':

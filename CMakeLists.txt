@@ -12,6 +12,7 @@ set(CMAKE_CXX_FLAGS "-DMSGPACK_USE_BOOST ${CMAKE_CXX_FLAGS}") #TODO: import ever
 
 include_directories(
     include
+    gen
     ${Boost_INCLUDE_DIR}
     ${MSGPACK_SOURCE_DIR}/include
 )
