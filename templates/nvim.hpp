@@ -19,10 +19,10 @@ public:
     {{func.return}} {{func.name}} ({% for arg in func.args %}{{arg.type}} {{arg.name}}{% if not loop.last %}, {% endif %}{% endfor %}) { 
         {% if func.return != "void" %}
         {{func.return}} res;
-        client_.send("{{func.name}}", res{% for arg in func.args %}, {{arg.name}}{% endfor %}); 
+        client_.call("{{func.name}}", res{% for arg in func.args %}, {{arg.name}}{% endfor %}); 
         return res;
         {% else %}
-        client_.send("{{func.name}}", nullptr{% for arg in func.args %}, {{arg.name}}{% endfor %}); 
+        client_.call("{{func.name}}", nullptr{% for arg in func.args %}, {{arg.name}}{% endfor %}); 
         {% endif %}
     }
 {% endfor %}

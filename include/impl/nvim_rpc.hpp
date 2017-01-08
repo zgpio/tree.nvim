@@ -1,6 +1,6 @@
 namespace nvim {
 
-namespace internal {
+namespace detail {
     using Packer = msgpack::packer<msgpack::sbuffer>;
 
     template<class X>
@@ -17,24 +17,20 @@ namespace internal {
           return pk;
     }
 
-} // namespace internal
+} // namespace detail
 
 template<typename T, typename...U>
-void NvimRPC::send(const std::string &method, T& res, const U&...u) {
-    Object v = do_send(method, u...);
-    std::cout << "T NvimRPC::send" << std::endl;
+void NvimRPC::call(const std::string &method, T& res, const U&...u) {
+    Object v = do_call(method, u...);
+    std::cout << "T NvimRPC::call" << std::endl;
     
-    //if(!v.is_nil()) return boost::get<T>(v);
-    //ret = boost::get<T>(v);
-    //return true;
-
     res = boost::get<T>(v);
 }
 
 template<typename...U>
-void NvimRPC::send(const std::string &method, Integer& res, const U& ...u) {
-    Object v = do_send(method, u...);
-    std::cout << "Integer NvimRPC::send" << std::endl;
+void NvimRPC::call(const std::string &method, Integer& res, const U& ...u) {
+    Object v = do_call(method, u...);
+    std::cout << "Integer NvimRPC::call" << std::endl;
     
     // int64_t is only for negative integer.
     if(v.is_int64_t())       res = v.as_int64_t();
@@ -43,32 +39,28 @@ void NvimRPC::send(const std::string &method, Integer& res, const U& ...u) {
 }
 
 template<typename...U>
-void NvimRPC::send(const std::string &method, Object& res, const U& ...u) {
-    Object v = do_send(method, u...);
-    std::cout << "Object NvimRPC::send" << std::endl;
-    
+void NvimRPC::call(const std::string &method, Object& res, const U& ...u) {
+    Object v = do_call(method, u...);
+    std::cout << "Object NvimRPC::call" << std::endl;
     res = v;
-    //return true;
 }
 
 template<typename...U>
-void NvimRPC::send(const std::string &method, nullptr_t res, const U&...u) {
-    do_send(method, u...);
-    std::cout << "void NvimRPC::send" << std::endl;
-
-    //return true;
+void NvimRPC::call(const std::string &method, nullptr_t res, const U&...u) {
+    do_call(method, u...);
+    std::cout << "void NvimRPC::call" << std::endl;
 }
 
 template<typename...U>
-Object NvimRPC::do_send(const std::string &method, const U&...u) {
+Object NvimRPC::do_call(const std::string &method, const U&...u) {
     msgpack::sbuffer sbuf;
-    internal::Packer pk(&sbuf);
+    detail::Packer pk(&sbuf);
     pk.pack_array(4) << (uint64_t)REQUEST
                      << msgid_++
                      << method;
     
     pk.pack_array(sizeof...(u));
-    internal::pack(pk, u...);
+    detail::pack(pk, u...);
     
     msgpack::object_handle oh = msgpack::unpack(sbuf.data(), sbuf.size());
 

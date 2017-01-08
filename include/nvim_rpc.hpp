@@ -35,20 +35,20 @@ public:
     }
     
     template<typename T, typename...U>
-    void send(const std::string &method, T& res, const U&...u);
+    void call(const std::string &method, T& res, const U&...u);
     
     template<typename...U>
-    void send(const std::string &method, Integer& res, const U&...u);
+    void call(const std::string &method, Integer& res, const U&...u);
 
     template<typename...U>
-    void send(const std::string &method, Object& res, const U&...u);
+    void call(const std::string &method, Object& res, const U&...u);
     
     template<typename...U>
-    void send(const std::string &method, nullptr_t res, const U&...u);
+    void call(const std::string &method, nullptr_t res, const U&...u);
     
 private:
     template<typename...U>
-    Object do_send(const std::string &method, const U&...u);
+    Object do_call(const std::string &method, const U&...u);
     
     uint64_t msgid_;
     Socket socket_;
