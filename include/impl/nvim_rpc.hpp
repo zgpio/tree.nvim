@@ -3,14 +3,14 @@ namespace nvim {
 namespace detail {
     using Packer = msgpack::packer<msgpack::sbuffer>;
 
-    template<class X>
-    Packer& pack(Packer& pk, const X& x) {
-          return pk << x;
+    template<class T>
+    Packer& pack(Packer& pk, const T& t) {
+          return pk << t;
     }
     
-    template<class X, class Y, class...Z>
-    Packer& pack(Packer& pk, const X &x, const Y &y, const Z &...z) {
-          return pack(pack(pk, x), y, z...);
+    template<class T1, class T2, class...T3>
+    Packer& pack(Packer& pk, const T1 &t1, const T2 &t2, const T3 &...t3) {
+          return pack(pack(pk, t1), t2, t3...);
     }
 
     static Packer& pack(Packer& pk) {
