@@ -21,11 +21,3 @@ int main() {
     return 0;
 }
 ```
-
-## TODO
-
-* provide various of connection interfaces
-
-* implement message event dispatcher and asynchronous request/response handler
-
-* support neovim gui notification stuff (GUI itself will be implemented as a separate package.)
