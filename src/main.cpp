@@ -1,4 +1,5 @@
 #include "nvim.hpp"
+#define BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT 
 
 int main() {
     nvim::Nvim nvim;

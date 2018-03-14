@@ -1,5 +1,6 @@
 #ifndef NEOVIM_CPP__SOCKET_HPP_
 #define NEOVIM_CPP__SOCKET_HPP_
+#define BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
 
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/io_service.hpp>

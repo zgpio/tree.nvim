@@ -6,6 +6,8 @@
 #include <boost/asio/read.hpp>
 #include <boost/asio/ip/tcp.hpp>
 
+#define BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
+
 using boost::asio::deadline_timer;
 using boost::asio::ip::tcp;
 using boost::lambda::bind;
