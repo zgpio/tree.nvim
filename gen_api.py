@@ -23,8 +23,8 @@ REMAP_T = {
     'Tabpage': NativeType('Tabpage'),
     'Integer': NativeType('Integer'),
     'Object': NativeType('Object', True),
-    # 'Array':NativeType('Array', True),
-    # 'Dictionary':NativeType('Dictionary', True)
+    'Array': NativeType('Array', True),
+    'Dictionary': NativeType('Dictionary', True)
 }
 
 def convert_type_to_native(nvim_t, enable_ref_op, const_ref=True, ref=False):

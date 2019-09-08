@@ -1,5 +1,5 @@
 #ifndef NEOVIM_CPP__NVIM_RPC_HPP_
-#define NEOVIM_CPP__NVIM_RPC_HPP__
+#define NEOVIM_CPP__NVIM_RPC_HPP_
 #define BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
 
 #include "msgpack.hpp"
@@ -16,41 +16,44 @@ using Window = Integer;
 using Buffer = Integer;
 using Tabpage = Integer;
 using Object = msgpack::type::variant;
+using Map = std::multimap<Object, Object>;
+using Dictionary = Map;
+using Array = std::vector<Object>;
 
 class NvimRPC {
-        
+
     enum {
         REQUEST  = 0,
         RESPONSE = 1,
         NOTIFY   = 2
     };
-    
+
 public:
-    NvimRPC() : 
+    NvimRPC() :
         msgid_(0) {
     }
 
-    void connect_tcp(const std::string &host, 
+    void connect_tcp(const std::string &host,
             const std::string &service, double timeout_sec) {
         socket_.connect_tcp(host, service, timeout_sec);
     }
-    
+
     template<typename T, typename...U>
     void call(const std::string &method, T& res, const U&...u);
-    
+
     template<typename...U>
     void call(const std::string &method, Integer& res, const U&...u);
 
     template<typename...U>
     void call(const std::string &method, Object& res, const U&...u);
-    
+
     template<typename...U>
     void call(const std::string &method, nullptr_t res, const U&...u);
-    
+
 private:
     template<typename...U>
     Object do_call(const std::string &method, const U&...u);
-    
+
     uint64_t msgid_;
     Socket socket_;
 

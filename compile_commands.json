@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/Users/zgp/Documents/neovim.cpp/build",
+  "command": "/usr/bin/clang++  -I/Users/zgp/Documents/neovim.cpp/external/msgpack/include -I/Users/zgp/Documents/neovim.cpp/include -I/Users/zgp/Documents/neovim.cpp/gen  -DMSGPACK_USE_BOOST -std=c++17    -std=gnu++1z -o CMakeFiles/test.dir/src/main.o -c /Users/zgp/Documents/neovim.cpp/src/main.cpp",
+  "file": "/Users/zgp/Documents/neovim.cpp/src/main.cpp"
+},
+]

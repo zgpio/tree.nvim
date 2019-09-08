@@ -23,7 +23,7 @@ void Socket::connect_tcp(const std::string& host,
     tcp::resolver::query query(host, service);
     tcp::resolver::iterator iter = tcp::resolver(io_service_).resolve(query);
 
-    deadline_.expires_from_now(boost::posix_time::seconds(timeout_sec));
+    deadline_.expires_from_now(boost::posix_time::seconds(long(timeout_sec)));
 
     boost::system::error_code ec;
 
@@ -41,7 +41,7 @@ void Socket::connect_tcp(const std::string& host,
 }
 
 size_t Socket::read(char *rbuf, size_t capacity, double timeout_sec) {
-    deadline_.expires_from_now(boost::posix_time::seconds(timeout_sec));
+    deadline_.expires_from_now(boost::posix_time::seconds(long(timeout_sec)));
     boost::system::error_code ec = boost::asio::error::would_block;
     size_t rlen;
     async_read(socket_, boost::asio::buffer(rbuf, capacity), 
@@ -55,7 +55,7 @@ size_t Socket::read(char *rbuf, size_t capacity, double timeout_sec) {
 }
 
 void Socket::write(char *sbuf, size_t size, double timeout_sec) {
-    deadline_.expires_from_now(boost::posix_time::seconds(timeout_sec));
+    deadline_.expires_from_now(boost::posix_time::seconds(long(timeout_sec)));
     boost::system::error_code ec = boost::asio::error::would_block;
     boost::asio::async_write(socket_, boost::asio::buffer(sbuf, size), var(ec) = _1);
 
