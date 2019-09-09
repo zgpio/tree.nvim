@@ -1,3 +1,4 @@
+#include "msgpack.hpp"
 namespace nvim {
 
 namespace detail {
@@ -66,7 +67,7 @@ Object NvimRPC::do_call(const std::string &method, const U&...u) {
 
     msgpack::object deserialized = oh.get();
 
-    std::cout << "sbuf = " << deserialized << std::endl;
+    // std::cout << "sbuf = " << deserialized << std::endl;
 
     socket_.write(sbuf.data(), sbuf.size(), 5);
 
