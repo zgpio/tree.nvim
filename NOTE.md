@@ -4,3 +4,16 @@
     * reset commit
     * remove boost::lambda
 
+    ```sh
+    git submodule update --init --recursive
+    brew install boost
+    brew info boost
+    ```
+
+* CMake
+https://github.com/cquery-project/cquery/wiki/Compilation-database
+    ```sh
+    mkdir build
+    (cd build; cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=YES ..)
+    ln -s build/compile_commands.json
+    ```

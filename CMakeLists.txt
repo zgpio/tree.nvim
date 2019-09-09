@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 
 project(neovim_client_cpp)
 
-find_package(Boost 1.55.0 REQUIRED COMPONENTS system coroutine context thread)
+find_package(Boost 1.55.0 REQUIRED COMPONENTS system coroutine context thread filesystem)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")
 set(MSGPACK_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/msgpack-c)
