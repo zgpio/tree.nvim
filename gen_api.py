@@ -80,6 +80,12 @@ def main():
     with open(os.path.join("./gen", "nvim.hpp"), 'w') as f:
         f.write(api)
 
+    tplcpp = env.get_template('nvim.cpp')
+    apicpp = tplcpp.render({'functions': functions})
+    with open(os.path.join("./gen", "nvim.cpp"), 'w') as f:
+        f.write(apicpp)
+
+
 if __name__ == '__main__':
     main()
 

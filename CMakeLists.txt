@@ -20,6 +20,7 @@ include_directories(
 add_executable(test 
     src/main.cpp
     src/socket.cpp
+    gen/nvim.cpp
 )
 
 target_link_libraries(test ${Boost_LIBRARIES})
