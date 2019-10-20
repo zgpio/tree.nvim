@@ -1,4 +1,3 @@
-# This repo is just for testing!
 # Tree.nvim - File explorer powered by C++.
 
 Experimental, maybe has breaking changes and bugs.

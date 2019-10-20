@@ -5,7 +5,6 @@
 #include <QCommandLineParser>
 #include "neovimconnector.h"
 #include "app.h"
-#include <iostream>
 
 #include "auto/neovimapi6.h"
 #if defined(Q_OS_WIN) && defined(USE_STATIC_QT)
@@ -15,20 +14,6 @@ Q_IMPORT_PLUGIN (QWindowsIntegrationPlugin);
 
 int ui_main(int argc, char **argv)
 {
-
-#ifdef Q_OS_WIN
-	// Enables automatic high-DPI scaling
-	// https://github.com/equalsraf/neovim-qt/issues/391
-	//
-	// The other way to do this is to set Qt::AA_EnableHighDpiScaling
-	// but it does not seem to work on Windows.
-	//
-	// @equalsraf: For now I'm setting this in windows only, there open
-	// issues in upstream Qt that suggests this may have unexpected effects
-	// in other systems (QTBUG-65061, QTBUG-65102), also QTBUG-63580 offers
-	// contradictory information with what we have experienced.
-	qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "1");
-#endif
 
 	NeovimQt::App app(argc, argv);
 
@@ -87,7 +72,6 @@ int main(int argc, char **argv)
 		return cli_main(argc, argv);
 	}
 #else
-    std::cout << "ui_main called" << std::endl;
 	return ui_main(argc, argv);
 #endif
 }
