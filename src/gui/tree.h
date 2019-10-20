@@ -24,7 +24,7 @@ public:
 	NeovimConnector *m_nvim;
     void changeRoot(QString path);
     void open_tree(int);
-    void open(int);
+    void open(const int l, const QList<QVariant> &args);
     void cd(const QList<QVariant>& args);
     void toggle_select(const int pos);
     void vim_input(string prompt, string text, string completion, string handle);

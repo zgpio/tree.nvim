@@ -23,8 +23,12 @@ function! tree#init#_channel() abort
     return v:true
   endif
 
-  " TODO: temporary
-  call jobstart(['/Users/zgp/Documents/tree.nvim/build/bin/nvim-qt.app/Contents/MacOS/nvim-qt',  '--server', v:servername])
+  " TODO: temporary, ~ cant work
+  if has('unix') && !has('macunix') && !has('win32unix')
+    call jobstart(['/home/zgp/tree.nvim/build/bin/nvim-qt', '--server', v:servername])
+  else
+    call jobstart(['/Users/zgp/Documents/tree.nvim/build/bin/nvim-qt.app/Contents/MacOS/nvim-qt', '--server', v:servername])
+  endif
   sleep 100m
   echom 'jobstart success'
   return v:true

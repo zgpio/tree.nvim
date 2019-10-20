@@ -50,13 +50,8 @@ void Tree::changeRoot(QString path)
     expandStore.insert(rootPath, true);
 
     // QDir::NoSymLinks
-    dir.setFilter(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
-    dir.setSorting(QDir::DirsFirst);
 
     // QFileInfo root_fi(path);
-    QFileInfoList list = dir.entryInfoList();
-
-    int file_count = list.count();
     FileItem::update_gmap(path);
 
     erase_entrylist(0, m_fileitem.size());
@@ -74,15 +69,14 @@ void Tree::changeRoot(QString path)
     QByteArray line;
     dyn_make_line(0, line);
     ret.append(line);
-    if (file_count > 0) {
-        QFileInfoList child;
-        QList<FileItem> child_fileitem;
-        entryInfoListRecursively(rootPath, 0, child, child_fileitem);
-        for (int i=0;i<child_fileitem.size();++i)
-            m_fileitem.insert(1+i, child_fileitem[i]);
 
-        insert_entrylist(child, 1, 0, ret);
-    }
+    QFileInfoList child;
+    QList<FileItem> child_fileitem;
+    entryInfoListRecursively(rootPath, 0, child, child_fileitem);
+    for (int i=0;i<child_fileitem.size();++i)
+        m_fileitem.insert(1+i, child_fileitem[i]);
+
+    insert_entrylist(child, 1, 0, ret);
 
     NeovimQt::NeovimApi6 *b = m_nvim->api6();
     b->nvim_buf_set_option(bufnr, "modifiable", true);
@@ -382,10 +376,6 @@ void Tree::open_tree(int l)
         const QString & rootPath = cur.fi.absoluteFilePath();
         expandStore.insert(rootPath, true);
         redraw_line(l, l + 1);
-        QDir dir(cur.fi.absoluteFilePath());
-        dir.setFilter(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
-        dir.setSorting(QDir::DirsFirst);
-        // QFileInfoList child = dir.entryInfoList();
         QFileInfoList child;
         QList<FileItem> child_fileitem;
         entryInfoListRecursively(cur.fi.absoluteFilePath(),cur.level +1,  child, child_fileitem);
@@ -454,16 +444,19 @@ void Tree::open_tree(int l)
     return;
 }
 
-void Tree::open(int l)
+void Tree::open(const int l, const QList<QVariant> &args)
 {
     const QFileInfo &fi = m_fileitem[l].fi;
-    int bufnr=0;
     NeovimQt::NeovimApi6 *b = m_nvim->api6();
-    if (fi.isDir())
-    {
+    if (fi.isDir()) {
         changeRoot(fi.absoluteFilePath());
-    } else{
-        // TODO: open file
+    }
+    else if (args.size()>0 && args[0]=="vsplit") {
+        QString path = fi.absoluteFilePath();
+        qDebug() << "vsplit" << path;
+        b->vim_call_function("tree#util#execute_path", {"rightbelow vsplit", path});
+    }
+    else {
         QString path = fi.absoluteFilePath();
         qDebug() << "drop" << path;
         b->vim_call_function("tree#util#execute_path", {"drop", path});
@@ -486,10 +479,6 @@ void Tree::open_or_close_tree_recursively(int l)
         const QString &rootPath = cur.fi.absoluteFilePath();
         expandStore.insert(rootPath, true);
         redraw_line(l, l + 1);
-        QDir dir(cur.fi.absoluteFilePath());
-        dir.setFilter(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
-        dir.setSorting(QDir::DirsFirst);
-        // QFileInfoList child = dir.entryInfoList();
         QFileInfoList child;
         QList<FileItem> child_fileitem;
         expandRecursively(cur.fi.absoluteFilePath(), cur.level + 1, child,
@@ -751,7 +740,6 @@ void Tree::cd(const QList<QVariant>& args)
     QString dir = args.at(0).toString();
     NeovimQt::NeovimApi6 *b = m_nvim->api6();
 
-    const int bufnr = this->bufnr;
     if (dir=="..") {
         QDir curdir(m_fileitem.at(0).fi.absoluteFilePath());
         if (curdir.cd(".."))
@@ -787,7 +775,7 @@ void Tree::action(const QString &action, const QList<QVariant> &args,
     this->ctx = context;
     qDebug() << "cursor position(1-based): " << ctx.cursor;
     if (action == "open") {
-        open(ctx.cursor - 1);
+        open(ctx.cursor - 1, args);
     }
     else if (action == "open_or_close_tree") {
         open_tree(ctx.cursor - 1);
