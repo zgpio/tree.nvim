@@ -60,6 +60,6 @@ deploy:
     - tree-release-macos.tar.gz
     - tree-release-linux.tar.gz
   on:
-    repo: zgpio/travis
+    # repo: zgpio/tree.nvim
     all_branches: true
     tags: true
