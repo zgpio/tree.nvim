@@ -1,0 +1,65 @@
+sudo: false
+# dist: bionic
+language: cpp
+os:
+  - linux
+  - osx
+
+addons:
+  apt:
+    update: false
+    sources:
+      - sourceline: 'ppa:neovim-ppa/unstable'
+    packages:
+      - neovim
+      - clang
+      - cmake
+      - qt5-default
+  homebrew:
+    update: false
+    packages:
+      - neovim
+      - cmake
+      - qt5
+      - msgpack
+compiler:
+  - gcc
+  - clang
+before_install:
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update          ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install neovim  ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew ls | grep -wq cmake || brew install cmake  ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew ls | grep -wq qt5 || brew install qt5  ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew ls | grep -wq msgpack || brew install msgpack  ; fi
+script:
+  - nvim --version
+  - mkdir build
+  - cd build
+  - cmake -DUSE_SYSTEM_MSGPACK=OFF -DCMAKE_INSTALL_PREFIX=./tree-release ..
+  - make install
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then /usr/local/opt/qt/bin/macdeployqt bin/nvim-qt.app/ -no-plugins  ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then tar -zcvf tree-release-macos.tar.gz  bin/nvim-qt.app  ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"  ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then chmod a+x linuxdeployqt-continuous-x86_64.AppImage  ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./linuxdeployqt-continuous-x86_64.AppImage ./tree-release/bin/nvim-qt -no-plugins -no-copy-copyright-files -no-translations -bundle-non-qt-libs  ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then tar -zcvf tree-release-linux.tar.gz  ./tree-release  ; fi
+  # - ctest --output-on-failure
+  # export VERSION=... # linuxdeployqt uses this for naming the file
+  # - ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -appimage
+env:
+  global:
+    secure: CcCUVe3DsQ7GtgUdTr6qyxNQs0ASrndtaEkxkWuADWLKwxUlV0pCwZqvg8Wb54RoEQMB0xhfYmbyb/ZbZe9VPDJr0wLg6Kovk7h7SMQluYk2N6PiZKPDJ+kkGhk2qDGlynZu4kwetpLtq3pG3mk7zbyPusIvGP01L8P4ws1/e+9c46wp3/LXReUZgxQZMHNlzVsdzzi+Duma0R8FZ632uGiWXSw3iuI6Mw2lJAGkMvZzSZMyOSqpFByVhkV/SC2/o+IYzPywmb+oKXtv2n+uCltgg9bENXt7ZNMMgsG7f0l6m5CrRM4Iw22izkejz4jjjNihOcmgN6sakaSbggsn0bkAl71BO+Tn23gn+F85kr6cqP7csQEebGmTC3srs0o4VjS0BHM+haD2U+vwSggmnliEwdKV07wxlNHX/oZE/IhxiBe28xOo4BJLQ1B8H0fMSf9Ory73z1c8prhLzNcByKOZO8rfEnFjDN9nyUxfq4rP5mXfYenXE0DixYA5mV/5g+MaUFg/kse7XNR/vbXC7mwKd2uG5cA6tsN9Bq0NNV6oHAdnHl2kM2bHUD00yi7/eZS9kFJqIpJ472F3vvNccAhWtd/XGVPOA3KnrNlCzPoqf1eEenL5P8spIPQQN5oztqkl0bQ9//buwmOdrU1NccNAISVawRqTOz2ljQKAGXA=
+deploy:
+  provider: releases
+  github_token: $GITHUB_TOKEN
+  overwrite: true
+  skip_cleanup: true
+  api_key:
+    secure: fpEdIBiEDFHwwgAjhUxXLfUbDhg1+1sdZel68dYs9eE9KqIdT0gYkHvEOuUjdjHEj0ZBOjlDe2Qu9s7H2rI4ZyFKYUhRk1P71SSPFC0IT2XX+OUZ10QRINsVTMpEaJIYidbRbw01/XFP7w4VcZTM230y2lQRyFHavMyse4J1vwbfy06c5AIBknoDrwW4Zk1kZSsKuHyh0OD4aZBcngw9mVTNCSwvE7MQhLvmmBovpP9T6NXkLdGm2xlrtQ/xT5Ut4BwKhw1oQ1wrHHEUCzf0giU2sUleoH2ltlxeE3INfugCNysloKdh7gZta7tkAUBoSVFrKudMwfYmagSLc+CMdDycYkKFtLAo1AfDYLVknmixyL+usedCuLjNg9Z8r8hyCR/Uf426RTf49CUy4wg44/fKW9bRWSk86Fe0cebPpkNjfAhiWsMlf2Xb+Xhh4VUGAnwjKdXY8N1BpvZqc2oXvgGkUn8L4xZFPY63ymGo5jSXohpungl5QCxox63Ygng1Ya6xNGa3zNPaYlp6pmAEMskbXgsbRm26POMRuIg048HO1kwadUkDHMnVn5griAExMB/On+P7wPKsZe40VnyEaGZTpCgM7CNetiCOyL20HYA7AzQuwtBE6r6NGEsqUPm9VOTyF+sxh3c9yUMfWUssjR8fJr8dhJHmb/rSbApDsec=
+  file:
+    - tree-release-macos.tar.gz
+    - tree-release-linux.tar.gz
+  on:
+    repo: zgpio/travis
+    all_branches: true
+    tags: true

@@ -1,0 +1,6 @@
+.DS_Store
+tags
+compile_commands.json
+build/
+src/gui/runtime/doc/tags
+third-party/msgpack*
