@@ -25,12 +25,12 @@ public:
     void changeRoot(QString path);
     void open_tree(int);
     void open(int);
-    void cd(QList<QVariant> args);
+    void cd(const QList<QVariant>& args);
     void toggle_select(const int pos);
-    void vim_input(std::string prompt, std::string text, std::string completion, std::string handle);
+    void vim_input(string prompt, string text, string completion, string handle);
     void redraw_line(int sl, int el);
     void redraw_recursively(int l);
-    void action(const QByteArray &name, const QVariantList &args);
+    void action(const QString &action, const QList<QVariant> &args, const QMap<QString, QVariant> context);
 
 protected slots:
     void handleRename(const QVariant& val);
@@ -41,7 +41,6 @@ private:
     QList<FileItem> m_fileitem;
     QMap<QString, QList<Cell>> col_map;
     QHash<QString, bool> expandStore;
-
 
     void hline(int sl, int el);
     int find_parent(int l);

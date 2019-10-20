@@ -746,7 +746,7 @@ void Tree::vim_input(string prompt="", string text="", string completion="", str
     //     req = b->nvim_call_function("input", {prompt.c_str(), text.c_str()});
 }
 
-void Tree::cd(QList<QVariant> args)
+void Tree::cd(const QList<QVariant>& args)
 {
     QString dir = args.at(0).toString();
     NeovimQt::NeovimApi6 *b = m_nvim->api6();
@@ -775,62 +775,65 @@ void Tree::toggle_select(const int pos)
     redraw_line(pos, pos+1);
 }
 
-void Tree::action(const QByteArray &name, const QVariantList &args) {
-    qDebug() << __PRETTY_FUNCTION__ << name;
+void Tree::action(const QString &action, const QList<QVariant> &args,
+                  const QMap<QString, QVariant> context)
+{
+    qDebug() << __PRETTY_FUNCTION__ << action;
 
     NeovimQt::NeovimApi6 *b = m_nvim->api6();
-    QList<QVariant>	vl = args.at(0).toList();
 
-    qDebug() << args;
-    if(name=="_tree_async_action" && args.size() > 0) {
-        // _tree_async_action [action, args, context]
-        QString action = vl.at(0).toString();
-        QList<QVariant> args = vl.at(1).toList();
-        QMap<QString, QVariant> context = vl.at(2).toMap();
-        qDebug() << "action args:"<< action << args;
-        // qDebug() << "context:" << context;
+    qDebug() << "action args:" << action << args;
+    // qDebug() << "context:" << context;
+    this->ctx = context;
+    qDebug() << "cursor position(1-based): " << ctx.cursor;
+    if (action == "open") {
+        open(ctx.cursor - 1);
+    }
+    else if (action == "open_or_close_tree") {
+        open_tree(ctx.cursor - 1);
+    }
+    else if (action == "cd") {
+        qDebug() << args;
+        cd(args);
+    }
+    else if (action == "rename") {
+        qDebug() << action << args;
+        FileItem &cur = m_fileitem[ctx.cursor - 1];
+        string info = cur.fi.absoluteFilePath().toStdString();
+        // NOTE: specify handle for vim_input
+        vim_input("Rename: " + info + " -> ", info, "file", "rename");
+    }
+    else if (action == "toggle_select") {
+        toggle_select(ctx.cursor - 1);
+    }
+    else if (action == "redraw") {
+        FileItem &root = m_fileitem[0];
+        changeRoot(root.fi.absoluteFilePath());
+    }
+    else if (action == "new_file") {
+        FileItem &cur = m_fileitem[ctx.cursor - 1];
+        string info = cur.fi.absolutePath().toStdString();
+        vim_input("New File: " + info + "/", "", "file", "new_file");
+    }
+    else if (action == "open_tree_recursive") {
+        open_or_close_tree_recursively(ctx.cursor - 1);
+    }
+    else if (action == "execute_system") {
+        FileItem &cur = m_fileitem[ctx.cursor - 1];
+        QString info = cur.fi.absoluteFilePath();
+        b->nvim_call_function("tree#util#open", {info});
+    }
+    else if (action == "yank_path") {
 
-        this->ctx=context;
-        qDebug() << "cursor position(1-based): " << ctx.cursor;
-        if (action=="open") {
-            open(ctx.cursor-1);
-        } else if(action=="open_or_close_tree"){
-            open_tree(ctx.cursor-1);
-        } else if(action=="cd") {
-            qDebug() << args;
-            cd(args);
-        } else if(action=="rename") {
-            qDebug() << action << args;
-            FileItem & cur = m_fileitem[ctx.cursor-1];
-            string info = cur.fi.absoluteFilePath().toStdString();
-            // NOTE: specify handle for vim_input
-            vim_input("Rename: " + info + " -> ", info,  "file", "rename");
-        } else if(action=="toggle_select"){
-            toggle_select(ctx.cursor-1);
-        } else if(action=="redraw") {
-            FileItem & root = m_fileitem[0];
-            changeRoot(root.fi.absoluteFilePath());
-        } else if(action=="new_file") {
-            FileItem & cur = m_fileitem[ctx.cursor-1];
-            string info = cur.fi.absolutePath().toStdString();
-            vim_input("New File: " + info +"/", "",  "file", "new_file");
-        } else if(action=="open_tree_recursive") {
-            open_or_close_tree_recursively(ctx.cursor-1);
-        } else if (action=="execute_system"){
-            FileItem & cur = m_fileitem[ctx.cursor-1];
-            QString info = cur.fi.absoluteFilePath();
-            b->nvim_call_function("tree#util#open", {info});
-        } else if (action=="yank_path"){
+        FileItem &cur = m_fileitem[ctx.cursor - 1];
+        // TODO: according to targets
+        QString yank = cur.fi.absoluteFilePath();
+        b->nvim_call_function("setreg", {"\"", yank});
 
-            FileItem & cur = m_fileitem[ctx.cursor-1];
-            // TODO: according to targets
-            QString yank = cur.fi.absoluteFilePath();
-            b->nvim_call_function("setreg", {"\"", yank});
-
-            b->nvim_call_function("tree#util#print_message", {yank});
-        } else if (action == "drop"){
-
-        }
+        b->nvim_call_function("tree#util#print_message", {yank});
+    }
+    else if (action == "drop") {
     }
 }
+
 } // namespace NeovimQt

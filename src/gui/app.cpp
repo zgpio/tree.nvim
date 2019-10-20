@@ -110,7 +110,7 @@ void App::handleNeovimNotification(const QByteArray &method, const QVariantList 
             // trees.remove(ctx.prev_bufnr);
             // delete tree;
         } else{
-            trees[m_ctx.prev_bufnr]->action(method, args);
+            trees[m_ctx.prev_bufnr]->action(action, act_args, context);
         }
     }
 }
