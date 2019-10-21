@@ -18,7 +18,7 @@ Tree::Tree(int bufnr, int ns_id, NeovimConnector* m_nvim)
 {
 
 }
-void Tree::dyn_make_line(const int pos, QByteArray &line)
+void Tree::makeline(const int pos, QByteArray &line)
 {
     assert(0<=pos&&pos<col_map["filename"].size());
     const FileItem &fileitem = m_fileitem[pos];
@@ -67,7 +67,7 @@ void Tree::changeRoot(QString path)
 
     QList<QByteArray> ret;
     QByteArray line;
-    dyn_make_line(0, line);
+    makeline(0, line);
     ret.append(line);
 
     QFileInfoList child;
@@ -90,11 +90,9 @@ void Tree::changeRoot(QString path)
 void Tree::insert_item(const int pos)
 {
     const FileItem &fileitem = m_fileitem[pos];
-    // using std::shared_ptr;
     int start = 0;
     int byte_start = 0;
     foreach (const QString &col, cfg.columns) {
-        // shared_ptr<Cell> cell;
         Cell cell;
         if (col == "mark") {
             cell.text = " ";
@@ -134,11 +132,10 @@ void Tree::insert_item(const int pos)
         cell.col_end = start + cell_str.size();
 
         // NOTE: alignment
-        if (col=="filename")
-        {
+        if (col=="filename") {
             int tmp = 50- cell.col_end;
-            if (tmp >0)
-            {
+            // TODO:此处都设置成统一列，在makeline时进行截断
+            if (tmp >0) {
                 cell.col_end+=tmp;
                 cell.byte_end+=tmp;
             }
@@ -165,15 +162,10 @@ void Tree::insert_entrylist(const QFileInfoList& fl, const int pos, const int le
         // QString absolute_file_path = file_info.absoluteFilePath();
         // QByteArray absolute_file_path(file_info.absoluteFilePath().toUtf8());
 
-        // FileItem fileitem;
-        // fileitem.fi = file_info;
-        // fileitem.level = level;
-        // m_fileitem.insert(pos+i, fileitem);
-
         insert_item(pos+i);
 
         QByteArray line;
-        dyn_make_line(pos+i, line);
+        makeline(pos+i, line);
         ret.append(line);
         // if (QString::compare(suffix, QString("png"), Qt::CaseInsensitive) == 0) { }
     }
@@ -296,7 +288,7 @@ void Tree::redraw_line(int sl, int el)
         }
 
         QByteArray line;
-        dyn_make_line(i, line);
+        makeline(i, line);
         ret.append(line);
     }
     b->nvim_buf_set_option(bufnr, "modifiable", true);

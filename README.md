@@ -9,7 +9,7 @@ Experimental, maybe has breaking changes and bugs.
 [![Downloads](https://img.shields.io/github/downloads/zgpio/tree.nvim/total.svg?maxAge=2592000)](https://github.com/zgpio/tree.nvim/releases)
 
 ## Requirements
-`>= neovim 0.4`
+`>= neovim 0.4.2`
 
 ## Features
 - NeoVim line-based highlight (Not dependent on conceal).

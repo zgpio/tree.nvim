@@ -48,7 +48,7 @@ private:
     void insert_entrylist(const QFileInfoList& fl, const int pos, const int level, QList<QByteArray>& ret);
     void insert_item(const int pos);
     void erase_entrylist(const int s, const int e);
-    void dyn_make_line(const int pos, QByteArray &line);
+    void makeline(const int pos, QByteArray &line);
     void entryInfoListRecursively(const QString & path, int level, QFileInfoList& lst, QList<FileItem>& fileitem_lst);
 
     void open_or_close_tree_recursively(int l);
