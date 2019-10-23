@@ -2,6 +2,7 @@
 #include <QFileInfo>
 #include <QDebug>
 #include <cinttypes>
+#include <cwchar>
 #include "auto/neovimapi6.h"
 #include "neovimconnector.h"
 #include "msgpackrequest.h"
