@@ -52,7 +52,7 @@ function(WinDeployQt)
 		message(STATUS "not set, the VC++ redistributable installer will NOT be bundled")
 	endif()
 
-	add_custom_target(windeployqt ALL ${_deploy_PROGRAM} --no-translations --dir ${PROJECT_BINARY_DIR}/windeployqt ${_ARGS}
+	add_custom_target(windeployqt ALL ${_deploy_PROGRAM} --no-plugins --no-translations --dir ${PROJECT_BINARY_DIR}/windeployqt ${_ARGS}
 		$<TARGET_FILE:${_deploy_TARGET}>
 		DEPENDS ${_deploy_TARGET}
 		COMMENT "Preparing Qt runtime dependencies")
