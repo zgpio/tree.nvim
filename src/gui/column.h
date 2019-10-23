@@ -30,9 +30,6 @@ public:
     // FileItem* parent;
     static QMap<QString, QByteArray> git_map;
     static void update_gmap(QString p);
-    static void update_git(Cell & git, const QFileInfo &fi);
-    static void update_icon(Cell & git, const FileItem & fn);
-    static void update_size(Cell & size, const QFileInfo&fi);
 };
 
 /// 多个column类意义不大，管理困难
@@ -40,6 +37,7 @@ class Cell
 {
 public:
     Cell();
+    Cell(const FileItem&, const QString);
     virtual ~Cell();
 
     // TODO: 考虑添加highlight_id, 并在highlight时加上列作用域防止冲突,
@@ -52,6 +50,9 @@ public:
     QByteArray text;
     QString color;
     QString tcolor;
+    void update_git(const QFileInfo &fi);
+    void update_icon(const FileItem & fn);
+    void update_size(const QFileInfo&fi);
 };
 
 struct Context

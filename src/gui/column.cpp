@@ -10,20 +10,53 @@ FileItem::FileItem()
 Cell::Cell()
 {
 }
+Cell::Cell(const FileItem& fileitem, const QString type)
+{
+    if (type=="mark") {
+        text = " ";
+        color = gui_colors["blue"];
+    }
+    else if (type == "indent") {
+        // text = QByteArray(fileitem.level*2, ' ');
+        text.clear();
+        for (int i = 0;i<fileitem.level;++i){
+            text.append("│  ");
+        }
+    }
+    else if (type == "git") {
+        update_git(fileitem.fi);
+    }
+    else if (type == "icon") {
+        update_icon(fileitem);
+    }
+    else if (type == "filename") {
+        color = gui_colors["yellow"];
+        QByteArray filename(fileitem.fi.fileName().toUtf8());
+        if (fileitem.fi.isDir()) {
+            filename.append("/");
+            color = gui_colors["blue"];
+        }
+        text = filename;
+    }
+    else if (type == "size") {
+        update_size(fileitem.fi);
+    } else{
+    }
+}
 Cell::~Cell()
 {
 }
 
 QMap<QString, QByteArray> FileItem::git_map;
-void FileItem::update_git(Cell & git, const QFileInfo &fi)
+void Cell::update_git(const QFileInfo &fi)
 {
-    git.text = " ";
+    text = " ";
     QString path = fi.absoluteFilePath();
     // qDebug() << "query:" << path;
     if (FileItem::git_map.contains(path))
-        git.text = FileItem::git_map.value(path);
+        text = FileItem::git_map.value(path);
 }
-void FileItem::update_size(Cell &col, const QFileInfo &fi)
+void Cell::update_size(const QFileInfo &fi)
 {
     auto sz = fi.size();
 
@@ -52,11 +85,11 @@ void FileItem::update_size(Cell &col, const QFileInfo &fi)
     }
 
     // The size of the directory has no meaning.
-    if (!fi.isDir()) col.text = text;
-    col.color = gui_colors["green"];
+    if (!fi.isDir()) this->text = text;
+    this->color = gui_colors["green"];
 }
 
-void FileItem::update_icon(Cell & icon, const FileItem & fn)
+void Cell::update_icon(const FileItem & fn)
 {
     const QFileInfo &fi = fn.fi;
     QString suffix = fi.suffix();
@@ -70,24 +103,24 @@ void FileItem::update_icon(Cell & icon, const FileItem & fn)
         // let s:nested_opened_tree_icon = get(g: ,'defx_icons_nested_opened_tree_icon', '')
     if (fi.isDir()){
         if (fn.opened_tree) {
-            icon.text = "";
-            icon.color = gui_colors["yellow"];
+            text = "";
+            color = gui_colors["yellow"];
         } else if (fi.isSymLink()){
             // directory_symlink_icon ''
-            icon.text = "";
-            icon.color = gui_colors["darkBlue"];
+            text = "";
+            color = gui_colors["darkBlue"];
         } else {
             // directory_icon ''
-            icon.text = "";
-            icon.color = gui_colors["pink"];
+            text = "";
+            color = gui_colors["pink"];
         }
     } else if (search != extensions.end()) {
-        icon.text = search->second["icon"].toUtf8();
-        icon.color = search->second["color"];
+        text = search->second["icon"].toUtf8();
+        color = search->second["color"];
     } else {
         // default_icon ''
-        icon.text = "";
-        icon.color = gui_colors["white"];
+        text = "";
+        color = gui_colors["white"];
     }
 }
 /// Ref to https://git-scm.com/docs/git-status

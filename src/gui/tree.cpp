@@ -57,17 +57,14 @@ void Tree::makeline(const int pos, QByteArray &line)
     // mark:indent:git:icons:filename:type
     int start = 0;
     foreach (const QString &col, cfg.columns) {
-        if(col=="indent"){
-        } else{
-            const Cell & cell = col_map[col][pos];
-            QString spc(cell.col_start-start, ' ');
-            line.append(std::move(spc));
-            line.append(cell.text);
-            QString cell_str(cell.text);
-            QString spc_after(cell.col_end-countgrid(cell_str)-cell.col_start, ' ');
-            line.append(std::move(spc_after));
-            start = cell.col_end;
-        }
+        const Cell & cell = col_map[col][pos];
+        QString spc(cell.col_start-start, ' ');
+        line.append(std::move(spc));
+        line.append(cell.text);
+        QString cell_str(cell.text);
+        QString spc_after(cell.col_end-countgrid(cell_str)-cell.col_start, ' ');
+        line.append(std::move(spc_after));
+        start = cell.col_end;
     }
     // qDebug()<<"mkline"<<pos<<":"<<line;
 }
@@ -125,38 +122,7 @@ void Tree::insert_item(const int pos)
     int start = 0;
     int byte_start = 0;
     foreach (const QString &col, cfg.columns) {
-        Cell cell;
-        if (col == "mark") {
-            cell.text = " ";
-            cell.color = gui_colors["blue"];
-        }
-        else if (col == "indent") {
-            // space size
-            start += fileitem.level *4;
-            byte_start += fileitem.level *4;
-            continue;
-        }
-        else if (col == "git") {
-            FileItem::update_git(cell, fileitem.fi);
-        }
-        else if (col == "icon") {
-            FileItem::update_icon(cell, fileitem);
-        }
-        else if (col == "filename") {
-            cell.color = gui_colors["yellow"];
-            QByteArray filename(fileitem.fi.fileName().toUtf8());
-            if (fileitem.fi.isDir()) {
-                filename.append("/");
-                cell.color = gui_colors["blue"];
-            }
-            cell.text = filename;
-        }
-        else if (col == "size") {
-            FileItem::update_size(cell, fileitem.fi);
-        } else{
-            assert(0);
-        }
-
+        Cell cell(fileitem, col);
         QString cell_str(cell.text);
         cell.byte_start = byte_start;
         cell.byte_end = byte_start+cell.text.size();
@@ -178,8 +144,9 @@ void Tree::insert_item(const int pos)
             }
         }
 
-        start = cell.col_end + 1;
-        byte_start = cell.byte_end + 1;
+        int sep = (col=="indent"?0:1);
+        start = cell.col_end + sep;
+        byte_start = cell.byte_end + sep;
         if (!col_map.contains(col)) {
             QList<Cell> cell;
             // move construct
@@ -276,8 +243,8 @@ void Tree::hline(int sl, int el)
 /// 0-based [sl, el).
 void Tree::redraw_line(int sl, int el)
 {
-    char format[] = "%s (0-based):" "[%" PRId64 ", %" PRId64 ")";
-    qDebug(format, __PRETTY_FUNCTION__, sl, el);
+    char format[] = "%s (1-based):" "[%" PRId64 ", %" PRId64 "]";
+    qDebug(format, __PRETTY_FUNCTION__, sl+1, el);
 
     NeovimQt::NeovimApi6 *b = m_nvim->api6();
 
@@ -291,21 +258,18 @@ void Tree::redraw_line(int sl, int el)
             Cell& cell = col_map[col][i];
             if (col=="mark"){
             }else if(col=="indent"){
-                start += fileitem.level *4;
-                byte_start += fileitem.level *4;
-                continue;
             }else if(col=="git"){
                 // TODO: Git::update_gmap(fn);
-                FileItem::update_git(cell, fileitem.fi);
+                cell.update_git(fileitem.fi);
             }else if(col=="icon"){
-                FileItem::update_icon(cell, fileitem);
+                cell.update_icon(fileitem);
             } else if(col=="filename"){
             }else if(col=="size"){
-                FileItem::update_size(cell, fileitem.fi);
+                cell.update_size(fileitem.fi);
             }
             QString cell_str(cell.text);
             cell.col_start =start;
-            cell.col_end = start+cell_str.size();
+            cell.col_end = start + countgrid(cell_str);
             cell.byte_start = byte_start;
             cell.byte_end = byte_start+cell.text.size();
 
@@ -320,8 +284,9 @@ void Tree::redraw_line(int sl, int el)
                     cell.byte_end+=tmp;
                 }
             }
-            start = cell.col_end + 1;
-            byte_start = cell.byte_end + 1;
+            int sep = (col=="indent"?0:1);
+            start = cell.col_end + sep;
+            byte_start = cell.byte_end + sep;
         }
 
         QByteArray line;
@@ -378,13 +343,8 @@ void Tree::redraw_recursively(int l)
 void Tree::erase_entrylist(const int s, const int e)
 {
     foreach (const QString &col, cfg.columns) {
-        if(col=="indent"){
-            continue;
-        }
-        else{
-            QList<Cell> & cell = col_map[col];
-            cell.erase(cell.begin()+s, cell.begin()+e);
-        }
+        QList<Cell> & cell = col_map[col];
+        cell.erase(cell.begin()+s, cell.begin()+e);
     }
     m_fileitem.erase(m_fileitem.begin()+s, m_fileitem.begin()+e);
 }

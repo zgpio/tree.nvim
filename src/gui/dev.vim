@@ -24,9 +24,9 @@ endf
 
 map <c-k> :<c-u>call ExeServer()<cr>
 
-let $root = fnamemodify(expand('<sfile>'), ':h')
-set rtp+=$root/viml/
-so $root/viml/plugin/tree.vim
+let $tree_root = fnamemodify(expand('<sfile>'), ':h')
+set rtp+=$tree_root/viml/
+so $tree_root/viml/plugin/tree.vim
 set cmdheight=2
 
 nnoremap <silent> <Space>e :<C-u>Tree -columns=mark:git:indent:icon:filename:size
