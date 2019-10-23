@@ -18,6 +18,27 @@ Tree::Tree(int bufnr, int ns_id, NeovimConnector* m_nvim)
 {
 
 }
+
+int countgrid(const QString &s)
+{
+    int n = s.count();
+    int ans = 0;
+    for (int i = 0; i < n; i++) {
+        const QChar c = s.at(i);
+        ushort uNum = c.unicode();
+        // Characters can be full-width or half-width (with invisible characters being 0-width).
+        // Ref:
+        //  https://bugreports.qt.io/browse/QTBUG-9956
+        //  https://www.php.net/manual/en/function.mb-strwidth.php
+        //  https://www.ibm.com/support/knowledgecenter/beta/fi/ssw_ibm_i_74/rtref/wcwidth.htm
+        wchar_t wc = uNum;
+        // qDebug() << QString(c) << wcwidth(wta);
+        if (wcwidth(wc)==2) {
+            ans++;
+        }
+    }
+    return n + ans;  // screen cells
+}
 void Tree::makeline(const int pos, QByteArray &line)
 {
     assert(0<=pos&&pos<col_map["filename"].size());
@@ -32,7 +53,7 @@ void Tree::makeline(const int pos, QByteArray &line)
             line.append(std::move(spc));
             line.append(cell.text);
             QString cell_str(cell.text);
-            QString spc_after(cell.col_end-cell_str.size()-cell.col_start, ' ');
+            QString spc_after(cell.col_end-countgrid(cell_str)-cell.col_start, ' ');
             line.append(std::move(spc_after));
             start = cell.col_end;
         }
@@ -129,7 +150,12 @@ void Tree::insert_item(const int pos)
         cell.byte_start = byte_start;
         cell.byte_end = byte_start+cell.text.size();
         cell.col_start = start;
-        cell.col_end = start + cell_str.size();
+        if (col=="filename") {
+            cell.col_end = start + countgrid(cell_str);
+        }
+        else {
+            cell.col_end = start + cell_str.size();
+        }
 
         // NOTE: alignment
         if (col=="filename") {
