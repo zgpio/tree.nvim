@@ -17,10 +17,12 @@ endif()
 
 include(GNUInstallDirs)
 
-add_library(neovim-qt-gui
-    column.cpp
-    tree.cpp
-	app.cpp)
+set(SRC_FILE column.cpp tree.cpp app.cpp)
+if(WIN32)
+    list(APPEND SRC_FILE wcwidth.cpp)
+endif()
+
+add_library(neovim-qt-gui ${SRC_FILE})
 
 # target_link_libraries(neovim-qt-gui qshellwidget neovim-qt)
 target_link_libraries(neovim-qt-gui neovim-qt)

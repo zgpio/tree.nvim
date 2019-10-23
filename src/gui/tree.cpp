@@ -8,6 +8,9 @@
 #include "msgpackrequest.h"
 #include "tree.h"
 
+#if defined(Q_OS_WIN)
+extern int mk_wcwidth(wchar_t ucs);
+#endif
 using std::string;
 namespace NeovimQt {
 
@@ -32,11 +35,18 @@ int countgrid(const QString &s)
         //  https://bugreports.qt.io/browse/QTBUG-9956
         //  https://www.php.net/manual/en/function.mb-strwidth.php
         //  https://www.ibm.com/support/knowledgecenter/beta/fi/ssw_ibm_i_74/rtref/wcwidth.htm
+        //  https://embedeo.org/ws/doc/man_windows/
         wchar_t wc = uNum;
         // qDebug() << QString(c) << wcwidth(wta);
+#if defined(Q_OS_WIN)
+        if (mk_wcwidth(wc)==2) {
+            ans++;
+        }
+#else
         if (wcwidth(wc)==2) {
             ans++;
         }
+#endif
     }
     return n + ans;  // screen cells
 }
