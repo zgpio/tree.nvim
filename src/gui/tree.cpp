@@ -109,7 +109,7 @@ void Tree::changeRoot(QString path)
 
     NeovimQt::NeovimApi6 *b = m_nvim->api6();
     b->nvim_buf_set_option(bufnr, "modifiable", true);
-    b->nvim_buf_set_lines(bufnr, 0, -1, true, ret);
+    b->nvim_buf_set_lines(bufnr, 0, -1, true, std::move(ret));
     b->nvim_buf_set_option(bufnr, "modifiable", false);
 
     hline(0, m_fileitem.size());
@@ -148,11 +148,10 @@ void Tree::insert_item(const int pos)
         start = cell.col_end + sep;
         byte_start = cell.byte_end + sep;
         if (!col_map.contains(col)) {
-            QList<Cell> cell;
-            // move construct
-            col_map.insert(col, std::move(cell));
+            col_map.insert(col, QList<Cell>());
         }
-        col_map[col].insert(pos, cell);
+        // TODO: 考虑编译器优化
+        col_map[col].insert(pos, std::move(cell));
         // qDebug() << col;
     }
 }
@@ -170,7 +169,7 @@ void Tree::insert_entrylist(const QFileInfoList& fl, const int pos, const int le
 
         QByteArray line;
         makeline(pos+i, line);
-        ret.append(line);
+        ret.append(std::move(line));
         // if (QString::compare(suffix, QString("png"), Qt::CaseInsensitive) == 0) { }
     }
 }
@@ -291,10 +290,10 @@ void Tree::redraw_line(int sl, int el)
 
         QByteArray line;
         makeline(i, line);
-        ret.append(line);
+        ret.append(std::move(line));
     }
     b->nvim_buf_set_option(bufnr, "modifiable", true);
-    b->nvim_buf_set_lines(bufnr, sl, el, true, ret);
+    b->nvim_buf_set_lines(bufnr, sl, el, true, std::move(ret));
     b->nvim_buf_set_option(bufnr, "modifiable", false);
     hline(sl, el);
 }
@@ -333,7 +332,7 @@ void Tree::redraw_recursively(int l)
     QList<QByteArray> ret;
     insert_entrylist(child, l + 1, cur.level + 1, ret);
     b->nvim_buf_set_option(bufnr, "modifiable", true);
-    b->nvim_buf_set_lines(0, s, e, true, ret);
+    b->nvim_buf_set_lines(bufnr, s, e, true, ret);
     b->nvim_buf_set_option(bufnr, "modifiable", false);
     hline(l + 1, l + 1 + ret.size());
 
@@ -378,7 +377,7 @@ void Tree::open_tree(int l)
 
         insert_entrylist(child, l + 1, cur.level + 1, ret);
         b->nvim_buf_set_option(bufnr, "modifiable", true);
-        b->nvim_buf_set_lines(0, l + 1, l + 1, true, ret);
+        b->nvim_buf_set_lines(bufnr, l + 1, l + 1, true, ret);
         b->nvim_buf_set_option(bufnr, "modifiable", false);
         hline(l + 1, l + 1 + ret.size());
         return;
@@ -395,7 +394,7 @@ void Tree::open_tree(int l)
         sprintf(info, "\tclose range(1-based): [%d, %d]", s + 1, e);
         qDebug() << info;
         b->nvim_buf_set_option(bufnr, "modifiable", true);
-        b->nvim_buf_set_lines(0, s, e, true, {});
+        b->nvim_buf_set_lines(bufnr, s, e, true, {});
         b->nvim_buf_set_option(bufnr, "modifiable", false);
 
         erase_entrylist(s, e);
@@ -414,7 +413,7 @@ void Tree::open_tree(int l)
         qDebug() << info;
 
         b->nvim_buf_set_option(bufnr, "modifiable", true);
-        b->nvim_buf_set_lines(0, s, e, true, {});
+        b->nvim_buf_set_lines(bufnr, s, e, true, {});
         b->nvim_buf_set_option(bufnr, "modifiable", false);
         // ref to https://github.com/equalsraf/neovim-qt/issues/596
         b->nvim_win_set_cursor(0, QPoint{0, s});
@@ -482,7 +481,7 @@ void Tree::open_or_close_tree_recursively(int l)
 
         insert_entrylist(child, l + 1, cur.level + 1, ret);
         b->nvim_buf_set_option(bufnr, "modifiable", true);
-        b->nvim_buf_set_lines(0, l + 1, l + 1, true, ret);
+        b->nvim_buf_set_lines(bufnr, l + 1, l + 1, true, ret);
         b->nvim_buf_set_option(bufnr, "modifiable", false);
         hline(l + 1, l + 1 + ret.size());
         return;
@@ -499,7 +498,7 @@ void Tree::open_or_close_tree_recursively(int l)
         sprintf(info, "\tclose range(1-based): [%d, %d]", s + 1, e);
         qDebug() << info;
         b->nvim_buf_set_option(bufnr, "modifiable", true);
-        b->nvim_buf_set_lines(0, s, e, true, {});
+        b->nvim_buf_set_lines(bufnr, s, e, true, {});
         b->nvim_buf_set_option(bufnr, "modifiable", false);
         shrinkRecursively(p);
         erase_entrylist(s, e);
@@ -518,7 +517,7 @@ void Tree::open_or_close_tree_recursively(int l)
         qDebug() << info;
 
         b->nvim_buf_set_option(bufnr, "modifiable", true);
-        b->nvim_buf_set_lines(0, s, e, true, {});
+        b->nvim_buf_set_lines(bufnr, s, e, true, {});
         b->nvim_buf_set_option(bufnr, "modifiable", false);
         // ref to https://github.com/equalsraf/neovim-qt/issues/596
         b->nvim_win_set_cursor(0, QPoint{0, s});
