@@ -13,6 +13,9 @@ function! tree#start(paths, user_context) abort
   let context = tree#init#_context(a:user_context)
   let paths = a:paths
   let paths = map(paths, "fnamemodify(v:val, ':p')")
+  if len(paths) == 0
+    let paths = [expand('%:p:h')]
+  endif
   call tree#util#rpcrequest('_tree_start', [paths, context], v:false)
   " TODO: 检查 search 是否存在
   " if context['search'] !=# ''

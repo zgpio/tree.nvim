@@ -92,6 +92,7 @@ void Tree::changeRoot(QString path)
     m_fileitem.append(fileitem);
 
     insert_item(0);
+    // FIXME: when icon not available
     col_map["icon"][0].text = "";
 
     QList<QByteArray> ret;
@@ -809,6 +810,9 @@ void Tree::action(const QString &action, const QList<QVariant> &args,
         b->nvim_call_function("tree#util#print_message", {yank});
     }
     else if (action == "drop") {
+    }
+    else if (action == "debug") {
+        qDebug() << cfg.columns;
     }
 }
 
