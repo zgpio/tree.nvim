@@ -126,6 +126,8 @@ void App::createTree()
     trees.insert(bufnr, tree);
     NeovimQt::NeovimApi6 *b = m_nvim->api6();
     tree->cfg.update(m_cfgmap);
+    // Record operation bufnr
+    m_ctx.prev_bufnr = bufnr;
     tree->changeRoot(path);
 
     // call nvim_buf_add_highlight(0, src, "Identifier", 0, 5, -1)
@@ -178,6 +180,7 @@ void App::handleRequest(MsgpackIODevice* dev, quint32 msgid, const QByteArray& m
             char cmd[128];
             sprintf(cmd, "lua resume(%s)", bufnrs.data());
             b->nvim_command(cmd);
+            trees[m_ctx.prev_bufnr]->cfg.update(m_cfgmap);
             // bufwinid(bufname(bufnr))
         }
 

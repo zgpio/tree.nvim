@@ -742,14 +742,29 @@ void Tree::toggle_select(const int pos)
 {
     // TODO: mark may not available
     Cell &cur = col_map["mark"][pos];
-    FileItem& curitem = m_fileitem[pos];
+    FileItem& item = m_fileitem[pos];
 
-    curitem.selected = !curitem.selected;
-    cur.text=" ";
-    if (curitem.selected)
+    item.selected = !item.selected;
+    if (item.selected) {
         cur.text = mark_indicators["selected_icon"];
+        targets.append(pos);
+    }
+    else {
+        cur.text=" ";
+        targets.removeOne(pos);
+    }
 
     redraw_line(pos, pos+1);
+}
+
+// TODO: 收集无序targets
+void collect_targets(const QList<FileItem> &m_fileitem)
+{
+    foreach (const FileItem &item, m_fileitem) {
+        if (item.selected){
+
+        }
+    }
 }
 
 void Tree::action(const QString &action, const QList<QVariant> &args,
@@ -801,13 +816,20 @@ void Tree::action(const QString &action, const QList<QVariant> &args,
         b->nvim_call_function("tree#util#open", {info});
     }
     else if (action == "yank_path") {
+        QStringList yank;
+        foreach (const int &pos, targets) {
+            yank.append(m_fileitem[pos].fi.absoluteFilePath());
+        }
+        if (yank.size()==0) {
+            FileItem &cur = m_fileitem[ctx.cursor - 1];
+            yank << cur.fi.absoluteFilePath();
+        }
+        QString reg = yank.join('\n');
+        b->nvim_call_function("setreg", {"\"", reg});
 
-        FileItem &cur = m_fileitem[ctx.cursor - 1];
-        // TODO: according to targets
-        QString yank = cur.fi.absoluteFilePath();
-        b->nvim_call_function("setreg", {"\"", yank});
-
-        b->nvim_call_function("tree#util#print_message", {yank});
+        yank.insert(0, "yank_path");
+        QString msg = yank.join('\n');
+        b->nvim_call_function("tree#util#print_message", {msg});
     }
     else if (action == "drop") {
     }

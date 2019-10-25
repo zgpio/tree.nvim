@@ -41,7 +41,7 @@ private:
     QList<FileItem> m_fileitem;
     QMap<QString, QList<Cell>> col_map;
     QHash<QString, bool> expandStore;
-
+    QList<int> targets;
     void hline(int sl, int el);
     int find_parent(int l);
     std::tuple<int, int> find_range(int l);
