@@ -102,7 +102,7 @@ void Tree::changeRoot(QString path)
 
     QFileInfoList child;
     QList<FileItem> child_fileitem;
-    entryInfoListRecursively(rootPath, 0, child, child_fileitem);
+    entryInfoListRecursively(m_fileitem[0], child, child_fileitem);
     for (int i=0;i<child_fileitem.size();++i)
         m_fileitem.insert(1+i, child_fileitem[i]);
 
@@ -174,6 +174,7 @@ void Tree::insert_entrylist(const QFileInfoList& fl, const int pos, const int le
         // if (QString::compare(suffix, QString("png"), Qt::CaseInsensitive) == 0) { }
     }
 }
+// TODO: 通过FileItem的parent查询
 /// l is 0-based row number.
 int Tree::find_parent(int l)
 {
@@ -320,8 +321,8 @@ void Tree::redraw_recursively(int l)
 
     QFileInfoList child;
     QList<FileItem> child_fileitem;
-    const QString &p = cur.fi.absoluteFilePath();
-    entryInfoListRecursively(p, cur.level + 1, child, child_fileitem);
+    // const QString &p = cur.fi.absoluteFilePath();
+    entryInfoListRecursively(cur, child, child_fileitem);
     for (int i = 0; i < child_fileitem.size(); ++i)
         m_fileitem.insert(l + 1 + i, child_fileitem[i]);
 
@@ -367,7 +368,7 @@ void Tree::open_tree(int l)
         redraw_line(l, l + 1);
         QFileInfoList child;
         QList<FileItem> child_fileitem;
-        entryInfoListRecursively(cur.fi.absoluteFilePath(),cur.level +1,  child, child_fileitem);
+        entryInfoListRecursively(cur, child, child_fileitem);
         for (int i=0;i<child_fileitem.size();++i)
             m_fileitem.insert(l+1+i, child_fileitem[i]);
 
@@ -470,8 +471,7 @@ void Tree::open_or_close_tree_recursively(int l)
         redraw_line(l, l + 1);
         QFileInfoList child;
         QList<FileItem> child_fileitem;
-        expandRecursively(cur.fi.absoluteFilePath(), cur.level + 1, child,
-                          child_fileitem);
+        expandRecursively(cur, child, child_fileitem);
         for (int i = 0; i < child_fileitem.size(); ++i)
             m_fileitem.insert(l + 1 + i, child_fileitem[i]);
 
@@ -539,11 +539,12 @@ void Tree::open_or_close_tree_recursively(int l)
 }
 
 // get entryInfoList recursively
-void Tree::entryInfoListRecursively(const QString &path, int level,
+void Tree::entryInfoListRecursively(const FileItem& item,
                                    QFileInfoList &lst,
                                    QList<FileItem> &fileitem_lst)
 {
-    QDir dir(path);
+    QDir dir(item.fi.absoluteFilePath());
+    const int level = item.level+1;
     dir.setFilter(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
     dir.setSorting(QDir::DirsFirst);
     QFileInfoList child = dir.entryInfoList();
@@ -552,18 +553,21 @@ void Tree::entryInfoListRecursively(const QString &path, int level,
         return;
     }
     for (int i = 0; i < file_count; ++i) {
-        QFileInfo file_info = child.at(i);
-        lst.append(file_info);
+        QFileInfo fi = child.at(i);
+        lst.append(fi);
 
         FileItem fileitem;
-        fileitem.fi = file_info;
+        fileitem.fi = fi;
         fileitem.level = level;
-        QString p = file_info.absoluteFilePath();
+        fileitem.parent = &item;
+        if (i==file_count-1)
+            fileitem.last=true;
+        QString p = fi.absoluteFilePath();
 
         if (expandStore.contains(p) && expandStore[p]) {
             fileitem.opened_tree = true;
             fileitem_lst.append(fileitem);
-            entryInfoListRecursively(p, level + 1, lst, fileitem_lst);
+            entryInfoListRecursively(fileitem_lst.back(), lst, fileitem_lst);
         }
         else {
             fileitem_lst.append(fileitem);
@@ -597,10 +601,11 @@ void Tree::shrinkRecursively(const QString &path)
 }
 
 // shrink recursively
-void Tree::expandRecursively(const QString &path, int level, QFileInfoList &lst,
+void Tree::expandRecursively(const FileItem &item, QFileInfoList &lst,
                             QList<FileItem> &fileitem_lst)
 {
-    QDir dir(path);
+    QDir dir(item.fi.absoluteFilePath());
+    const int level = item.level+1;
     dir.setFilter(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
     dir.setSorting(QDir::DirsFirst);
     QFileInfoList child = dir.entryInfoList();
@@ -615,13 +620,16 @@ void Tree::expandRecursively(const QString &path, int level, QFileInfoList &lst,
         FileItem fileitem;
         fileitem.fi = file_info;
         fileitem.level = level;
+        fileitem.parent = &item;
+        if (i==file_count-1)
+            fileitem.last=true;
 
         if (file_info.isDir()) {
             QString p = file_info.absoluteFilePath();
             expandStore.insert(p, true);
             fileitem.opened_tree = true;
             fileitem_lst.append(fileitem);
-            expandRecursively(p, level + 1, lst, fileitem_lst);
+            expandRecursively(fileitem_lst.back(), lst, fileitem_lst);
         }
         else {
             fileitem_lst.append(fileitem);
@@ -832,6 +840,14 @@ void Tree::action(const QString &action, const QList<QVariant> &args,
         b->nvim_call_function("tree#util#print_message", {msg});
     }
     else if (action == "drop") {
+        FileItem &cur = m_fileitem[ctx.cursor - 1];
+        QString info = cur.fi.absoluteFilePath();
+
+        b->nvim_command("lua require('tree')");
+        char cmd[128];
+        sprintf(cmd, "lua drop('%s')", info.toStdString().c_str());
+        qDebug()<<cmd;
+        b->nvim_command(cmd);
     }
     else if (action == "debug") {
         qDebug() << cfg.columns;

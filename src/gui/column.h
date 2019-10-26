@@ -27,7 +27,8 @@ public:
     // TODO: parent被选中 与 部分child被选中，两者是冲突的 <04-10-19, zgp>
     bool selected = false;
     // TODO: 更快地查找父FileItem
-    // FileItem* parent;
+    const FileItem* parent;
+    bool last = false;
     static QMap<QString, QByteArray> git_map;
     static void update_gmap(QString p);
 };

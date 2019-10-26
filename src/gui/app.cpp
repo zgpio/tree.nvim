@@ -180,6 +180,7 @@ void App::handleRequest(MsgpackIODevice* dev, quint32 msgid, const QByteArray& m
             char cmd[128];
             sprintf(cmd, "lua resume(%s)", bufnrs.data());
             b->nvim_command(cmd);
+            // TODO: columns 状态更新需要清除不需要的columns
             trees[m_ctx.prev_bufnr]->cfg.update(m_cfgmap);
             // bufwinid(bufname(bufnr))
         }

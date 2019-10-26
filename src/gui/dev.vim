@@ -1,3 +1,4 @@
+" -------------------- For develop --------------------
 let s:Windows = has('win64')
 let s:Unix = has('unix')
 let s:Linux = has('unix') && !has('macunix') && !has('win32unix')
@@ -6,7 +7,6 @@ let s:OSX = has('macunix')
 if !exists('g:colors_name')
   colorscheme desert
 endif
-set termguicolors
 tnoremap jk <c-\><c-n>
 
 func ExeServer()
@@ -29,6 +29,8 @@ set rtp+=$tree_root/viml/
 so $tree_root/viml/plugin/tree.vim
 set cmdheight=2
 
+" -------------------- User Configuration --------------------
+set termguicolors
 nnoremap <silent> <Space>e :<C-u>Tree -columns=mark:git:indent:icon:filename:size
       \ -split=vertical
       \ -direction=topleft

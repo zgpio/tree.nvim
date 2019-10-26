@@ -22,3 +22,28 @@ function resume(bufnrs)
         cmd(str)
     end
 end
+
+--- Drop file.
+-- If the window corresponding to file is available, goto it;
+-- otherwise, goto prev window and edit file.
+-- @param file  string: file absolute path.
+-- @return nil.
+function drop(file)
+    bufnr = call('bufnr', {file})
+    winids = call('win_findbuf', {bufnr})
+    -- print(vim.inspect(winids))
+    if #winids == 1 then
+        call('win_gotoid', {winids[1]})
+    else
+        prev_winnr = call('winnr', {'#'})
+        prev_winid = call('win_getid', {prev_winnr})
+        call('win_gotoid', {prev_winid})
+        str = string.format("edit %s", file)
+        cmd(str)
+    end
+end
+
+function rrequire(module)
+    package.loaded[module] = nil
+    return require(module)
+end

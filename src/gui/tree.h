@@ -49,11 +49,11 @@ private:
     void insert_item(const int pos);
     void erase_entrylist(const int s, const int e);
     void makeline(const int pos, QByteArray &line);
-    void entryInfoListRecursively(const QString & path, int level, QFileInfoList& lst, QList<FileItem>& fileitem_lst);
+    void entryInfoListRecursively(const FileItem &, QFileInfoList& lst, QList<FileItem>& fileitem_lst);
 
     void open_or_close_tree_recursively(int l);
     void shrinkRecursively(const QString &path);
-    void expandRecursively(const QString &path, int level, QFileInfoList &lst, QList<FileItem> &fileitem_lst);
+    void expandRecursively(const FileItem&, QFileInfoList &lst, QList<FileItem> &fileitem_lst);
 };
 
 } // namespace NeovimQt

@@ -19,8 +19,20 @@ Cell::Cell(const FileItem& fileitem, const QString type)
     else if (type == "indent") {
         // text = QByteArray(fileitem.level*2, ' ');
         text.clear();
-        for (int i = 0;i<fileitem.level;++i){
-            text.append("│  ");
+        const FileItem* pf = fileitem.parent;
+        // from high level to low
+        if (fileitem.level>0) {
+            if (fileitem.last )
+                text.append("└  ");
+            else
+                text.append("│  ");
+
+            for (int i = 0; i<fileitem.level-1; ++i, pf=pf->parent){
+                if(pf->last)
+                    text.prepend("   ");
+                else
+                    text.prepend("│  ");
+            }
         }
     }
     else if (type == "git") {
