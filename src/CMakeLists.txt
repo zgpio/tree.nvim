@@ -18,4 +18,4 @@ endif()
 add_library(neovim-qt STATIC ${NEOVIM_QT_SOURCES})
 target_link_libraries(neovim-qt Qt5::Network ${MSGPACK_LIBRARIES})
 
-add_subdirectory(gui)
+add_subdirectory(app)
