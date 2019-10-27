@@ -56,6 +56,7 @@ private:
     std::tuple<int, int> find_range(int l);
     void insert_entrylist(const QFileInfoList& fl, const int pos, const int level, QList<QByteArray>& ret);
     void insert_item(const int pos);
+    void insert_rootcell(const int pos);
     void erase_entrylist(const int s, const int e);
     void makeline(const int pos, QByteArray &line);
     void entryInfoListRecursively(const FileItem &, QFileInfoList& lst, QList<FileItem>& fileitem_lst);

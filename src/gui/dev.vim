@@ -31,7 +31,7 @@ set cmdheight=2
 
 " -------------------- User Configuration --------------------
 set termguicolors
-nnoremap <silent> <Space>e :<C-u>Tree -columns=mark:git:indent:icon:filename:size
+nnoremap <silent> <Space>z :<C-u>Tree -columns=mark:git:indent:icon:filename:size
       \ -split=vertical
       \ -direction=topleft
       \ -winwidth=40
@@ -41,9 +41,20 @@ nnoremap <silent> <Space>e :<C-u>Tree -columns=mark:git:indent:icon:filename:siz
 nnoremap <silent> <Space>xdf :Tree -new -split=vertical -winwidth=20
             \ -columns=mark:indent:git:icon:filename:type:size -show-ignored-files
             \ -direction=topleft `expand('%:p:h')` -search=`expand('%:p')`<CR>
-autocmd FileType tree call Ft()
 
-func Ft()
+call tree#custom#option('_', {
+      \ 'root_marker': ':',
+      \ })
+
+" TODO: deprecate custom#column
+call tree#custom#column('filename', {
+      \ 'root_marker_highlight': 'Ignore',
+      \ })
+
+autocmd FileType tree call s:set_tree()
+
+func! s:set_tree() abort
+  " Define mappings
   nnoremap <silent><buffer><expr> <CR> tree#action('drop')
   nnoremap <silent><buffer><expr> s tree#action('multi', [['drop', 'split']])
   nnoremap <silent><buffer><expr> se tree#action('save_session')

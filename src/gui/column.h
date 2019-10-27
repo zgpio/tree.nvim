@@ -90,7 +90,7 @@ public:
     bool new_ = false;
     bool resume = false;
 
-    string root_marker = "";
+    string root_marker = "[in]: ";
     string search = "";
     string session_file = "";
     string sort = "";

@@ -12,6 +12,7 @@ extern int mk_wcwidth(wchar_t ucs);
 using std::string;
 namespace NeovimQt {
 
+const int kStop = 40;
 Tree::Tree(){
 }
 
@@ -91,7 +92,7 @@ void Tree::changeRoot(QString path)
     fileitem.fi = QFileInfo(dir.absolutePath());
     m_fileitem.append(fileitem);
 
-    insert_item(0);
+    insert_rootcell(0);
     // FIXME: when icon not available
     col_map["icon"][0].text = "";
 
@@ -134,7 +135,7 @@ void Tree::insert_item(const int pos)
 
         // NOTE: alignment
         if (col=="filename") {
-            int tmp = 40- cell.col_end;
+            int tmp = kStop - cell.col_end;
             // TODO:此处都设置成统一列，在makeline时进行截断
             if (tmp >0) {
                 cell.col_end+=tmp;
@@ -154,6 +155,38 @@ void Tree::insert_item(const int pos)
     }
 }
 
+void Tree::insert_rootcell(const int pos)
+{
+    const FileItem &fileitem = m_fileitem[pos];
+    int start = 0;
+    int byte_start = 0;
+    foreach (const QString &col, cfg.columns) {
+        Cell cell(cfg, fileitem, col);
+        cell.col_start = start;
+        if (col=="filename") {
+            QByteArray filename(fileitem.fi.absoluteFilePath().toUtf8());
+            if (fileitem.fi.isDir()) {
+                filename.append("/");
+            }
+            filename.prepend(cfg.root_marker.c_str());
+            cell.text = filename;
+        }
+        QString cell_str(cell.text);
+        cell.byte_start = byte_start;
+        cell.byte_end = byte_start+cell.text.size();
+        cell.col_end = start + countgrid(cell_str);
+
+        int sep = (col=="indent"?0:1);
+        start = cell.col_end + sep;
+        byte_start = cell.byte_end + sep;
+
+        if (!col_map.contains(col)) {
+            col_map.insert(col, QList<Cell>());
+        }
+        // TODO: 考虑编译器优化
+        col_map[col].insert(pos, std::move(cell));
+    }
+}
 /// pos is 0-based row number.
 void Tree::insert_entrylist(const QFileInfoList& fl, const int pos, const int level, QList<QByteArray>& ret)
 {
@@ -273,7 +306,7 @@ void Tree::redraw_line(int sl, int el)
 
             if (col=="filename")
             {
-                int tmp = 50- cell.col_end;
+                int tmp = kStop - cell.col_end;
                 if (tmp >0)
                 {
                     cell.col_end+=tmp;
