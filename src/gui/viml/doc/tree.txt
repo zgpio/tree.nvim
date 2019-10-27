@@ -46,9 +46,9 @@ COMMANDS 						*tree-commands*
 ------------------------------------------------------------------------------
 FUNCTIONS 						*tree-functions*
 
-tree#async_action({action}[, {args}])			*tree#async_action()*
-		Fire {action} action with {args} asynchronously.  You can find
-		the actions list in |tree-actions|.
+tree#action({action}[, {args}])				*tree#action()*
+		Fire {action} action with {args} asynchronously.
+		See |tree-actions|.
 		{args} behavior depends on {action}.
 		Note: It is only used to define mappings.
 		Note: You cannot fire the next action until the previous
@@ -56,14 +56,13 @@ tree#async_action({action}[, {args}])			*tree#async_action()*
 
 							*tree#call_action()*
 tree#call_action({action}[, {args}])
-		Fire {action} action with {args}.  You can find the actions
-		list in |tree-actions|.
+		Fire {action} action with {args}.  See |tree-actions|.
 		{args} behavior depends on {action}.
 
 						*tree#call_async_action()*
 tree#call_async_action({action}[, {args}])
-		Fire {action} action with {args} asynchronously.  You can find
-		the actions list in |tree-actions|.
+		Fire {action} action with {args} asynchronously.
+		See |tree-actions|.
 		{args} behavior depends on {action}.
 		Note: You cannot fire the next action until the previous
 		action is finished.
@@ -116,17 +115,11 @@ tree#custom#source({source-name}, {dict})
 	function! Root(path) abort
 	  return fnamemodify(a:path, ':t')
 	endfunction
-	
+
 	call tree#custom#source('file', {
 	     \ 'root': 'Root',
 	     \})
 <
-tree#do_action({action}[, {args}])			*tree#do_action()*
-		Fire {action} action with {args}.  You can find the actions
-		list in |tree-actions|.
-		{args} behavior depends on {action}.
-		Note: It is only used to define mappings.
-
 tree#get_candidate()					*tree#get_candidate()*
 		Returns the current cursor candidate as |Dictionary|.
 

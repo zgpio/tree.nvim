@@ -23,16 +23,7 @@ function! tree#start(paths, user_context) abort
   " endif
 endfunction
 
-function! tree#do_action(action, ...) abort
-  if &l:filetype !=# 'tree'
-    return ''
-  endif
-
-  let args = tree#util#convert2list(get(a:000, 0, []))
-  return printf(":\<C-u>call tree#call_action(%s, %s)\<CR>",
-        \ string(a:action), string(args))
-endfunction
-function! tree#async_action(action, ...) abort
+function! tree#action(action, ...) abort
   if &l:filetype !=# 'tree'
     return ''
   endif
