@@ -120,7 +120,7 @@ void Tree::insert_item(const int pos)
     int start = 0;
     int byte_start = 0;
     foreach (const QString &col, cfg.columns) {
-        Cell cell(fileitem, col);
+        Cell cell(cfg, fileitem, col);
         QString cell_str(cell.text);
         cell.byte_start = byte_start;
         cell.byte_end = byte_start+cell.text.size();
@@ -134,7 +134,7 @@ void Tree::insert_item(const int pos)
 
         // NOTE: alignment
         if (col=="filename") {
-            int tmp = 50- cell.col_end;
+            int tmp = 40- cell.col_end;
             // TODO:此处都设置成统一列，在makeline时进行截断
             if (tmp >0) {
                 cell.col_end+=tmp;

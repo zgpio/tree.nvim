@@ -380,7 +380,7 @@ OPTIONS							*tree-options*
 		Default: "default"
 
 							*tree-option-columns*
--columns={columns1:columns2,...}
+-columns={…:indent:…:icon:filename:…}
 		Specify tree columns.
 		Default: "mark:indent:icon:filename:type"
 
@@ -654,7 +654,7 @@ A: >
 Q: How to open file use drop?
 
 A: >
-	  nnoremap <silent><buffer><expr> <CR> tree#do_action('drop')
+	nnoremap <silent><buffer><expr> <CR> tree#do_action('drop')
 
 Q: How to disable root marker?
 

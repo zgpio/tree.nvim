@@ -15,6 +15,7 @@ extern unordered_map<string, QByteArray> mark_indicators;
 extern unordered_map<string, QString> gui_colors;
 
 class Cell;
+class Config;
 class FileItem
 {
 public:
@@ -38,7 +39,7 @@ class Cell
 {
 public:
     Cell();
-    Cell(const FileItem&, const QString);
+    Cell(const Config&, const FileItem&, const QString);
     virtual ~Cell();
 
     // TODO: 考虑添加highlight_id, 并在highlight时加上列作用域防止冲突,

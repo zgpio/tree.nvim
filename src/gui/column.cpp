@@ -10,7 +10,7 @@ FileItem::FileItem()
 Cell::Cell()
 {
 }
-Cell::Cell(const FileItem& fileitem, const QString type)
+Cell::Cell(const Config &cfg, const FileItem& fileitem, const QString type)
 {
     if (type=="mark") {
         text = " ";
@@ -19,20 +19,24 @@ Cell::Cell(const FileItem& fileitem, const QString type)
     else if (type == "indent") {
         // NOTE: text="" when level<0.
         // text = QByteArray(fileitem.level*2, ' ');
+        int margin = cfg.columns.indexOf("icon")-cfg.columns.indexOf("indent")-1;
+        QString prefix(margin*2, ' ');
         text.clear();
         const FileItem* pf = fileitem.parent;
         // from high level to low
         if (fileitem.level>0) {
             if (fileitem.last )
-                text.append("└  ");
+                text.append("└ ");
             else
-                text.append("│  ");
+                text.append("│ ");
 
+            text.prepend(prefix.toUtf8());
             for (int i = 0; i<fileitem.level-1; ++i, pf=pf->parent){
                 if(pf->last)
-                    text.prepend("   ");
+                    text.prepend("  ");
                 else
-                    text.prepend("│  ");
+                    text.prepend("│ ");
+                text.prepend(prefix.toUtf8());
             }
         }
     }
