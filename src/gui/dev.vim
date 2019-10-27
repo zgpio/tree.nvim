@@ -14,6 +14,8 @@ func ExeServer()
     exe 'term ~/Documents/tree.nvim/build/bin/nvim-qt.app/Contents/MacOS/nvim-qt --server ' . v:servername
   elseif s:Linux
     exe 'term ~/tree.nvim/build/bin/nvim-qt --nofork --server ' . v:servername
+  elseif s:Windows
+    exe 'term C:\Users\zgp\tree.nvim\bin\nvim-qt.exe --server ' . v:servername
   endif
   wincmd n
   call feedkeys("\<c-w>j")
