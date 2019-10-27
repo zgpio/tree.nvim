@@ -5,6 +5,7 @@
 #include <tuple>
 #include "msgpackiodevice.h"
 #include "column.h"
+#include "neovimconnector.h"
 
 namespace NeovimQt {
 
@@ -31,6 +32,14 @@ public:
     void redraw_line(int sl, int el);
     void redraw_recursively(int l);
     void action(const QString &action, const QList<QVariant> &args, const QMap<QString, QVariant> context);
+    inline void buf_set_lines(int s, int e, bool strict, QList<QByteArray> replacement)
+    {
+        NeovimApi6 *b = m_nvim->api6();
+        b->nvim_buf_set_option(bufnr, "modifiable", true);
+        b->nvim_buf_set_lines(bufnr, s, e, strict, replacement);
+        b->nvim_buf_set_option(bufnr, "modifiable", false);
+    };
+
 
 protected slots:
     void handleRename(const QVariant& val);

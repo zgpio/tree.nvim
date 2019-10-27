@@ -17,6 +17,7 @@ Cell::Cell(const FileItem& fileitem, const QString type)
         color = gui_colors["blue"];
     }
     else if (type == "indent") {
+        // NOTE: text="" when level<0.
         // text = QByteArray(fileitem.level*2, ' ');
         text.clear();
         const FileItem* pf = fileitem.parent;
