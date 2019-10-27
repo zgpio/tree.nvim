@@ -130,8 +130,7 @@ tree#is_directory()					*tree#is_directory()*
 
 		nnoremap <silent><buffer><expr> <CR>
 		\ tree#is_directory() ?
-		\ tree#do_action('open') :
-		\ tree#do_action('multi', ['drop', 'quit'])
+		\ tree#action('open') : tree#action('multi', ['drop', 'quit'])
 
 
 tree#is_opened_tree()					*tree#is_opened_tree()*
@@ -142,7 +141,7 @@ tree#is_opened_tree()					*tree#is_opened_tree()*
 KEY MAPPINGS 						*tree-key-mappings*
 
 Tree does not provide any of default key mappings.
-You need to define original key mappings by |tree#do_action()|.
+You need to define original key mappings by |tree#action()|.
 
 ------------------------------------------------------------------------------
 ACTIONS 						*tree-actions*
@@ -176,7 +175,7 @@ call 						*tree-action-call*
 		  echomsg string(a:context.targets)
 		endfunction
 		nnoremap <silent><buffer><expr> f
-		\ tree#do_action('call', 'Test')
+		\ tree#action('call', 'Test')
 
 		" or you can use SID hack
 		function! s:Test(context) abort
@@ -188,7 +187,7 @@ call 						*tree-action-call*
 		endfunction
 		let g:sid = s:SID_PREFIX()
   		nnoremap <silent><buffer><expr> f
-  		\ tree#do_action('call', g:sid.'Test')
+		\ tree#action('call', g:sid.'Test')
 
 cd 						*tree-action-cd*
 		Change the current directory.
@@ -240,9 +239,9 @@ multi 						*tree-action-multi*
 
 		" auto quit like behavior
 		nnoremap <silent><buffer><expr> <CR>
-		\ tree#do_action('multi', ['drop', 'quit'])
+		\ tree#action('multi', ['drop', 'quit'])
 		nnoremap <silent><buffer><expr> s
-		\ tree#do_action('multi', [['drop', 'split'], 'quit'])
+		\ tree#action('multi', [['drop', 'split'], 'quit'])
 
 new_file 						*tree-action-new_file*
 		Create a new file or directory.
@@ -577,24 +576,6 @@ file		File
 				  (default is v:null)
 
 ==============================================================================
-DENITE SOURCES						*tree-denite-sources*
-
-						*denite-source-tree/drive*
-tree/drive	Gather tree drives.
-
-		Note: You can set drives like this:
->
-	call tree#custom#option('_', 'drives', [
-	\ expand('~/Downloads'), expand('~')
-	\ ])
-<
-						*denite-source-tree/history*
-tree/history	Gather tree histories.
-
-						*denite-source-tree/session*
-tree/session	Gather tree sessions.
-
-==============================================================================
 EXAMPLES						*tree-examples*
 >
 	...
@@ -615,7 +596,7 @@ A: >
 Q: How to open file use drop?
 
 A: >
-	nnoremap <silent><buffer><expr> <CR> tree#do_action('drop')
+	nnoremap <silent><buffer><expr> <CR> tree#action('drop')
 
 Q: How to disable root marker?
 

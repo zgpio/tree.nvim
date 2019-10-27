@@ -45,7 +45,7 @@ nnoremap <silent> <Space>xdf :Tree -new -split=vertical -winwidth=20
             \ -direction=topleft `expand('%:p:h')` -search=`expand('%:p')`<CR>
 
 call tree#custom#option('_', {
-      \ 'root_marker': ':',
+      \ 'root_marker': '',
       \ })
 
 " TODO: deprecate custom#column
