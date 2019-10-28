@@ -53,7 +53,6 @@ int countgrid(const QString &s)
 void Tree::makeline(const int pos, QByteArray &line)
 {
     assert(0<=pos&&pos<col_map["filename"].size());
-    const FileItem &fileitem = m_fileitem[pos];
     // mark:indent:git:icons:filename:type
     int start = 0;
     foreach (const QString &col, cfg.columns) {
@@ -86,10 +85,10 @@ void Tree::changeRoot(QString path)
     erase_entrylist(0, m_fileitem.size());
 
     // FIXME: root and its child's level inconsistent
-    FileItem fileitem;
-    fileitem.level = -1;
-    fileitem.opened_tree = true;
-    fileitem.fi = QFileInfo(dir.absolutePath());
+    FileItem *fileitem = new FileItem;
+    fileitem->level = -1;
+    fileitem->opened_tree = true;
+    fileitem->fi = QFileInfo(dir.absolutePath());
     m_fileitem.append(fileitem);
 
     insert_rootcell(0);
@@ -101,8 +100,8 @@ void Tree::changeRoot(QString path)
     makeline(0, line);
     ret.append(line);
 
-    QList<FileItem> child_fileitem;
-    entryInfoListRecursively(m_fileitem[0], child_fileitem);
+    QList<FileItem*> child_fileitem;
+    entryInfoListRecursively(*m_fileitem[0], child_fileitem);
     for (int i=0;i<child_fileitem.size();++i)
         m_fileitem.insert(1+i, child_fileitem[i]);
 
@@ -116,7 +115,7 @@ void Tree::changeRoot(QString path)
 /// Insert columns
 void Tree::insert_item(const int pos)
 {
-    const FileItem &fileitem = m_fileitem[pos];
+    const FileItem &fileitem = *m_fileitem[pos];
     int start = 0;
     int byte_start = 0;
     foreach (const QString &col, cfg.columns) {
@@ -156,7 +155,7 @@ void Tree::insert_item(const int pos)
 
 void Tree::insert_rootcell(const int pos)
 {
-    const FileItem &fileitem = m_fileitem[pos];
+    const FileItem &fileitem = *m_fileitem[pos];
     int start = 0;
     int byte_start = 0;
     foreach (const QString &col, cfg.columns) {
@@ -187,7 +186,7 @@ void Tree::insert_rootcell(const int pos)
     }
 }
 /// pos is 0-based row number.
-void Tree::insert_entrylist(const QList<FileItem>& fil, const int pos, QList<QByteArray>& ret)
+void Tree::insert_entrylist(const QList<FileItem*>& fil, const int pos, QList<QByteArray>& ret)
 {
     int file_count = fil.count();
     for (int i = 0; i < file_count; ++i) {
@@ -206,10 +205,10 @@ void Tree::insert_entrylist(const QList<FileItem>& fil, const int pos, QList<QBy
 /// l is 0-based row number.
 int Tree::find_parent(int l)
 {
-    int level = m_fileitem.at(l).level;
+    int level = m_fileitem.at(l)->level;
     for (int i=l-1;i>=0;--i)
     {
-        const FileItem &fn = m_fileitem.at(i);
+        const FileItem &fn = *m_fileitem.at(i);
         if (fn.level == level-1)
             return i;
     }
@@ -220,10 +219,10 @@ int Tree::find_parent(int l)
 std::tuple<int, int> Tree::find_range(int l)
 {
     int s=l, i;
-    int level = m_fileitem.at(l).level;
+    int level = m_fileitem.at(l)->level;
     for (i=l+1;i<m_fileitem.size();++i)
     {
-        int l = m_fileitem.at(i).level;
+        int l = m_fileitem.at(i)->level;
         if (level >= l)
             break;
     }
@@ -238,7 +237,7 @@ void Tree::hline(int sl, int el)
     b->nvim_buf_clear_namespace(bufnr, icon_ns_id, sl, el);
     for (int i = sl;i<el;++i)
     {
-        const FileItem &fileitem = m_fileitem[i];
+        const FileItem &fileitem = *m_fileitem[i];
         char name[40];
         char cmd[80];
 
@@ -277,7 +276,7 @@ void Tree::redraw_line(int sl, int el)
 
     QList<QByteArray> ret;
     for (int i = sl; i < el; ++i) {
-        FileItem & fileitem = m_fileitem[i];
+        FileItem & fileitem = *m_fileitem[i];
 
         int start = 0;
         int byte_start = 0;
@@ -330,7 +329,7 @@ void Tree::redraw_recursively(int l)
 {
     assert(0 <= l && l < m_fileitem.size());
     if (l == 0) return;
-    FileItem &cur = m_fileitem[l];
+    FileItem &cur = *m_fileitem[l];
 
     std::tuple<int, int> se = find_range(l);
     int s = std::get<0>(se) + 1;
@@ -341,7 +340,7 @@ void Tree::redraw_recursively(int l)
 
     erase_entrylist(s, e);
 
-    QList<FileItem> child_fileitem;
+    QList<FileItem*> child_fileitem;
     // const QString &p = cur.fi.absoluteFilePath();
     entryInfoListRecursively(cur, child_fileitem);
     for (int i = 0; i < child_fileitem.size(); ++i)
@@ -366,6 +365,9 @@ void Tree::erase_entrylist(const int s, const int e)
         QList<Cell> & cell = col_map[col];
         cell.erase(cell.begin()+s, cell.begin()+e);
     }
+    for (int i = s; i < e; ++i) {
+        delete m_fileitem.at(i);
+    }
     m_fileitem.erase(m_fileitem.begin()+s, m_fileitem.begin()+e);
 }
 
@@ -376,7 +378,7 @@ void Tree::open_tree(int l)
     assert(0 <= l && l < m_fileitem.size());
     // if (l == 0) return;
     QList<QByteArray> ret;
-    FileItem &cur = m_fileitem[l];
+    FileItem &cur = *m_fileitem[l];
 
     NeovimQt::NeovimApi6 *b = m_nvim->api6();
 
@@ -385,7 +387,7 @@ void Tree::open_tree(int l)
         const QString & rootPath = cur.fi.absoluteFilePath();
         expandStore.insert(rootPath, true);
         redraw_line(l, l + 1);
-        QList<FileItem> child_fileitem;
+        QList<FileItem*> child_fileitem;
         entryInfoListRecursively(cur, child_fileitem);
         for (int i=0;i<child_fileitem.size();++i)
             m_fileitem.insert(l+1+i, child_fileitem[i]);
@@ -433,7 +435,7 @@ void Tree::open_tree(int l)
         b->nvim_win_set_cursor(0, QPoint{0, s});
         erase_entrylist(s, e);
 
-        FileItem &father = m_fileitem[parent];
+        FileItem &father = *m_fileitem[parent];
         father.opened_tree = false;
         const QString & p = father.fi.absoluteFilePath();
         if (expandStore.contains(p) && expandStore[p]) {
@@ -448,7 +450,7 @@ void Tree::open_tree(int l)
 
 void Tree::open(const int l, const QList<QVariant> &args)
 {
-    const QFileInfo &fi = m_fileitem[l].fi;
+    const QFileInfo &fi = m_fileitem[l]->fi;
     NeovimQt::NeovimApi6 *b = m_nvim->api6();
     if (fi.isDir()) {
         changeRoot(fi.absoluteFilePath());
@@ -472,7 +474,7 @@ void Tree::open_or_close_tree_recursively(int l)
     assert(0 <= l && l < m_fileitem.size());
     if (l == 0) return;
     QList<QByteArray> ret;
-    FileItem &cur = m_fileitem[l];
+    FileItem &cur = *m_fileitem[l];
 
     NeovimQt::NeovimApi6 *b = m_nvim->api6();
 
@@ -481,7 +483,7 @@ void Tree::open_or_close_tree_recursively(int l)
         const QString &rootPath = cur.fi.absoluteFilePath();
         expandStore.insert(rootPath, true);
         redraw_line(l, l + 1);
-        QList<FileItem> child_fileitem;
+        QList<FileItem*> child_fileitem;
         expandRecursively(cur, child_fileitem);
         for (int i = 0; i < child_fileitem.size(); ++i)
             m_fileitem.insert(l + 1 + i, child_fileitem[i]);
@@ -528,7 +530,7 @@ void Tree::open_or_close_tree_recursively(int l)
         // ref to https://github.com/equalsraf/neovim-qt/issues/596
         b->nvim_win_set_cursor(0, QPoint{0, s});
 
-        FileItem &father = m_fileitem[parent];
+        FileItem &father = *m_fileitem[parent];
         father.opened_tree = false;
         const QString &p = father.fi.absoluteFilePath();
         if (expandStore.contains(p) && expandStore[p]) {
@@ -545,7 +547,7 @@ void Tree::open_or_close_tree_recursively(int l)
 
 // get entryInfoList recursively
 void Tree::entryInfoListRecursively(const FileItem& item,
-                                   QList<FileItem> &fileitem_lst)
+                                   QList<FileItem*> &fileitem_lst)
 {
     QDir dir(item.fi.absoluteFilePath());
     const int level = item.level+1;
@@ -559,18 +561,18 @@ void Tree::entryInfoListRecursively(const FileItem& item,
     for (int i = 0; i < file_count; ++i) {
         QFileInfo fi = child.at(i);
 
-        FileItem fileitem;
-        fileitem.fi = fi;
-        fileitem.level = level;
-        fileitem.parent = &item;
+        FileItem *fileitem = new FileItem;
+        fileitem->fi = fi;
+        fileitem->level = level;
+        fileitem->parent = &item;
         if (i==file_count-1)
-            fileitem.last=true;
+            fileitem->last=true;
         QString p = fi.absoluteFilePath();
 
         if (expandStore.contains(p) && expandStore[p]) {
-            fileitem.opened_tree = true;
+            fileitem->opened_tree = true;
             fileitem_lst.append(fileitem);
-            entryInfoListRecursively(fileitem_lst.back(), fileitem_lst);
+            entryInfoListRecursively(*fileitem, fileitem_lst);
         }
         else {
             fileitem_lst.append(fileitem);
@@ -604,7 +606,7 @@ void Tree::shrinkRecursively(const QString &path)
 
 // shrink recursively
 void Tree::expandRecursively(const FileItem &item,
-                            QList<FileItem> &fileitem_lst)
+                            QList<FileItem*> &fileitem_lst)
 {
     QDir dir(item.fi.absoluteFilePath());
     const int level = item.level+1;
@@ -618,19 +620,19 @@ void Tree::expandRecursively(const FileItem &item,
     for (int i = 0; i < file_count; ++i) {
         QFileInfo file_info = child.at(i);
 
-        FileItem fileitem;
-        fileitem.fi = file_info;
-        fileitem.level = level;
-        fileitem.parent = &item;
+        FileItem *fileitem = new FileItem;
+        fileitem->fi = file_info;
+        fileitem->level = level;
+        fileitem->parent = &item;
         if (i==file_count-1)
-            fileitem.last=true;
+            fileitem->last=true;
 
         if (file_info.isDir()) {
             QString p = file_info.absoluteFilePath();
             expandStore.insert(p, true);
-            fileitem.opened_tree = true;
+            fileitem->opened_tree = true;
             fileitem_lst.append(fileitem);
-            expandRecursively(fileitem_lst.back(), fileitem_lst);
+            expandRecursively(*fileitem, fileitem_lst);
         }
         else {
             fileitem_lst.append(fileitem);
@@ -647,7 +649,7 @@ void Tree::handleRename(const QVariant& val)
     input = val.toString();
 
     Cell & cur = col_map["filename"][ctx.cursor-1];
-    FileItem & curitem = m_fileitem[ctx.cursor-1];
+    FileItem & curitem = *m_fileitem[ctx.cursor-1];
     QString fn = curitem.fi.absoluteFilePath();
     QFile qf(fn);
     if (qf.rename(input)) {
@@ -674,7 +676,7 @@ void Tree::handleNewFile(const QVariant &val)
     qDebug() << __PRETTY_FUNCTION__ << input;
 
     // Cell & cur = col_map["filename"][ctx.cursor-1];
-    FileItem & fileitem = m_fileitem[ctx.cursor-1];
+    FileItem & fileitem = *m_fileitem[ctx.cursor-1];
 
     QString filename, destdir;
     if (fileitem.opened_tree) {
@@ -739,7 +741,7 @@ void Tree::cd(const QList<QVariant>& args)
     NeovimQt::NeovimApi6 *b = m_nvim->api6();
 
     if (dir=="..") {
-        QDir curdir(m_fileitem.at(0).fi.absoluteFilePath());
+        QDir curdir(m_fileitem.at(0)->fi.absoluteFilePath());
         if (curdir.cd(".."))
         {
             qDebug()<< __PRETTY_FUNCTION__ << curdir;
@@ -751,7 +753,7 @@ void Tree::toggle_select(const int pos)
 {
     // TODO: mark may not available
     Cell &cur = col_map["mark"][pos];
-    FileItem& item = m_fileitem[pos];
+    FileItem& item = *m_fileitem[pos];
 
     item.selected = !item.selected;
     if (item.selected) {
@@ -799,7 +801,7 @@ void Tree::action(const QString &action, const QList<QVariant> &args,
     }
     else if (action == "rename") {
         qDebug() << action << args;
-        FileItem &cur = m_fileitem[ctx.cursor - 1];
+        FileItem &cur = *m_fileitem[ctx.cursor - 1];
         string info = cur.fi.absoluteFilePath().toStdString();
         // NOTE: specify handle for vim_input
         vim_input("Rename: " + info + " -> ", info, "file", "rename");
@@ -808,11 +810,11 @@ void Tree::action(const QString &action, const QList<QVariant> &args,
         toggle_select(ctx.cursor - 1);
     }
     else if (action == "redraw") {
-        FileItem &root = m_fileitem[0];
+        FileItem &root = *m_fileitem[0];
         changeRoot(root.fi.absoluteFilePath());
     }
     else if (action == "new_file") {
-        FileItem &cur = m_fileitem[ctx.cursor - 1];
+        FileItem &cur = *m_fileitem[ctx.cursor - 1];
         string info = cur.fi.absolutePath().toStdString();
         vim_input("New File: " + info + "/", "", "file", "new_file");
     }
@@ -820,17 +822,17 @@ void Tree::action(const QString &action, const QList<QVariant> &args,
         open_or_close_tree_recursively(ctx.cursor - 1);
     }
     else if (action == "execute_system") {
-        FileItem &cur = m_fileitem[ctx.cursor - 1];
+        FileItem &cur = *m_fileitem[ctx.cursor - 1];
         QString info = cur.fi.absoluteFilePath();
         b->nvim_call_function("tree#util#open", {info});
     }
     else if (action == "yank_path") {
         QStringList yank;
         foreach (const int &pos, targets) {
-            yank.append(m_fileitem[pos].fi.absoluteFilePath());
+            yank.append(m_fileitem[pos]->fi.absoluteFilePath());
         }
         if (yank.size()==0) {
-            FileItem &cur = m_fileitem[ctx.cursor - 1];
+            FileItem &cur = *m_fileitem[ctx.cursor - 1];
             yank << cur.fi.absoluteFilePath();
         }
         QString reg = yank.join('\n');
@@ -841,7 +843,7 @@ void Tree::action(const QString &action, const QList<QVariant> &args,
         b->nvim_call_function("tree#util#print_message", {msg});
     }
     else if (action == "drop") {
-        FileItem &cur = m_fileitem[ctx.cursor - 1];
+        FileItem &cur = *m_fileitem[ctx.cursor - 1];
         QString info = cur.fi.absoluteFilePath();
 
         b->nvim_command("lua require('tree')");

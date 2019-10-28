@@ -47,23 +47,23 @@ protected slots:
 
 private:
 
-    QList<FileItem> m_fileitem;
+    QList<FileItem *> m_fileitem;
     QMap<QString, QList<Cell>> col_map;
     QHash<QString, bool> expandStore;
     QList<int> targets;
     void hline(int sl, int el);
     int find_parent(int l);
     std::tuple<int, int> find_range(int l);
-    void insert_entrylist(const QList<FileItem> &, const int pos, QList<QByteArray>& ret);
+    void insert_entrylist(const QList<FileItem*> &, const int pos, QList<QByteArray>& ret);
     void insert_item(const int pos);
     void insert_rootcell(const int pos);
     void erase_entrylist(const int s, const int e);
     void makeline(const int pos, QByteArray &line);
-    void entryInfoListRecursively(const FileItem &, QList<FileItem>& fileitem_lst);
+    void entryInfoListRecursively(const FileItem &, QList<FileItem*>& fileitem_lst);
 
     void open_or_close_tree_recursively(int l);
     void shrinkRecursively(const QString &path);
-    void expandRecursively(const FileItem&, QList<FileItem> &fileitem_lst);
+    void expandRecursively(const FileItem&, QList<FileItem*> &fileitem_lst);
 };
 
 } // namespace NeovimQt
