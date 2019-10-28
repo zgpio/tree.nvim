@@ -2,6 +2,7 @@
 #define NEOVIM_QT_TREE
 
 #include <QList>
+#include <QDir>
 #include <tuple>
 #include "msgpackiodevice.h"
 #include "column.h"
@@ -38,6 +39,26 @@ public:
         b->nvim_buf_set_option(bufnr, "modifiable", true);
         b->nvim_buf_set_lines(bufnr, s, e, strict, replacement);
         b->nvim_buf_set_option(bufnr, "modifiable", false);
+    };
+    inline void set_dir(QDir &dir)
+    {
+        // TODO: QDir::setNameFilters
+        QDir::Filters filters = QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot;
+        if (cfg.show_ignored_files)
+            filters |= QDir::Hidden;
+        dir.setFilter(filters);
+        dir.setSorting(QDir::Name|QDir::DirsFirst);
+// QDir::Name     Sort by name.
+// QDir::Time     Sort by time (modification time).
+// QDir::Size     Sort by file size.
+// QDir::Type     Sort by file type (extension).
+// QDir::Unsorted 	 Do not sort.
+// QDir::NoSort     Not sorted by default.
+// QDir::DirsFirst	 Put the directories first, then the files.
+// QDir::DirsLast	 Put the files first, then the directories.
+// QDir::Reversed	 Reverse the sort order.
+// QDir::IgnoreCase Sort case-insensitively.
+// QDir::LocaleAware  Sort items appropriately using the current locale settings.
     };
 
 

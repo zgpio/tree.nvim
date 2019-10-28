@@ -95,11 +95,11 @@ public:
     string session_file = "";
     string sort = "";
 
-    int wincol = 0;
-    int winheight = 0;
+    int winheight = 30;
+    int winwidth = 90;
     string winrelative = "editor";
+    int wincol = 0;
     int winrow = 0;
-    int winwidth = 0;
 
     bool show_ignored_files = false;
     string split = "no";

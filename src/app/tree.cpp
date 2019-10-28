@@ -1,4 +1,3 @@
-#include <QDir>
 #include <QFileInfo>
 #include <QDebug>
 #include <cinttypes>
@@ -163,7 +162,7 @@ void Tree::insert_rootcell(const int pos)
         cell.col_start = start;
         if (col=="filename") {
             QByteArray filename(fileitem.fi.absoluteFilePath().toUtf8());
-            if (fileitem.fi.isDir()) {
+            if (!fileitem.fi.isRoot() && fileitem.fi.isDir()) {
                 filename.append("/");
             }
             filename.prepend(cfg.root_marker.c_str());
@@ -540,9 +539,8 @@ void Tree::entryInfoListRecursively(const FileItem& item,
                                    QList<FileItem*> &fileitem_lst)
 {
     QDir dir(item.fi.absoluteFilePath());
+    set_dir(dir);
     const int level = item.level+1;
-    dir.setFilter(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
-    dir.setSorting(QDir::DirsFirst);
     QFileInfoList child = dir.entryInfoList();
     int file_count = child.count();
     if (file_count <= 0) {
@@ -575,8 +573,7 @@ void Tree::entryInfoListRecursively(const FileItem& item,
 void Tree::shrinkRecursively(const QString &path)
 {
     QDir dir(path);
-    dir.setFilter(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
-    dir.setSorting(QDir::DirsFirst);
+    set_dir(dir);
     QFileInfoList child = dir.entryInfoList();
     int file_count = child.count();
     if (file_count <= 0) {
@@ -599,9 +596,8 @@ void Tree::expandRecursively(const FileItem &item,
                             QList<FileItem*> &fileitem_lst)
 {
     QDir dir(item.fi.absoluteFilePath());
+    set_dir(dir);
     const int level = item.level+1;
-    dir.setFilter(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
-    dir.setSorting(QDir::DirsFirst);
     QFileInfoList child = dir.entryInfoList();
     int file_count = child.count();
     if (file_count <= 0) {
@@ -845,6 +841,12 @@ void Tree::action(const QString &action, const QList<QVariant> &args,
     else if (action == "debug") {
         qDebug() << cfg.columns;
     }
+    else if (action == "toggle_ignored_files") {
+        cfg.show_ignored_files=!cfg.show_ignored_files;
+        FileItem &root = *m_fileitem[0];
+        changeRoot(root.fi.absoluteFilePath());
+    }
+
 }
 
 } // namespace NeovimQt
