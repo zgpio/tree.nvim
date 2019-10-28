@@ -203,6 +203,7 @@ void Tree::insert_entrylist(const QList<FileItem*>& fil, const int pos, QList<QB
 }
 // TODO: 通过FileItem的parent查询
 /// l is 0-based row number.
+/// NOTE: root.level=-1
 int Tree::find_parent(int l)
 {
     int level = m_fileitem.at(l)->level;
@@ -271,7 +272,7 @@ void Tree::hline(int sl, int el)
 /// 0-based [sl, el).
 void Tree::redraw_line(int sl, int el)
 {
-    char format[] = "%s (1-based):" "[%" PRId64 ", %" PRId64 "]";
+    char format[] = "%s (1-based): [%d, %d]";
     qDebug(format, __PRETTY_FUNCTION__, sl+1, el);
 
     QList<QByteArray> ret;
@@ -328,15 +329,12 @@ void Tree::redraw_line(int sl, int el)
 void Tree::redraw_recursively(int l)
 {
     assert(0 <= l && l < m_fileitem.size());
-    if (l == 0) return;
     FileItem &cur = *m_fileitem[l];
 
     std::tuple<int, int> se = find_range(l);
     int s = std::get<0>(se) + 1;
     int e = std::get<1>(se) + 1;
-    char info[80];
-    sprintf(info, "redraw range(1-based): [%d, %d]", s + 1, e);
-    qDebug() << __PRETTY_FUNCTION__ << info;
+    qDebug("%s redraw range(1-based): [%d, %d]", __PRETTY_FUNCTION__, s+1, e);
 
     erase_entrylist(s, e);
 
@@ -410,9 +408,7 @@ void Tree::open_tree(int l)
         std::tuple<int, int> se = find_range(l);
         int s = std::get<0>(se) + 1;
         int e = std::get<1>(se) + 1;
-        char info[80];
-        sprintf(info, "\tclose range(1-based): [%d, %d]", s + 1, e);
-        qDebug() << info;
+        qDebug("\tclose range(1-based): [%d, %d]", s+1, e);
         buf_set_lines(s, e, true, {});
 
         erase_entrylist(s, e);
@@ -426,9 +422,7 @@ void Tree::open_tree(int l)
         int s = std::get<0>(se) + 1;
         int e = std::get<1>(se) + 1;
 
-        char info[80];
-        sprintf(info, "\tclose range(1-based): [%d, %d]", s + 1, e);
-        qDebug() << info;
+        qDebug("\tclose range(1-based): [%d, %d]", s+1, e);
 
         buf_set_lines(s, e, true, {});
         // ref to https://github.com/equalsraf/neovim-qt/issues/596
@@ -506,9 +500,7 @@ void Tree::open_or_close_tree_recursively(int l)
         std::tuple<int, int> se = find_range(l);
         int s = std::get<0>(se) + 1;
         int e = std::get<1>(se) + 1;
-        char info[80];
-        sprintf(info, "\tclose range(1-based): [%d, %d]", s + 1, e);
-        qDebug() << info;
+        qDebug("\tclose range(1-based): [%d, %d]", s+1, e);
         buf_set_lines(s, e, true, {});
         shrinkRecursively(p);
         erase_entrylist(s, e);
@@ -522,9 +514,7 @@ void Tree::open_or_close_tree_recursively(int l)
         int s = std::get<0>(se) + 1;
         int e = std::get<1>(se) + 1;
 
-        char info[80];
-        sprintf(info, "\tclose range(1-based): [%d, %d]", s + 1, e);
-        qDebug() << info;
+        qDebug("\tclose range(1-based): [%d, %d]", s+1, e);
 
         buf_set_lines(s, e, true, {});
         // ref to https://github.com/equalsraf/neovim-qt/issues/596
@@ -707,7 +697,7 @@ void Tree::handleNewFile(const QVariant &val)
     } else{
         // TODO: location: find_child
         int pidx = find_parent(ctx.cursor-1);
-        // TODO: pidx may -1, 即如果在根目录下的new要特殊处理
+        // NOTE: root.level=-1
         // TODO: consider named redraw_family
         redraw_recursively(pidx);
     }
