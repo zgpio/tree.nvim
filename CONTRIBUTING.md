@@ -1,6 +1,13 @@
-
 Thanks in advance for taking the time to contribute, here are a few guidelines
 that help move things faster.
+
+## Building
+
+### Dependencies
+* Qt5
+* Neovim
+
+## Development
 
 ## Submitting Issues
 
@@ -19,4 +26,3 @@ Please include the following information, it helps narrowing down issues
 - Format C++ code with **tabs**
 - Python code is **PEP8**
 - **Keep portability in mind** this is expected to run in Windows and Unix systems
-
