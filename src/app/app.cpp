@@ -169,17 +169,16 @@ void App::handleRequest(MsgpackIODevice* dev, quint32 msgid, const QByteArray& m
         } else {
             // NOTE: Resume tree buffer by default.
             // Tree * tree = *trees.begin();
-            QByteArray bufnrs("{");
-            foreach(const int bufnr, trees.keys()) {
-                bufnrs.append(QString::number(bufnr));
-                bufnrs.append(",");
-            }
-            bufnrs.append("}");
+            // QList to QVariantList
+            // https://stackoverflow.com/questions/9265288/casting-a-list-as-qvariant-or-qvariant-list
+            QVariantList bufnrs;
+            foreach(const int item, trees.keys())
+                bufnrs << item;
+
             qDebug()<<bufnrs;
             b->nvim_command("lua require('tree')");
-            char cmd[128];
-            sprintf(cmd, "lua resume(%s)", bufnrs.data());
-            b->nvim_command(cmd);
+            b->nvim_execute_lua("resume(...)", {bufnrs, 2});
+
             // TODO: columns 状态更新需要清除不需要的columns
             trees[m_ctx.prev_bufnr]->cfg.update(m_cfgmap);
             // bufwinid(bufname(bufnr))

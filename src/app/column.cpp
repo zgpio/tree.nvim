@@ -13,8 +13,11 @@ Cell::Cell()
 Cell::Cell(const Config &cfg, const FileItem& fileitem, const QString type)
 {
     if (type=="mark") {
-        text = " ";
         color = gui_colors["blue"];
+        if (fileitem.fi.permission(QFile::WriteUser))
+            text = " ";
+        else
+            text = mark_indicators["readonly_icon"];
     }
     else if (type == "indent") {
         // NOTE: text="" when level<0.
@@ -202,12 +205,14 @@ void FileItem::update_gmap(QString p)
         // qDebug()<<"LR"<<LR;
 
         string status;
-        QString key;
         get_indicator_name(X, Y, status);
         // TODO: Check compatible in Windows
-        key = top_dir.filePath(status == "Renamed" ? LR[1] : LR[0]);
-        // qDebug() << "key:" << key << endl;
-        FileItem::git_map[key] = git_indicators[status];
+        QString key = top_dir.filePath(status == "Renamed" ? LR[1] : LR[0]);
+        QDir keyDir(key);
+        while (keyDir!=top_dir) {
+            FileItem::git_map[keyDir.absolutePath()] = git_indicators[status];
+            keyDir.cdUp();
+        }
     }
     foreach (const QString &name, git_map.keys())
         qDebug().noquote() << name << ":" << git_map.value(name);

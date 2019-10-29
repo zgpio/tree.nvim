@@ -6,13 +6,16 @@ local cmd = vim.api.nvim_command
 -- otherwise, create a new window.
 -- @param bufnrs table: trees bufnrs.
 -- @return nil.
-function resume(bufnrs)
+function resume(bufnrs, fool)
     print("bufnrs", vim.inspect(bufnrs))
+    print("fool", vim.inspect(fool))
     for i, bufnr in pairs(bufnrs) do
         winid = call('bufwinid', {bufnr})
         if winid > 0 then
             print('goto winid', winid)
             call('win_gotoid', {winid})
+            -- TODO: Duplicate
+            cmd('vertical resize 40')
             return
         end
     end
@@ -21,6 +24,7 @@ function resume(bufnrs)
         str = string.format("silent keepalt %s %s %s %d", "leftabove", "vertical", "sbuffer", bufnr)
         cmd(str)
     end
+    cmd('vertical resize 40')
 end
 
 --- Drop file.

@@ -833,10 +833,7 @@ void Tree::action(const QString &action, const QList<QVariant> &args,
         QString info = cur.fi.absoluteFilePath();
 
         b->nvim_command("lua require('tree')");
-        char cmd[128];
-        sprintf(cmd, "lua drop('%s')", info.toStdString().c_str());
-        qDebug()<<cmd;
-        b->nvim_command(cmd);
+        b->nvim_execute_lua("drop(...)", {info});
     }
     else if (action == "debug") {
         qDebug() << cfg.columns;
