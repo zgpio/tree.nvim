@@ -83,8 +83,13 @@ void App::handleHLfinish(quint32 msgid, quint64 fun, const QVariant& val)
 }
 void App::handleBufReq(quint32 msgid, quint64 fun, const QVariant& val)
 {
+    static int count = 0;
     int bufnr = val.toInt();
     resource.insert("bufnr", int(bufnr));
+    NeovimQt::NeovimApi6 *b = m_nvim->api6();
+    QString bufname = QString("Tree-%1").arg(count);
+    b->nvim_buf_set_name(bufnr, bufname.toUtf8());
+    count ++;
     qDebug() << __PRETTY_FUNCTION__ << "bufnr:"<< bufnr;
     // FIXME: 保证在所有资源申请成功后创建tree.
     //  idea: 在所有的handle函数中判断资源是否申请完成(resource是否符合要求)

@@ -4,6 +4,8 @@
 " License: MIT license
 "=============================================================================
 
+let s:project_root = fnamemodify(expand('<sfile>'), ':h:h:h')
+
 function! tree#init#_initialize() abort
   if exists('g:tree#_channel_id')
     return
@@ -25,16 +27,15 @@ function! tree#init#_channel() abort
 
   " TODO: temporary, ~ cant work
   if has('unix') && !has('macunix') && !has('win32unix')
-    call jobstart(['/home/zgp/tree.nvim/build/bin/nvim-qt', '--server', v:servername])
+    call jobstart([s:project_root . '/bin/nvim-qt', '--server', v:servername])
   else
-    call jobstart(['/Users/zgp/Documents/tree.nvim/build/bin/nvim-qt.app/Contents/MacOS/nvim-qt', '--server', v:servername])
+    call jobstart([s:project_root . '/bin/nvim-qt.app/Contents/MacOS/nvim-qt', '--server', v:servername])
   endif
   sleep 100m
   echom 'jobstart success'
   return v:true
   " call tree#util#print_error(v:exception)
   " call tree#util#print_error(v:throwpoint)
-  " call tree#util#print_error('tree failed to load.')
 
 endfunction
 function! tree#init#_check_channel() abort

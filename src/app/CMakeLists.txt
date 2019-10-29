@@ -22,10 +22,9 @@ if(WIN32)
     list(APPEND SRC_FILE wcwidth.cpp)
 endif()
 
-add_library(neovim-qt-gui ${SRC_FILE})
+add_library(tree-nvim ${SRC_FILE})
 
-# target_link_libraries(neovim-qt-gui qshellwidget neovim-qt)
-target_link_libraries(neovim-qt-gui neovim-qt)
+target_link_libraries(tree-nvim neovim-qt)
 
 if(NOT APPLE)
 	set_property(SOURCE app.cpp PROPERTY COMPILE_DEFINITIONS
@@ -37,7 +36,7 @@ add_executable(nvim-qt WIN32 MACOSX_BUNDLE main.cpp
 	${RES_FILE}
 	${ICON_PATH})
 
-target_link_libraries(nvim-qt ${QTLIBS} ${MSGPACK_LIBRARIES} neovim-qt-gui)
+target_link_libraries(nvim-qt ${QTLIBS} ${MSGPACK_LIBRARIES} tree-nvim)
 
 if(APPLE)
 #	TODO: Bundle Qt, currently conflicts with brew Qt
