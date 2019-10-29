@@ -15,4 +15,5 @@ Experimental, maybe has breaking changes and bugs.
 - NeoVim support only.
 
 ## Using
+### Config (Soon or later)
 ![Demo](https://user-images.githubusercontent.com/19503791/67631779-98fdc080-f8d5-11e9-9688-d0e81e41d338.png)

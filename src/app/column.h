@@ -6,13 +6,18 @@
 #include <QByteArrayList>
 #include <QMap>
 #include <QString>
+#include <array>
 #include <QVariant>
 using std::string;
+using std::array;
 using std::unordered_map;
-extern unordered_map<string, unordered_map<string, QString>> extensions;
 extern unordered_map<string, QByteArray> git_indicators;
 extern unordered_map<string, QByteArray> mark_indicators;
 extern unordered_map<string, QString> gui_colors;
+
+extern unordered_map<string, array<QString, 2>> icons;
+extern unordered_map<string, string> extensions;
+extern unordered_map<string, string> filenames;
 
 class Cell;
 class Config;

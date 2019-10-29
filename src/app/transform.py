@@ -19,11 +19,11 @@ with open(f"{self_dir}/transform.cpp", "w") as f:
                 print(k, code, color)
                 line = f'    {{ "{k}", {{"{code}", "{color}"}} }},\n'
                 f.write(line)
-            f.write('}\n')
+            f.write('};\n')
         else:
             f.write('\n')
             f.write(f'unordered_map<string, string> {name} = {{\n')
             for k, v in val.items():
                 line = f'    {{ "{k}", "{v}" }},\n'
                 f.write(line)
-            f.write('}\n')
+            f.write('};\n')

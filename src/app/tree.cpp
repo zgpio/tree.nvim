@@ -246,13 +246,13 @@ void Tree::hline(int sl, int el)
 
             if(col=="filename") {
                 sprintf(name, "tree_%s_%d", col.toStdString().c_str(), fileitem.fi.isDir());
-                sprintf(cmd, "hi %s guifg=#%s", name, cell.color.toStdString().c_str());
+                sprintf(cmd, "hi %s guifg=%s", name, cell.color.toStdString().c_str());
                 b->nvim_command(cmd);
                 b->nvim_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
             } else if(col=="icon") {
                 // :hi tree_<tab>
                 sprintf(name, "tree_%s", cell.text.data());
-                sprintf(cmd, "silent hi %s guifg=#%s", name, cell.color.toStdString().c_str());
+                sprintf(cmd, "silent hi %s guifg=%s", name, cell.color.toStdString().c_str());
                 b->nvim_command(cmd);
                 // qDebug() << icon.col_start<< "->"<<icon.col_end;
                 // auto req_hl = b->nvim_buf_add_highlight(bufnr, 0, "String", 0, 0, 3);
@@ -260,7 +260,7 @@ void Tree::hline(int sl, int el)
                 // qDebug() << icon.text;
             } else if (col=="size"){
                 sprintf(name, "tree_%s", col.toStdString().c_str());
-                sprintf(cmd, "hi %s guifg=#%s", name, cell.color.toStdString().c_str());
+                sprintf(cmd, "hi %s guifg=%s", name, cell.color.toStdString().c_str());
                 b->nvim_command(cmd);
                 b->nvim_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
             }
