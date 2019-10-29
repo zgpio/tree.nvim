@@ -16,4 +16,4 @@ Experimental, maybe has breaking changes and bugs.
 
 ## Using
 ### Config (Soon or later)
-![Demo](https://user-images.githubusercontent.com/19503791/67631779-98fdc080-f8d5-11e9-9688-d0e81e41d338.png)
+![Demo](https://user-images.githubusercontent.com/19503791/67760636-a0ab9980-fa7c-11e9-844f-c5acea41d7f1.png)
