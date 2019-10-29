@@ -35,14 +35,14 @@ script:
   - nvim --version
   - mkdir build
   - cd build
-  - cmake -DUSE_SYSTEM_MSGPACK=OFF -DCMAKE_INSTALL_PREFIX=./tree-release ..
+  - cmake -DUSE_SYSTEM_MSGPACK=OFF -DCMAKE_INSTALL_PREFIX=./INSTALL ..
   - make install
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then /usr/local/opt/qt/bin/macdeployqt bin/nvim-qt.app/ -no-plugins  ; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then tar -zcvf tree-release-macos.tar.gz  bin/nvim-qt.app -C ../src/app/viml . ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then /usr/local/opt/qt/bin/macdeployqt  ./INSTALL/bin/tree-nvim.app/ -no-plugins  ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then tar -zcvf tree-release-macos.tar.gz  ./INSTALL  ; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"  ; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then chmod a+x linuxdeployqt-continuous-x86_64.AppImage  ; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./linuxdeployqt-continuous-x86_64.AppImage ./tree-release/bin/nvim-qt -no-plugins -no-copy-copyright-files -no-translations -bundle-non-qt-libs  ; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then tar -zcvf tree-release-linux.tar.gz  ./tree-release -C ../src/app/viml . ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./linuxdeployqt-continuous-x86_64.AppImage ./INSTALL/bin/tree-nvim -no-plugins -no-copy-copyright-files -no-translations -bundle-non-qt-libs  ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then tar -zcvf tree-release-linux.tar.gz  ./INSTALL  ; fi
   # - ctest --output-on-failure
   # export VERSION=... # linuxdeployqt uses this for naming the file
   # - ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -appimage

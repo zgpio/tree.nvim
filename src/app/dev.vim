@@ -11,11 +11,11 @@ tnoremap jk <c-\><c-n>
 
 func ExeServer()
   if s:OSX
-    exe 'term ~/Documents/tree.nvim/build/bin/nvim-qt.app/Contents/MacOS/nvim-qt --server ' . v:servername
+    exe 'term ~/Documents/tree.nvim/build/bin/tree-nvim.app/Contents/MacOS/tree-nvim --server ' . v:servername
   elseif s:Linux
-    exe 'term ~/tree.nvim/build/bin/nvim-qt --nofork --server ' . v:servername
+    exe 'term ~/tree.nvim/build/bin/tree-nvim --nofork --server ' . v:servername
   elseif s:Windows
-    exe 'term C:\Users\zgp\tree.nvim\bin\nvim-qt.exe --server ' . v:servername
+    exe 'term C:\Users\zgp\tree.nvim\bin\tree-nvim.exe --server ' . v:servername
   endif
   wincmd n
   call feedkeys("\<c-w>j")

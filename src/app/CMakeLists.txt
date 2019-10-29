@@ -10,7 +10,6 @@ if(WIN32)
 	endif()
 	enable_language(RC)
 elseif(APPLE)
-	# set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 	# set(MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/cmake/MacOSXBundleInfo.plist.in)
 else()
 endif()
@@ -22,37 +21,37 @@ if(WIN32)
     list(APPEND SRC_FILE wcwidth.cpp)
 endif()
 
-add_library(tree-nvim ${SRC_FILE})
+add_library(tree-server ${SRC_FILE})
 
-target_link_libraries(tree-nvim neovim-qt)
+target_link_libraries(tree-server neovim-qt)
 
 if(NOT APPLE)
 	set_property(SOURCE app.cpp PROPERTY COMPILE_DEFINITIONS
 		)
 endif()
 
-add_executable(nvim-qt WIN32 MACOSX_BUNDLE main.cpp
+add_executable(tree-nvim WIN32 MACOSX_BUNDLE main.cpp
 	${NEOVIM_RCC_SOURCES}
-	${RES_FILE}
-	${ICON_PATH})
+	${RES_FILE})
 
-target_link_libraries(nvim-qt ${QTLIBS} ${MSGPACK_LIBRARIES} tree-nvim)
+target_link_libraries(tree-nvim ${QTLIBS} ${MSGPACK_LIBRARIES} tree-server)
 
 if(APPLE)
 #	TODO: Bundle Qt, currently conflicts with brew Qt
-#	add_custom_command(TARGET nvim-qt COMMAND macdeployqt
-#		ARGS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/nvim-qt.app
+#	add_custom_command(TARGET tree-nvim COMMAND macdeployqt
+#		ARGS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/tree-nvim.app
 #		COMMENT "Bundling Qt libraries")
 endif()
 
-install(TARGETS nvim-qt DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(DIRECTORY viml/ DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS tree-nvim DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 if(WIN32 AND NOT CMAKE_CROSSCOMPILING)
 	if(Qt5Core_VERSION VERSION_LESS 5.3)
 		message(WARNING "Cannot use windeployqt in Qt 5.2 and earlier")
 	elseif(NOT DEFINED USE_STATIC_QT)
 		include(WinDeployQt)
-		WinDeployQt(TARGET nvim-qt COMPILER_RUNTIME INCLUDE_MODULES ${QTLIBS} EXCLUDE_MODULES webkit webkit2)
+		WinDeployQt(TARGET tree-nvim COMPILER_RUNTIME INCLUDE_MODULES ${QTLIBS} EXCLUDE_MODULES webkit webkit2)
 		install(DIRECTORY ${PROJECT_BINARY_DIR}/windeployqt/
 			DESTINATION ${CMAKE_INSTALL_BINDIR})
 	endif()
