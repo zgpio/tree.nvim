@@ -723,16 +723,24 @@ void Tree::vim_input(string prompt="", string text="", string completion="", str
 
 void Tree::cd(const QList<QVariant>& args)
 {
-    QString dir = args.at(0).toString();
     NeovimQt::NeovimApi6 *b = m_nvim->api6();
+    if (args.size()>0) {
+        QString dir = args.at(0).toString();
 
-    if (dir=="..") {
-        QDir curdir(m_fileitem.at(0)->fi.absoluteFilePath());
-        if (curdir.cd(".."))
-        {
-            qDebug()<< __PRETTY_FUNCTION__ << curdir;
-            changeRoot(curdir.absolutePath());
+        if (dir=="..") {
+            QDir curdir(m_fileitem.at(0)->fi.absoluteFilePath());
+            if (curdir.cd(".."))
+            {
+                qDebug()<< __PRETTY_FUNCTION__ << curdir;
+                changeRoot(curdir.absolutePath());
+            }
         }
+        else {
+            changeRoot(dir);
+        }
+    }
+    else {
+        changeRoot(QDir::home().absolutePath());
     }
 }
 void Tree::toggle_select(const int pos)
@@ -837,6 +845,16 @@ void Tree::action(const QString &action, const QList<QVariant> &args,
     }
     else if (action == "debug") {
         qDebug() << cfg.columns;
+    }
+    else if (action == "print") {
+        FileItem &cur = *m_fileitem[ctx.cursor - 1];
+        QString msg =cur.fi.absoluteFilePath();
+        b->nvim_call_function("tree#util#print_message", {msg});
+    }
+    else if (action == "toggle_select_all") {
+        for (int i=1;i<m_fileitem.size();++i) {
+            toggle_select(i);
+        }
     }
     else if (action == "toggle_ignored_files") {
         cfg.show_ignored_files=!cfg.show_ignored_files;
