@@ -8,6 +8,21 @@ if !exists('g:colors_name')
   colorscheme desert
 endif
 tnoremap jk <c-\><c-n>
+nnoremap <silent>       [WB]  :vertical resize +3<CR>
+nnoremap <silent>       [WS]  :vertical resize -3<CR>
+nnoremap <silent><expr> [HS]  winheight(0) <= (&lines-3-&cmdheight) ? ':resize -3<CR>' : ' '
+nnoremap <silent>       [HB]  :resize +3<CR>
+
+" Alacritty/MacVim workaround
+map ˚ [HB]
+map ∆ [HS]
+map ˙ [WS]
+map ¬ [WB]
+
+map <A-k> [HB]
+map <A-j> [HS]
+map <A-h> [WS]
+map <A-l> [WB]
 
 func ExeServer()
   if s:OSX

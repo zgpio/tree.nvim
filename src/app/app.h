@@ -43,6 +43,7 @@ private:
     // FIXME: cant work when string as key
     QHash<QString, QVariant> resource;
     QHash<int, Tree*> trees;
+    QList<int> treebufs;  // Recently used order
 };
 
 } // Namespace

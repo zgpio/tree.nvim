@@ -127,13 +127,14 @@ void App::createTree()
     QString path = resource["start_path"].toString();
     qDebug() << __PRETTY_FUNCTION__ << "bufnr:"<<bufnr<<"ns_id:"<<ns_id<<path;
     // TODO: 当bufnr不存在时, 回收tree
-    Tree *tree = new Tree(bufnr, ns_id, m_nvim);
-    trees.insert(bufnr, tree);
+    Tree &tree = *(new Tree(bufnr, ns_id, m_nvim));
+    trees.insert(bufnr, &tree);
+    treebufs.prepend(bufnr);
     NeovimQt::NeovimApi6 *b = m_nvim->api6();
-    tree->cfg.update(m_cfgmap);
-    // Record operation bufnr
+    tree.cfg.update(m_cfgmap);
+
     m_ctx.prev_bufnr = bufnr;
-    tree->changeRoot(path);
+    tree.changeRoot(path);
 
     // call nvim_buf_add_highlight(0, src, "Identifier", 0, 5, -1)
     b->nvim_command("set nu");
@@ -141,11 +142,16 @@ void App::createTree()
     b->nvim_command("set nolist");
     b->nvim_buf_set_option(bufnr, "ft", "tree");
     b->nvim_buf_set_option(bufnr, "modifiable", false);
-    qDebug() << "\t"<< QString(tree->cfg.split.c_str());
-    char cmd[128];
-    sprintf(cmd, "silent keepalt %s %s %s %d", "leftabove", "vertical", "sbuffer", bufnr);
-    // sprintf(cmd, "silent keepalt %s %d", "buffer", bufnr);
-    b->nvim_command(cmd);
+
+    b->nvim_command("lua require('tree')");
+    QVariantMap tree_cfg;
+    tree_cfg["winwidth"] = tree.cfg.winwidth;
+    tree_cfg["winheight"] = tree.cfg.winheight;
+    tree_cfg["split"] = tree.cfg.split.c_str();
+    tree_cfg["new"] = tree.cfg.new_;
+    tree_cfg["toggle"] = tree.cfg.toggle;
+    b->nvim_execute_lua("resume(...)", {m_ctx.prev_bufnr, tree_cfg});
+
 }
 
 void App::handleRequest(MsgpackIODevice* dev, quint32 msgid, const QByteArray& method, const QVariantList& args)
@@ -174,19 +180,28 @@ void App::handleRequest(MsgpackIODevice* dev, quint32 msgid, const QByteArray& m
         } else {
             // NOTE: Resume tree buffer by default.
             // Tree * tree = *trees.begin();
+            // TODO: consider to use treebufs[0]
+            Tree & tree = *trees[m_ctx.prev_bufnr];
+            auto curbuf = treebufs.takeAt(treebufs.indexOf(m_ctx.prev_bufnr));
+            treebufs.prepend(curbuf);
+            tree.cfg.update(m_cfgmap);
             // QList to QVariantList
             // https://stackoverflow.com/questions/9265288/casting-a-list-as-qvariant-or-qvariant-list
             QVariantList bufnrs;
-            foreach(const int item, trees.keys())
+            foreach(const int item, treebufs)
                 bufnrs << item;
-
             qDebug()<<bufnrs;
+
             b->nvim_command("lua require('tree')");
-            b->nvim_execute_lua("resume(...)", {bufnrs, 2});
+            QVariantMap tree_cfg;
+            tree_cfg["winwidth"] = tree.cfg.winwidth;
+            tree_cfg["winheight"] = tree.cfg.winheight;
+            tree_cfg["split"] = tree.cfg.split.c_str();
+            tree_cfg["new"] = tree.cfg.new_;
+            tree_cfg["toggle"] = tree.cfg.toggle;
+            b->nvim_execute_lua("resume(...)", {bufnrs, tree_cfg});
 
             // TODO: columns 状态更新需要清除不需要的columns
-            trees[m_ctx.prev_bufnr]->cfg.update(m_cfgmap);
-            // bufwinid(bufname(bufnr))
         }
 
         dev->sendResponse(msgid, QVariant(), 0);

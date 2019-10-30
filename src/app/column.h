@@ -86,28 +86,27 @@ public:
 
     bool auto_cd = false;
     int auto_recursive_level = 0;
-    string buffer_name = "default";
     QStringList columns = {"mark","indent","git","icon","filename","size"};
-    string direction = "";
     string ignored_files = "";
-    bool listed = false;
+    bool show_ignored_files = false;
     bool profile = false;
-    bool new_ = false;
-    bool resume = false;
 
     string root_marker = "[in]: ";
     string search = "";
     string session_file = "";
     string sort = "";
 
+    bool listed = false;
+    string buffer_name = "default";
+
+    string direction = "";
+    string split = "no";
+    string winrelative = "editor";
     int winheight = 30;
     int winwidth = 90;
-    string winrelative = "editor";
     int wincol = 0;
     int winrow = 0;
-
-    bool show_ignored_files = false;
-    string split = "no";
+    bool new_ = false;
     bool toggle = false;
 
     // targets: typing.List[typing.Dict[str, typing.Any]] = []

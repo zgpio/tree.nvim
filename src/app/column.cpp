@@ -270,9 +270,6 @@ void Config::update(const QMap<QString, QVariant> &ctx)
         else if (k == "profile") {
             profile = v.toBool();
         }
-        else if (k == "resume") {
-            resume = v.toBool();
-        }
         else if (k == "show_ignored_files") {
             show_ignored_files = v.toBool();
         }

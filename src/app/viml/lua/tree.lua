@@ -1,30 +1,65 @@
 
+local buf_is_loaded = vim.api.nvim_buf_is_loaded
 local call = vim.api.nvim_call_function
 local cmd = vim.api.nvim_command
 --- Resume tree window.
 -- If the window corresponding to bufnrs is available, goto it;
 -- otherwise, create a new window.
--- @param bufnrs table: trees bufnrs.
+-- @param bufnrs table: trees bufnrs ordered by recently used.
 -- @return nil.
-function resume(bufnrs, fool)
+function resume(bufnrs, cfg)
     print("bufnrs", vim.inspect(bufnrs))
-    print("fool", vim.inspect(fool))
+    print("cfg", vim.inspect(cfg))
+
+    if bufnrs == nil then
+        return
+    end
+    if type(bufnrs) == 'number' then
+        bufnrs = {bufnrs}
+    end
+
+    -- check bufnrs
+    deadbufs = {}
+    treebufs = {}
     for i, bufnr in pairs(bufnrs) do
+        loaded = buf_is_loaded(bufnr)
+        if loaded then
+            table.insert(treebufs, bufnr)
+        else
+            table.insert(deadbufs, bufnr)
+        end
+    end
+    print("treebufs:", vim.inspect(treebufs))
+
+    find = false
+    -- TODO: send delete notify when -1.
+    for i, bufnr in pairs(treebufs) do
         winid = call('bufwinid', {bufnr})
         if winid > 0 then
             print('goto winid', winid)
             call('win_gotoid', {winid})
-            -- TODO: Duplicate
-            cmd('vertical resize 40')
-            return
+            find = true
+            break
         end
     end
-    for i, bufnr in pairs(bufnrs) do
-        print('resume bufnr', bufnr)
+
+    bufnr = treebufs[1]
+    if cfg.split == 'vertical' then
+        resize_cmd = string.format('vertical resize %d', cfg['winwidth'])
         str = string.format("silent keepalt %s %s %s %d", "leftabove", "vertical", "sbuffer", bufnr)
+    elseif cfg.split == 'horizontal' then
+        resize_cmd = string.format('resize %d', cfg.winheight)
+        str = string.format("silent keepalt %s %s %d", "leftabove", "sbuffer", bufnr)
+    end
+
+    -- not nil => true
+    if not find then
+        print('resume bufnr', bufnr)
         cmd(str)
     end
-    cmd('vertical resize 40')
+
+    print("resize_cmd", vim.inspect(resize_cmd))
+    cmd(resize_cmd)
 end
 
 --- Drop file.
