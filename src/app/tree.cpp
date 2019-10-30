@@ -11,12 +11,14 @@ extern int mk_wcwidth(wchar_t ucs);
 using std::string;
 namespace NeovimQt {
 
+QString Tree::clipboard;
+NeovimConnector * Tree::m_nvim;
 const int kStop = 40;
 Tree::Tree(){
 }
 
-Tree::Tree(int bufnr, int ns_id, NeovimConnector* m_nvim)
-    : bufnr(bufnr), icon_ns_id(ns_id), m_nvim(m_nvim)
+Tree::Tree(int bufnr, int ns_id)
+    : bufnr(bufnr), icon_ns_id(ns_id)
 {
 
 }
@@ -799,6 +801,22 @@ void Tree::action(const QString &action, const QList<QVariant> &args,
         string info = cur.fi.absoluteFilePath().toStdString();
         // NOTE: specify handle for vim_input
         vim_input("Rename: " + info + " -> ", info, "file", "rename");
+    }
+    else if (action == "copy") {
+        FileItem &cur = *m_fileitem[ctx.cursor - 1];
+        Tree::clipboard = cur.fi.absoluteFilePath();
+    }
+    else if (action == "paste") {
+        FileItem &cur = *m_fileitem[ctx.cursor - 1];
+        QString fname = QFileInfo(clipboard).fileName();
+        if (QFile::copy(clipboard, cur.fi.absoluteDir().absoluteFilePath(fname))) {
+            b->nvim_call_function("tree#util#print_message", {"Copyed"});
+            int pidx = find_parent(ctx.cursor-1);
+            redraw_recursively(pidx);
+        }
+        else {
+            b->nvim_call_function("tree#util#print_message", {"Failed"});
+        }
     }
     else if (action == "toggle_select") {
         toggle_select(ctx.cursor - 1);

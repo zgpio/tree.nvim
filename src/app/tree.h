@@ -17,13 +17,14 @@ class Tree: public QObject
     Q_OBJECT
 public:
     Tree();
-    Tree(int bufnr, int icon_ns_id, NeovimConnector* m_nvim);
+    Tree(int bufnr, int icon_ns_id);
+    static QString clipboard;
+	static NeovimConnector *m_nvim;
     int bufnr = -1;
     int icon_ns_id = -1;
     Config cfg;
     Context ctx;
     QString input;
-	NeovimConnector *m_nvim;
     void changeRoot(QString path);
     void open_tree(int);
     void open(const int l, const QList<QVariant> &args);

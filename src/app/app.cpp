@@ -59,6 +59,7 @@ App::App(int &argc, char ** argv)
 void App::init(NeovimConnector *c)
 {
     this->m_nvim = c;
+    Tree::m_nvim = c;
     m_nvim->setRequestHandler(this);
 
     connect(m_nvim, &NeovimConnector::ready, this, &App::init_channel);
@@ -127,7 +128,7 @@ void App::createTree()
     QString path = resource["start_path"].toString();
     qDebug() << __PRETTY_FUNCTION__ << "bufnr:"<<bufnr<<"ns_id:"<<ns_id<<path;
     // TODO: 当bufnr不存在时, 回收tree
-    Tree &tree = *(new Tree(bufnr, ns_id, m_nvim));
+    Tree &tree = *(new Tree(bufnr, ns_id));
     trees.insert(bufnr, &tree);
     treebufs.prepend(bufnr);
     NeovimQt::NeovimApi6 *b = m_nvim->api6();

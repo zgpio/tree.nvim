@@ -75,10 +75,8 @@ func! s:set_tree() abort
   nnoremap <silent><buffer><expr> s tree#action('multi', [['drop', 'split']])
   nnoremap <silent><buffer><expr> se tree#action('save_session')
   nnoremap <silent><buffer><expr> sl tree#action('load_session')
-  nnoremap <silent><buffer><expr> cp tree#action('copy')
   nnoremap <silent><buffer><expr> ! tree#action('execute_command')
   nnoremap <silent><buffer><expr> m tree#action('move')
-  nnoremap <silent><buffer><expr> p tree#action('paste')
   nnoremap <silent><buffer><expr> P tree#action('open', 'pedit')
   nnoremap <silent><buffer><expr> M tree#action('new_multiple_files')
   nnoremap <silent><buffer><expr> C tree#action('toggle_columns', 'mark:filename:type:size:time')
@@ -87,6 +85,8 @@ func! s:set_tree() abort
   nnoremap <silent><buffer><expr> . tree#action('repeat')
   "nnoremap <silent><buffer><expr> <Tab> winnr('$') != 1 ? ':<C-u>wincmd w<CR>' : ':<C-u>tree -buffer-name=temp -split=vertical<CR>'
   nnoremap <silent><buffer><expr> q tree#action('quit')
+  nnoremap <silent><buffer><expr> cp tree#action('copy')
+  nnoremap <silent><buffer><expr> p tree#action('paste')
 
   nnoremap <silent><buffer><expr> > tree#action('toggle_ignored_files')
   nnoremap <silent><buffer><expr> * tree#action('toggle_select_all')

@@ -19,8 +19,8 @@ function resume(bufnrs, cfg)
     end
 
     -- check bufnrs
-    deadbufs = {}
-    treebufs = {}
+    local deadbufs = {}
+    local treebufs = {}
     for i, bufnr in pairs(bufnrs) do
         loaded = buf_is_loaded(bufnr)
         if loaded then
@@ -31,7 +31,7 @@ function resume(bufnrs, cfg)
     end
     print("treebufs:", vim.inspect(treebufs))
 
-    find = false
+    local find = false
     -- TODO: send delete notify when -1.
     for i, bufnr in pairs(treebufs) do
         winid = call('bufwinid', {bufnr})
@@ -43,7 +43,8 @@ function resume(bufnrs, cfg)
         end
     end
 
-    bufnr = treebufs[1]
+    local bufnr = treebufs[1]
+    local resize, str
     if cfg.split == 'vertical' then
         resize_cmd = string.format('vertical resize %d', cfg['winwidth'])
         str = string.format("silent keepalt %s %s %s %d", "leftabove", "vertical", "sbuffer", bufnr)
@@ -55,6 +56,7 @@ function resume(bufnrs, cfg)
     -- not nil => true
     if not find then
         print('resume bufnr', bufnr)
+        print('split cmd', str)
         cmd(str)
     end
 

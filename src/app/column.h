@@ -100,7 +100,7 @@ public:
     string buffer_name = "default";
 
     string direction = "";
-    string split = "no";
+    string split = "no";  // {"vertical", "horizontal", "no", "tab", "floating"}
     string winrelative = "editor";
     int winheight = 30;
     int winwidth = 90;
