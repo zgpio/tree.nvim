@@ -29,7 +29,8 @@ function! tree#init#_channel() abort
   if has('unix') && !has('macunix') && !has('win32unix')
     call jobstart([s:project_root . '/bin/tree-nvim', '--server', v:servername])
   elseif tree#util#is_windows()
-    call jobstart([s:project_root . '\bin\tree-nvim\tree-nvim.exe', '--server', v:servername])
+    echom s:project_root . '\bin\tree-nvim.exe'
+    call jobstart([s:project_root . '\bin\tree-nvim.exe', '--server', v:servername])
   else
     call jobstart([s:project_root . '/bin/tree-nvim.app/Contents/MacOS/tree-nvim', '--server', v:servername])
   endif
