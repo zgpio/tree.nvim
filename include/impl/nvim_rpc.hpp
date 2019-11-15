@@ -63,10 +63,8 @@ Object NvimRPC::do_call(const std::string &method, const U&...u) {
     pk.pack_array(sizeof...(u));
     detail::pack(pk, u...);
 
-    msgpack::object_handle oh = msgpack::unpack(sbuf.data(), sbuf.size());
-
-    msgpack::object deserialized = oh.get();
-
+    // msgpack::object_handle oh = msgpack::unpack(sbuf.data(), sbuf.size());
+    // msgpack::object deserialized = oh.get();
     // std::cout << "sbuf = " << deserialized << std::endl;
 
     socket_.write(sbuf.data(), sbuf.size(), 5);

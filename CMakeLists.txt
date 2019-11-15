@@ -34,4 +34,4 @@ if (PYTHONINTERP_FOUND)
     )
 endif()
 
-add_dependencies(test auto_gen_api)
+# add_dependencies(test auto_gen_api)

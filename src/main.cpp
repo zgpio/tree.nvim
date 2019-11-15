@@ -36,12 +36,46 @@ void display(nvim::Nvim &nvim, path &p)
         cout << ex.what() << '\n';
     }
 }
+void check_type(const nvim::Object &obj)
+{
+    if (obj.is_vector())
+        std::cout << "vector" << std::endl;
+    else if (obj.is_ext())
+        std::cout << "ext" << std::endl;
+    else if (obj.is_map())
+        std::cout << "map" << std::endl;
+    else if (obj.is_nil())
+        std::cout << "nil" << std::endl;
+    else if (obj.is_bool())
+        std::cout << "bool" << std::endl;
+    else if (obj.is_double())
+        std::cout << "double" << std::endl;
+    else if (obj.is_string())
+        std::cout << "string" << std::endl;
+    else if (obj.is_ext_ref())
+        std::cout << "ext_ref" << std::endl;
+    else if (obj.is_int64_t())
+        std::cout << "int64_t" << std::endl;
+    else if (obj.is_raw_ref())
+        std::cout << "raw_ref" << std::endl;
+    else if (obj.is_multimap())
+        std::cout << "multimap" << std::endl;
+    else if (obj.is_vector_char())
+        std::cout << "vector_char" << std::endl;
+    else if (obj.is_boost_string_ref())
+        std::cout << "boost_string_ref" << std::endl;
+    else if (obj.is_uint64_t())
+        std::cout << "uint64_t" << std::endl;
+}
 
 int main(int argc, char *argv[])
 {
     nvim::Nvim nvim;
     nvim.connect_tcp("localhost", "6666");
-    nvim.nvim_eval("( 3 + 2 ) * 4");
+    nvim::Object rv = nvim.nvim_eval("( 3 + 2 ) * 4");
+    check_type(rv);
+    uint64_t res = rv.as_uint64_t();
+    std::cout << res << std::endl;
     std::cout << "get_current_line = " << nvim.nvim_get_current_line()
               << std::endl;
     // nvim.vim_set_current_line("testhogefuga");
