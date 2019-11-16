@@ -19,5 +19,5 @@ https://github.com/cquery-project/cquery/wiki/Compilation-database
     ```
 
 # 尝试实现异步接受rpc请求/通知
-* [Boost异步套接字client](https://blog.csdn.net/AASE1235779/article/details/53957785)
+* [Boost异步套接字client](https://www.boost.org/doc/libs/1_45_0/doc/html/boost_asio/example/timeouts/async_tcp_client.cpp)
 * pynvim 的test中有广播的测试, broadcast needs `nvim_subscribe`
