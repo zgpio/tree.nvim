@@ -1,7 +1,7 @@
 #include "socket.hpp"
 
 #include <boost/lambda/bind.hpp>
-#include <boost/lambda/lambda.hpp>
+// #include <boost/lambda/lambda.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/ip/tcp.hpp>
@@ -11,9 +11,9 @@
 using boost::asio::deadline_timer;
 using boost::asio::ip::tcp;
 using boost::lambda::bind;
-using boost::lambda::var;
-using boost::lambda::_1;
-using boost::lambda::_2;
+// using boost::lambda::var;
+// using boost::lambda::_1;
+// using boost::lambda::_2;
 
 namespace nvim {
 
@@ -30,7 +30,11 @@ void Socket::connect_tcp(const std::string& host,
     for (; iter != tcp::resolver::iterator(); ++iter) {
         socket_.close();
         ec = boost::asio::error::would_block;
-        socket_.async_connect(iter->endpoint(), var(ec) = _1);
+        // socket_.async_connect(iter->endpoint(), var(ec) = _1);
+        socket_.async_connect(iter->endpoint(),
+                        [&ec](boost::system::error_code e){
+                            ec = e;
+                        });
 
         do io_service_.run_one(); while (ec == boost::asio::error::would_block);
         if (!ec && socket_.is_open()) return;
@@ -57,7 +61,11 @@ size_t Socket::read(char *rbuf, size_t capacity, double timeout_sec) {
 void Socket::write(char *sbuf, size_t size, double timeout_sec) {
     deadline_.expires_from_now(boost::posix_time::seconds(long(timeout_sec)));
     boost::system::error_code ec = boost::asio::error::would_block;
-    boost::asio::async_write(socket_, boost::asio::buffer(sbuf, size), var(ec) = _1);
+    // boost::asio::async_write(socket_, boost::asio::buffer(sbuf, size), var(ec) = _1);
+    boost::asio::async_write(socket_, boost::asio::buffer(sbuf, size),
+                [&ec](boost::system::error_code e, size_t s){
+                    ec = e;
+                });
 
     do io_service_.run_one(); while (ec == boost::asio::error::would_block);
 

@@ -87,7 +87,7 @@ Object NvimRPC::do_call(const std::string &method, const U&...u) {
     //TODO: full-state response handler should be implemented
     unpacker.next(result);
     const msgpack::object &obj = result.get();
-    std::cout << "res = " << obj << std::endl;
+    // std::cout << "res = " << obj << std::endl;
     msgpack::type::tuple<int64_t, int64_t, Object, Object> dst;
     obj.convert(dst);
     return dst.get<3>();

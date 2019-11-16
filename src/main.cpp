@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 using std::cout;
+using std::string;
 using namespace boost::filesystem;
 #define BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
 
@@ -72,13 +73,19 @@ int main(int argc, char *argv[])
 {
     nvim::Nvim nvim;
     nvim.connect_tcp("localhost", "6666");
-    nvim::Object rv = nvim.nvim_eval("( 3 + 2 ) * 4");
+
+    string expr = "( 3 + 2 ) * 4";
+    nvim::Object rv = nvim.nvim_eval(expr);
     check_type(rv);
     uint64_t res = rv.as_uint64_t();
-    std::cout << res << std::endl;
-    std::cout << "get_current_line = " << nvim.nvim_get_current_line()
-              << std::endl;
-    // nvim.vim_set_current_line("testhogefuga");
+    printf("nvim_eval('%s') = %llu\n", expr.c_str(), res);
+
+    nvim::Array info = nvim.nvim_get_api_info();
+    std::cout << info[0].as_uint64_t() << std::endl;
+
+    nvim.vim_set_current_line("hello world");
+    string line = nvim.nvim_get_current_line();
+    std::cout << "get_current_line = " << line << std::endl;
 
     if (argc < 2) {
         cout << "Usage: tut3 path\n";
