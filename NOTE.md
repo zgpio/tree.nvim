@@ -33,6 +33,7 @@ https://github.com/cquery-project/cquery/wiki/Compilation-database
             );
     // unpacker.reserve_buffer(32*1024ul);
     ```
+* initial_buffer_size=25 时unpack得到的消息可能出现错误, 设置为17不会, 设置得这么小是为了验证reserve buffer正确工作.
 * [msgpack controls a buffer](https://github.com/msgpack/msgpack-c/wiki/v2_0_cpp_unpacker)
 * try
     ```cpp
@@ -40,4 +41,11 @@ https://github.com/cquery-project/cquery/wiki/Compilation-database
     }catch(std::exception& e) {
         std::cout << e.what() << std::endl;
     }
+    ```
+* 验证消息传递
+    ```vim
+    while 1
+        call rpcnotify(g:cpp_chan_id, "helloworld\n",[1,2,[1,2],{1:2,2:3}])
+        sleep 10m
+    endw
     ```

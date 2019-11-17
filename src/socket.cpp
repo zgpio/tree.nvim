@@ -65,7 +65,7 @@ msgpack::unpacked Socket::read2(double timeout_sec)
     msgpack::unpacker unp(
             [](msgpack::type::object_type /*type*/, std::size_t /*len*/, void*) -> bool { return true; },
             MSGPACK_NULLPTR,
-            25
+            32
             );
 
     do {

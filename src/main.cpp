@@ -83,6 +83,8 @@ int main(int argc, char *argv[])
     nvim::Array info = nvim.nvim_get_api_info();
     std::cout << info[0].as_uint64_t() << std::endl;
 
+    nvim.nvim_set_var("cpp_chan_id", info[0].as_uint64_t());
+
     nvim.vim_set_current_line("hello world");
     string line = nvim.nvim_get_current_line();
     std::cout << "get_current_line = " << line << std::endl;
