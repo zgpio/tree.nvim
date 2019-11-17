@@ -12,6 +12,8 @@
 #include <iostream>
 #include <string>
 
+#include <msgpack.hpp>
+// #include <msgpack.h>
 namespace nvim {
 
 //TODO Implement asynchronous response handler.
@@ -29,6 +31,7 @@ public:
                const std::string& service, double timeout_sec);
 
     size_t read(char *rbuf, size_t capacity, double timeout_sec);
+    msgpack::unpacked read2(double timeout_sec);
     void write(char *sbuf, size_t size, double timeout_sec);
 
 private:

@@ -69,26 +69,14 @@ Object NvimRPC::do_call(const std::string &method, const U&...u) {
 
     socket_.write(sbuf.data(), sbuf.size(), 5);
 
-    msgpack::unpacker unpacker;
-    unpacker.reserve_buffer(32*1024ul);
-
-    size_t rlen = socket_.read(unpacker.buffer(), unpacker.buffer_capacity(), 5);
-    msgpack::unpacked result;
-    unpacker.buffer_consumed(rlen);
-
-    /*
-    while(unpacker.next(result)) {
-        const msgpack::object &obj = result.get();
-        std::cout << "res = " << obj << std::endl;
-        result.zone().reset();
-    }
-    */
+    msgpack::unpacked result = socket_.read2(5);
+    msgpack::object obj(result.get());
 
     //TODO: full-state response handler should be implemented
-    unpacker.next(result);
-    const msgpack::object &obj = result.get();
-    // std::cout << "res = " << obj << std::endl;
+
+    std::cout << "res = " << obj << std::endl;
     msgpack::type::tuple<int64_t, int64_t, Object, Object> dst;
+    // [type=1, msgid(uint), error(str?), result(...)]
     obj.convert(dst);
     return dst.get<3>();
 }

@@ -57,6 +57,47 @@ size_t Socket::read(char *rbuf, size_t capacity, double timeout_sec) {
 
     return rlen;
 }
+/// 能够根据msgpack message的长度, 动态增加缓冲区
+msgpack::unpacked Socket::read2(double timeout_sec)
+{
+    size_t rlen = 0;
+    // msgpack::unpacker unp;
+    msgpack::unpacker unp(
+            [](msgpack::type::object_type /*type*/, std::size_t /*len*/, void*) -> bool { return true; },
+            MSGPACK_NULLPTR,
+            25
+            );
+
+    do {
+        deadline_.expires_from_now(boost::posix_time::seconds(long(timeout_sec)));
+        boost::system::error_code ec = boost::asio::error::would_block;
+        if (unp.buffer_capacity() == 0) {
+            std::cout << "-----reserve_buffer-----" << std::endl;
+            unp.reserve_buffer(8192);
+        }
+
+        // rlen = socket_.read_some(boost::asio::buffer(unp.buffer(), unp.buffer_capacity()));
+        async_read(
+            socket_,
+            boost::asio::buffer(unp.buffer(), unp.buffer_capacity()),
+            boost::asio::transfer_at_least(1),
+            [&ec, &rlen](boost::system::error_code e, size_t s) {
+                ec = e;
+                rlen = s;
+            });
+
+        do io_service_.run_one(); while (ec == boost::asio::error::would_block);
+        if (ec) throw boost::system::system_error(ec);
+
+        if (rlen > 0) {
+            msgpack::unpacked result;
+            unp.buffer_consumed(rlen);
+            if (unp.next(result)) {
+                return result;
+            }
+        }
+    } while (rlen > 0);
+}
 
 void Socket::write(char *sbuf, size_t size, double timeout_sec) {
     deadline_.expires_from_now(boost::posix_time::seconds(long(timeout_sec)));

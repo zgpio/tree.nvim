@@ -33,3 +33,4 @@ https://github.com/cquery-project/cquery/wiki/Compilation-database
             );
     // unpacker.reserve_buffer(32*1024ul);
     ```
+* [msgpack controls a buffer](https://github.com/msgpack/msgpack-c/wiki/v2_0_cpp_unpacker)

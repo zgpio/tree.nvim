@@ -87,6 +87,9 @@ int main(int argc, char *argv[])
     string line = nvim.nvim_get_current_line();
     std::cout << "get_current_line = " << line << std::endl;
 
+    // TODO: 临时
+    nvim.client_.wait_notify();
+    while(true);
     if (argc < 2) {
         cout << "Usage: tut3 path\n";
         return 1;
@@ -95,11 +98,10 @@ int main(int argc, char *argv[])
     path p(argv[1]);
     display(nvim, p);
 
-    nvim::Integer src =
-        nvim.nvim_buf_add_highlight(0, 0, "Identifier", 1, 0, 4);
-
+    nvim::Integer ns_id =
+        nvim.nvim_buf_add_highlight(0, 0, "Identifier", 0, 0, -1);
     for (int i = 2; i < 10000; i++) {
-        nvim.nvim_buf_add_highlight(0, src, "String", i, 2, 8);
+        nvim.nvim_buf_add_highlight(0, ns_id, "String", i, 0, -1);
     }
     for (;;) {
     }
