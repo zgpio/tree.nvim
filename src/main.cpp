@@ -88,8 +88,8 @@ int main(int argc, char *argv[])
     std::cout << "get_current_line = " << line << std::endl;
 
     // TODO: 临时
-    nvim.client_.wait_notify();
-    while(true);
+    nvim.client_.eventloop();
+
     if (argc < 2) {
         cout << "Usage: tut3 path\n";
         return 1;

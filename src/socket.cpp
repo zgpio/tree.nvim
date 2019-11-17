@@ -76,18 +76,18 @@ msgpack::unpacked Socket::read2(double timeout_sec)
             unp.reserve_buffer(8192);
         }
 
-        // rlen = socket_.read_some(boost::asio::buffer(unp.buffer(), unp.buffer_capacity()));
-        async_read(
-            socket_,
-            boost::asio::buffer(unp.buffer(), unp.buffer_capacity()),
-            boost::asio::transfer_at_least(1),
-            [&ec, &rlen](boost::system::error_code e, size_t s) {
-                ec = e;
-                rlen = s;
-            });
-
-        do io_service_.run_one(); while (ec == boost::asio::error::would_block);
-        if (ec) throw boost::system::system_error(ec);
+        rlen = socket_.read_some(boost::asio::buffer(unp.buffer(), unp.buffer_capacity()));
+        // async_read(
+        //     socket_,
+        //     boost::asio::buffer(unp.buffer(), unp.buffer_capacity()),
+        //     boost::asio::transfer_at_least(1),
+        //     [&ec, &rlen](boost::system::error_code e, size_t s) {
+        //         ec = e;
+        //         rlen = s;
+        //     });
+        //
+        // do io_service_.run_one(); while (ec == boost::asio::error::would_block);
+        // if (ec) throw boost::system::system_error(ec);
 
         if (rlen > 0) {
             msgpack::unpacked result;

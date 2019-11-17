@@ -51,12 +51,13 @@ public:
     void call(const std::string &method, nullptr_t res, const U&...u);
 
     // TODO: 临时
-    void wait_notify() {
-        std::cout << "wait_notify" << std::endl;
-        msgpack::unpacked result = socket_.read2(10);
-        msgpack::object obj(result.get());
-
-        std::cout << "res = " << obj << std::endl;
+    void eventloop() {
+        std::cout << "eventloop started" << std::endl;
+        while(true) {
+            msgpack::unpacked result = socket_.read2(10);
+            msgpack::object obj(result.get());
+            std::cout << "res = " << obj << std::endl;
+        }
     }
 private:
     template<typename...U>
