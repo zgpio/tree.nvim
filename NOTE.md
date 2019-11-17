@@ -5,6 +5,7 @@
     * remove boost::lambda
 
     ```sh
+    git clone --recursive https://gitee.com/zgpio/nvim.cpp
     git submodule update --init --recursive
     brew install boost
     brew info boost
@@ -21,3 +22,14 @@ https://github.com/cquery-project/cquery/wiki/Compilation-database
 # 尝试实现异步接受rpc请求/通知
 * [Boost异步套接字client](https://www.boost.org/doc/libs/1_45_0/doc/html/boost_asio/example/timeouts/async_tcp_client.cpp)
 * pynvim 的test中有广播的测试, broadcast needs `nvim_subscribe`
+
+# 问题
+* initial_buffer_size=25*1024ul 时读取nvim_get_api_info()的结果时崩溃
+    ```cpp
+    msgpack::unpacker unpacker(
+            [](msgpack::type::object_type /*type*/, std::size_t /*len*/, void*) -> bool { return true; },
+            MSGPACK_NULLPTR,
+            25*1024ul
+            );
+    // unpacker.reserve_buffer(32*1024ul);
+    ```
