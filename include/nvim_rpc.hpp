@@ -1,5 +1,5 @@
-#ifndef NEOVIM_CPP__NVIM_RPC_HPP_
-#define NEOVIM_CPP__NVIM_RPC_HPP_
+#ifndef NEOVIM_CPP__NVIM_RPC_HPP
+#define NEOVIM_CPP__NVIM_RPC_HPP
 #define BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
 
 #include "msgpack.hpp"
@@ -116,5 +116,5 @@ private:
 
 #include "impl/nvim_rpc.hpp"
 
-#endif //NEOVIM_CPP__NVIM_RPC_HPP_
+#endif //NEOVIM_CPP__NVIM_RPC_HPP
 

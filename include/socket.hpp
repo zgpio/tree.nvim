@@ -1,5 +1,5 @@
-#ifndef NEOVIM_CPP__SOCKET_HPP_
-#define NEOVIM_CPP__SOCKET_HPP_
+#ifndef NEOVIM_CPP__SOCKET_HPP
+#define NEOVIM_CPP__SOCKET_HPP
 #define BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
 
 #include <boost/asio/deadline_timer.hpp>
@@ -45,4 +45,4 @@ private:
 
 } //namespace nvim
 
-#endif //NEOVIM_CPP__SOCKET_HPP_
+#endif //NEOVIM_CPP__SOCKET_HPP
