@@ -5,16 +5,22 @@ project(neovim_client_cpp)
 find_package(Boost 1.55.0 REQUIRED COMPONENTS system coroutine context thread filesystem)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")
-set(MSGPACK_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/msgpack-c)
 
-#add_subdirectory(${MSGPACK_SOURCE_DIR})
 set(CMAKE_CXX_FLAGS "-DMSGPACK_USE_BOOST ${CMAKE_CXX_FLAGS}") #TODO: import every flags directly from msgpack-c
+
+# msgpack
+option(USE_SYSTEM_MSGPACK "Use system msgpack libraries " OFF)
+if(USE_SYSTEM_MSGPACK)
+    find_package(Msgpack REQUIRED)
+else()
+    add_subdirectory(external)
+endif()
 
 include_directories(
     include
     gen
     ${Boost_INCLUDE_DIR}
-    ${MSGPACK_SOURCE_DIR}/include
+    ${MSGPACK_INCLUDE_DIRS}
 )
 
 add_executable(test 

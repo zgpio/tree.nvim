@@ -1,5 +1,6 @@
 .DS_Store
 compile_commands.json
+external/msgpack*
 tags
 
 # Compiled Object files
