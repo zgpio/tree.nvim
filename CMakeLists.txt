@@ -7,6 +7,8 @@ find_package(Boost 1.55.0 REQUIRED COMPONENTS system coroutine context thread fi
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")
 
 set(CMAKE_CXX_FLAGS "-DMSGPACK_USE_BOOST ${CMAKE_CXX_FLAGS}") #TODO: import every flags directly from msgpack-c
+# to generate a compile_commands.json usable by ycm and other tooling
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # msgpack
 option(USE_SYSTEM_MSGPACK "Use system msgpack libraries " OFF)

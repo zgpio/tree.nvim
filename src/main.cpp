@@ -39,34 +39,22 @@ void display(nvim::Nvim &nvim, path &p)
 }
 void check_type(const nvim::Object &obj)
 {
-    if (obj.is_vector())
-        std::cout << "vector" << std::endl;
-    else if (obj.is_ext())
-        std::cout << "ext" << std::endl;
-    else if (obj.is_map())
-        std::cout << "map" << std::endl;
-    else if (obj.is_nil())
-        std::cout << "nil" << std::endl;
-    else if (obj.is_bool())
-        std::cout << "bool" << std::endl;
-    else if (obj.is_double())
-        std::cout << "double" << std::endl;
-    else if (obj.is_string())
-        std::cout << "string" << std::endl;
-    else if (obj.is_ext_ref())
-        std::cout << "ext_ref" << std::endl;
-    else if (obj.is_int64_t())
-        std::cout << "int64_t" << std::endl;
-    else if (obj.is_raw_ref())
-        std::cout << "raw_ref" << std::endl;
-    else if (obj.is_multimap())
-        std::cout << "multimap" << std::endl;
-    else if (obj.is_vector_char())
-        std::cout << "vector_char" << std::endl;
-    else if (obj.is_boost_string_ref())
-        std::cout << "boost_string_ref" << std::endl;
-    else if (obj.is_uint64_t())
-        std::cout << "uint64_t" << std::endl;
+    std::string s;
+    if (obj.is_vector()) s = "vector";
+    else if (obj.is_ext()) s = "ext";
+    else if (obj.is_map()) s = "map";
+    else if (obj.is_nil()) s = "nil";
+    else if (obj.is_bool()) s = "bool";
+    else if (obj.is_double()) s = "double";
+    else if (obj.is_string()) s = "string";
+    else if (obj.is_ext_ref()) s = "ext_ref";
+    else if (obj.is_int64_t()) s = "int64_t";
+    else if (obj.is_raw_ref()) s = "raw_ref";
+    else if (obj.is_multimap()) s = "multimap";
+    else if (obj.is_vector_char()) s = "vector_char";
+    else if (obj.is_boost_string_ref()) s = "boost_string_ref";
+    else if (obj.is_uint64_t()) s = "uint64_t";
+    std::cout << s << std::endl;
 }
 
 int main(int argc, char *argv[])
