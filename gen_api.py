@@ -60,7 +60,8 @@ def main():
 # generate nvim.hpp
     functions = []
     for f in unpacked_api['functions']:
-
+        if 'deprecated_since' in f and f['deprecated_since']<=3:
+            continue
         d = {}
         # if re.match(r'(n?vim_)?(ui.*|(un)?subscribe|.*(de|a)ttach.*)', f['name']):
         #     print('This is ui function: ' + f['name'])
