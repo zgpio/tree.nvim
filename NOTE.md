@@ -9,6 +9,8 @@
     git submodule update --init --recursive
     brew install boost
     brew info boost
+
+    cmake -S ~/Documents/nvim.cpp/ -B ~/Documents/nvim.cpp/build
     ```
 
 * CMake

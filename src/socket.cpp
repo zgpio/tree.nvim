@@ -17,7 +17,7 @@ using boost::lambda::bind;
 
 namespace nvim {
 
-void Socket::connect_tcp(const std::string& host, 
+void Socket::connect_tcp(const std::string& host,
                      const std::string& service, double timeout_sec)
 {
     tcp::resolver::query query(host, service);
@@ -48,10 +48,11 @@ size_t Socket::read(char *rbuf, size_t capacity, double timeout_sec) {
     deadline_.expires_from_now(boost::posix_time::seconds(long(timeout_sec)));
     boost::system::error_code ec = boost::asio::error::would_block;
     size_t rlen;
-    async_read(socket_, boost::asio::buffer(rbuf, capacity), 
-        boost::asio::transfer_at_least(1), 
+    async_read(socket_, boost::asio::buffer(rbuf, capacity),
+        boost::asio::transfer_at_least(1),
         [&ec, &rlen](boost::system::error_code e, size_t s) {ec = e; rlen = s;});
 
+    // Block until the asynchronous operation has completed.
     do io_service_.run_one(); while (ec == boost::asio::error::would_block);
     if (ec) throw boost::system::system_error(ec);
 
@@ -77,6 +78,7 @@ msgpack::unpacked Socket::read2(double timeout_sec)
         }
 
         rlen = socket_.read_some(boost::asio::buffer(unp.buffer(), unp.buffer_capacity()));
+        // TODO: 异步读取超时导致套接字关闭
         // async_read(
         //     socket_,
         //     boost::asio::buffer(unp.buffer(), unp.buffer_capacity()),
