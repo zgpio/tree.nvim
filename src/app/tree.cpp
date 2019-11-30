@@ -367,12 +367,13 @@ void Tree::entryInfoListRecursively(const FileItem& item,
         fileitem->p = x.path();
         fileitem->filename = x.path().filename().string();
 
-        if (is_directory(x)) {
-            fileitem->opened_tree = true;
-            fileitem_lst.push_back(fileitem);
-            entryInfoListRecursively(*fileitem, fileitem_lst);
-        }
-        else
+        // TODO: 临时
+        // if (is_directory(x)) {
+        //     fileitem->opened_tree = true;
+        //     fileitem_lst.push_back(fileitem);
+        //     entryInfoListRecursively(*fileitem, fileitem_lst);
+        // }
+        // else
             fileitem_lst.push_back(fileitem);
     }
 }

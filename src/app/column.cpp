@@ -285,8 +285,10 @@ void FileItem::update_gmap(string p)
 
     if (pipe_stream && std::getline(pipe_stream, line) && !line.empty())
         std::cerr << line << std::endl;
+    if (line=="")
+        return;
     string topdir(line+boost::filesystem::path::preferred_separator);
-    std::cout << "topddddddddddddddir: "<<topdir << std::endl;
+    std::cout << __FUNCTION__ << " top dir: " << topdir << std::endl;
 
     ipstream pipe_stream2;
     string cmd2 = "git -C " + p + " status --porcelain -u";

@@ -54,7 +54,7 @@ App::App(nvim::Nvim *nvim, int chan_id) : m_nvim(nvim), chan_id(chan_id)
     }
 }
 
-void App::createTree()
+void App::createTree(string &path)
 {
     static int count = 0;
     auto &b = m_nvim;
@@ -67,14 +67,12 @@ void App::createTree()
     count++;
 
     int ns_id = b->nvim_create_namespace("tree_icon");
-    string path = "/Users/zgp/OJ/test";
     cout << __FUNCTION__ << "bufnr:" << bufnr << "ns_id:" << ns_id << path << endl;
 
     Tree &tree = *(new Tree(bufnr, ns_id));
     trees.insert({bufnr, &tree});
     treebufs.insert(treebufs.begin(), bufnr);
-    // NeovimQt::NeovimApi6 *b = m_nvim->api6();
-    // tree.cfg.update(m_cfgmap);
+    tree.cfg.update(m_cfgmap);
 
     m_ctx.prev_bufnr = bufnr;
     tree.changeRoot(path);
@@ -156,14 +154,13 @@ void App::handleRequest(nvim::NvimRPC & rpc, uint64_t msgid, const string& metho
     {
         // _tree_start [paths: List, context: Dictionary]
         string path = method_args[0].as_string();
-        std::cout << "path=" << path << std::endl;
         m_cfgmap = context;
         auto *b = m_nvim;
 
         auto search = m_cfgmap.find("new");
         if (trees.size()<1 || (search != m_cfgmap.end() && search->second.as_bool())) {
             // TODO: createTree时存在request和此处的response好像产生冲突
-            createTree();
+            createTree(path);
         }
         else {
             // NOTE: Resume tree buffer by default.
