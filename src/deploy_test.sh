@@ -1,4 +1,4 @@
-BUILD=~/Documents/neovim.cpp/build
+BUILD=~/Documents/nvim.cpp/build
 rm -rf $BUILD/test.app
 mkdir -p $BUILD/test.app/Contents/Macos
 cp $BUILD/test $BUILD/test.app/Contents/Macos/

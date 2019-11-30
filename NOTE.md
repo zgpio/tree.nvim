@@ -51,3 +51,29 @@ https://github.com/cquery-project/cquery/wiki/Compilation-database
         sleep 10m
     endw
     ```
+* history
+    ```cpp
+    using boost::core::demangle;
+    std::cout << "check_type:" << demangle(obj.type().name()) << std::endl;
+
+    using boost::core::demangle;
+    std::cout << demangle(rv.type().name()) << std::endl;
+    std::cout << demangle(typeid(int).name()) << std::endl;
+
+    ```
+* NOTE
+    * 理解UTF-8与Unicode
+    ```cpp
+    string s = "中国"; // (与源文件编码(UTF-8)一致?) byte array
+    cout << s.at(0) << s.at(1) << s.at(2) << endl; // 中
+
+    wstring ws(L"中国");
+    cout << ws.size() << endl; // 2
+    cout << "ws[0]: " << ws[0] << endl; // 中
+
+    cout << wcwidth(L'中') << endl; // 2; 如果不设置locale, 输出-1.
+    cout << "sizeof(wchar_t): "<< sizeof(wchar_t) << endl; // 4
+    ```
+    * boost::filesystem::path 支持 cout
+    * [STL map, hash_map, unordered_map区别](https://blog.csdn.net/haluoluo211/article/details/80877558)
+    * `__PRETTY_FUNCTION__` 不是标准预定义宏(Predefined Macros)

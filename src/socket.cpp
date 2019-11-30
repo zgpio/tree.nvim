@@ -4,6 +4,7 @@
 // #include <boost/lambda/lambda.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/asio/read.hpp>
+#include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/ip/tcp.hpp>
 
 #define BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
@@ -77,19 +78,19 @@ msgpack::unpacked Socket::read2(double timeout_sec)
             unp.reserve_buffer(8192);
         }
 
-        rlen = socket_.read_some(boost::asio::buffer(unp.buffer(), unp.buffer_capacity()));
+        // rlen = socket_.read_some(boost::asio::buffer(unp.buffer(), unp.buffer_capacity()));
         // TODO: 异步读取超时导致套接字关闭
-        // async_read(
-        //     socket_,
-        //     boost::asio::buffer(unp.buffer(), unp.buffer_capacity()),
-        //     boost::asio::transfer_at_least(1),
-        //     [&ec, &rlen](boost::system::error_code e, size_t s) {
-        //         ec = e;
-        //         rlen = s;
-        //     });
-        //
-        // do io_service_.run_one(); while (ec == boost::asio::error::would_block);
-        // if (ec) throw boost::system::system_error(ec);
+        async_read(
+            socket_,
+            boost::asio::buffer(unp.buffer(), unp.buffer_capacity()),
+            boost::asio::transfer_at_least(1),
+            [&ec, &rlen](boost::system::error_code e, size_t s) {
+                ec = e;
+                rlen = s;
+            });
+
+        do io_service_.run_one(); while (ec == boost::asio::error::would_block);
+        if (ec) throw boost::system::system_error(ec);
 
         if (rlen > 0) {
             msgpack::unpacked result;
@@ -117,7 +118,8 @@ void Socket::write(char *sbuf, size_t size, double timeout_sec) {
 
 void Socket::check_deadline() {
     if (deadline_.expires_at() <= deadline_timer::traits_type::now()) {
-        socket_.close();
+        // socket_.close();
+        socket_.cancel();
         deadline_.expires_at(boost::posix_time::pos_infin);
     }
 

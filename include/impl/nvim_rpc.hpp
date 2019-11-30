@@ -1,4 +1,5 @@
 #include "msgpack.hpp"
+
 namespace nvim {
 
 namespace detail {
@@ -23,7 +24,7 @@ namespace detail {
 template<typename T, typename...U>
 void NvimRPC::call(const std::string &method, T& res, const U&...u) {
     Object v = do_call(method, u...);
-    std::cout << "T NvimRPC::call" << std::endl;
+    // std::cout << "T NvimRPC::call" << std::endl;
 
     res = boost::get<T>(v);
 }
@@ -31,25 +32,32 @@ void NvimRPC::call(const std::string &method, T& res, const U&...u) {
 template<typename...U>
 void NvimRPC::call(const std::string &method, Integer& res, const U& ...u) {
     Object v = do_call(method, u...);
-    std::cout << "Integer NvimRPC::call" << std::endl;
+    // std::cout << "Integer NvimRPC::call" << std::endl;
 
     // int64_t is only for negative integer.
     if(v.is_int64_t())       res = v.as_int64_t();
     else if(v.is_uint64_t()) res = v.as_uint64_t();
+    else if (v.is_ext()) {
+        // NOTE: Buffer: 0; Tabpage: 2; Window: 1
+        std::cout << type_name(v) << std::endl;
+        std::cout << int(v.as_ext().type()) << std::endl;
+        std::cout << v.as_ext().size() << std::endl;
+        res = int(v.as_ext().data()[0]);
+    }
     else std::cout << "invalid response type" << std::endl; //TODO: add error handler
 }
 
 template<typename...U>
 void NvimRPC::call(const std::string &method, Object& res, const U& ...u) {
     Object v = do_call(method, u...);
-    std::cout << "Object NvimRPC::call" << std::endl;
+    // std::cout << "Object NvimRPC::call" << std::endl;
     res = v;
 }
 
 template<typename...U>
 void NvimRPC::call(const std::string &method, nullptr_t res, const U&...u) {
     do_call(method, u...);
-    std::cout << "void NvimRPC::call" << std::endl;
+    // std::cout << "void NvimRPC::call" << std::endl;
 }
 
 template<typename...U>
@@ -74,11 +82,25 @@ Object NvimRPC::do_call(const std::string &method, const U&...u) {
 
     //TODO: full-state response handler should be implemented
 
-    std::cout << "res = " << obj << std::endl;
+    // std::cout << "res = " << obj << std::endl;
     msgpack::type::tuple<int64_t, int64_t, Object, Object> dst;
     // [type=1, msgid(uint), error(str?), result(...)]
     obj.convert(dst);
     return dst.get<3>();
+}
+
+bool NvimRPC::send_response(uint64_t msgid, const Object &err, const Object &res)
+{
+    msgpack::sbuffer sbuf;
+    detail::Packer pk(&sbuf);
+    pk.pack_array(4) << (uint64_t)RESPONSE
+                     << msgid
+                     << err
+                     << res;
+
+    socket_.write(sbuf.data(), sbuf.size(), 5);
+
+    return true;
 }
 
 } //namespace nvim

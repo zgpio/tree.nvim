@@ -1,0 +1,119 @@
+#ifndef NVIM_COLUMN_H
+#define NVIM_COLUMN_H
+#include "msgpack.hpp" // msgpack::type::variant
+#include <unordered_map>
+#include <string>
+#include <array>
+#include <boost/filesystem.hpp>
+using Map = std::multimap<msgpack::type::variant, msgpack::type::variant>;
+using std::string;
+using std::array;
+using std::list;
+using std::unordered_map;
+using boost::filesystem::file_status;
+extern unordered_map<string, string> mark_indicators;
+extern array<string, 2> git_indicators[];
+extern array<string, 2> icons[];
+extern string gui_colors[];
+
+enum GUI_COLOR { BROWN, AQUA, BLUE, DARKBLUE, PURPLE, LIGHTPURPLE, RED, BEIGE, YELLOW, ORANGE, DARKORANGE, PINK, SALMON, GREEN, LIGHTGREEN, WHITE };
+enum column {MARK, INDENT, GIT, ICON, FILENAME, SIZE, TIME};
+enum git_status {Untracked, Modified, Staged, Renamed, Ignored, Unmerged, Deleted, Unknown};
+
+class Cell;
+class Config;
+class FileItem
+{
+public:
+    FileItem();
+    virtual ~FileItem(){};
+
+    file_status fi;
+    boost::filesystem::path p;
+    string filename;
+    int level = 0;
+    bool opened_tree = false;
+    // TODO: parent被选中 与 部分child被选中，两者是冲突的 <04-10-19, zgp>
+    bool selected = false;
+    // TODO: 更快地查找父FileItem
+    const FileItem* parent=nullptr;
+    bool last = false;
+    static unordered_map<string, git_status> git_map;
+    static void update_gmap(string p);
+};
+
+/// 多个column类意义不大，管理困难
+class Cell
+{
+public:
+    Cell();
+    Cell(const Config&, const FileItem&, const int);
+    virtual ~Cell();
+
+    int col_start, col_end;
+    // TODO: use text.size() when byte highlight, consider remove byte_end
+    int byte_start, byte_end;
+    // TODO: QString的size与视觉不一定一致, 而QByteArray更不是
+    string text;
+    // TODO: 考虑添加highlight_id, 并在highlight时加上列作用域防止冲突,
+    //  icon/git/mark可以由text作为id,
+    //  而filename以文件种类作为id, size以大小种类作为id, ...
+    int color = -1; // color id, 不同的列用不同的表存储; 也可以是公共的表, 如gui_color
+    string tcolor;
+    void update_git(const FileItem &fi);
+    void update_icon(const FileItem &fn);
+    void update_size(const FileItem &fi);
+};
+
+struct Context
+{
+    // FIXME: 默认构造的成员初始值没有意义
+    Context(){};
+    Context(const Map &ctx);
+    int cursor = 0;
+    list<string> drives;
+    int prev_bufnr = 0;
+    int prev_winid = 0;
+    int visual_start = 0;
+    int visual_end = 0;
+};
+
+// NOTE: tree状态参数
+class Config
+{
+public:
+    Config(){};
+    Config(const Map &ctx);
+    virtual ~Config(){};
+    void update(const Map &ctx);
+
+    bool auto_cd = false;
+    int auto_recursive_level = 0;
+    list<int> columns = {MARK, INDENT, GIT, ICON, FILENAME, SIZE, TIME};
+    string ignored_files = "";
+    bool show_ignored_files = false;
+    bool profile = false;
+
+    string root_marker = "[in]: ";
+    string search = "";
+    string session_file = "";
+    string sort = "";
+
+    bool listed = false;
+    string buffer_name = "default";
+
+    string direction = "";
+    string split = "no";  // {"vertical", "horizontal", "no", "tab", "floating"}
+    string winrelative = "editor";
+    int winheight = 30;
+    int winwidth = 50;
+    int wincol = 0;
+    int winrow = 0;
+    bool new_ = false;
+    bool toggle = false;
+
+    // targets: typing.List[typing.Dict[str, typing.Any]] = []
+};
+
+
+#endif

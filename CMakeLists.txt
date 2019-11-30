@@ -27,7 +27,12 @@ include_directories(
 
 add_executable(test 
     src/main.cpp
+    src/app/tree.cpp
+    src/app/app.cpp
+    src/app/column.cpp
+    src/app/wcwidth.cpp
     src/socket.cpp
+    src/util.cpp
     gen/nvim.cpp
 )
 
