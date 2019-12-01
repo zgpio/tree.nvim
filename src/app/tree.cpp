@@ -207,7 +207,7 @@ void Tree::insert_rootcell(const int pos)
         cell.byte_start = byte_start;
         if (col==FILENAME) {
             string filename(fileitem.filename);
-            if (is_directory(fileitem.fi)) {
+            if (filename.back() != '/' && is_directory(fileitem.fi)) {
                 filename.append("/");
             }
             filename.insert(0, cfg.root_marker.c_str());
@@ -379,7 +379,7 @@ void Tree::set_last(vector<FileItem *> &fileitems)
 
 typedef void (Tree::*Action)(const nvim::Array& args);
 std::unordered_map<string, Action> action_map {
-    // {"cd"                   , &Tree::cd},
+    {"cd"                   , &Tree::cd},
     // {"goto"                 , &Tree::goto_},
     {"open_or_close_tree"   , &Tree::open_tree},
     // {"open"                 , &Tree::open},
@@ -422,7 +422,7 @@ void Tree::action(const string &action, const nvim::Array &args,
 void Tree::open_tree(const nvim::Array &args)
 {
     const int l = ctx.cursor - 1;
-    cout << __PRETTY_FUNCTION__ << endl;
+    cout << __FUNCTION__ << endl;
     assert(0 <= l && l < m_fileitem.size());
     // if (l == 0) return;
     vector<string> ret;
@@ -491,3 +491,31 @@ void Tree::open_tree(const nvim::Array &args)
     return;
 }
 
+void Tree::cd(const nvim::Array &args)
+{
+    if (args.size()>0) {
+        string dir = args.at(0).as_string();
+
+        // FIXME 第一次cd无效
+        if (dir=="..") {
+            path & curdir = m_fileitem[0]->p;
+            cout << __FUNCTION__ << curdir.parent_path().string() << endl;
+            changeRoot(curdir.parent_path().string());
+        }
+        else if (dir == ".") {
+            FileItem &cur = *m_fileitem[ctx.cursor - 1];
+            string dir(cur.p.string());
+            // if (cur.opened_tree)
+            //     dir = cur.fi.absoluteFilePath();
+            string cmd = "cd " + dir;
+            api->async_nvim_call_function("tree#util#print_message", {cmd});
+            api->nvim_command(cmd);
+        }
+        else {
+            changeRoot(dir);
+        }
+    }
+    else {
+        // changeRoot(QDir::home().absolutePath());
+    }
+}

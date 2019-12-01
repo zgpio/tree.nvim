@@ -112,7 +112,10 @@ Cell::Cell(const Config &cfg, const FileItem& fileitem, const int type)
     }
     else if (type == INDENT) {
         // NOTE: text="" when level<0.
-        // text = QByteArray(fileitem.level*2, ' ');
+        // if (fileitem.level>=0)
+        //     text = string(fileitem.level*2, ' ');
+        // else
+        //     text = "";
         int margin = cfg.margin;
         string prefix(margin*2, ' ');
         text.clear();
@@ -172,7 +175,7 @@ void Cell::update_git(const FileItem &fi)
 {
     text = " ";
     string path = fi.p.string();
-    // qDebug() << "query:" << path;
+    // cout << "query:" << path;
     auto search = FileItem::git_map.find(path);
     if (search != FileItem::git_map.end()) {
         auto key = search->second;
