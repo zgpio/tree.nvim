@@ -90,6 +90,7 @@ public:
     bool auto_cd = false;
     int auto_recursive_level = 0;
     list<int> columns = {MARK, INDENT, GIT, ICON, FILENAME, SIZE, TIME};
+    int margin = 1;  // (INDENT, GIT , ICON)
     string ignored_files = "";
     bool show_ignored_files = false;
     bool profile = false;

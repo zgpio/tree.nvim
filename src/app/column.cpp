@@ -113,7 +113,7 @@ Cell::Cell(const Config &cfg, const FileItem& fileitem, const int type)
     else if (type == INDENT) {
         // NOTE: text="" when level<0.
         // text = QByteArray(fileitem.level*2, ' ');
-        int margin = 1;
+        int margin = cfg.margin;
         string prefix(margin*2, ' ');
         text.clear();
         const FileItem* pf = fileitem.parent;
@@ -123,7 +123,7 @@ Cell::Cell(const Config &cfg, const FileItem& fileitem, const int type)
                 text.append("└ ");
             else
                 text.append("│ ");
-        
+
             text.insert(0, prefix);
             for (int i = 0; i<fileitem.level-1; ++i, pf=pf->parent){
                 if(pf->last)
@@ -468,6 +468,15 @@ void Config::update(const Map &ctx)
                 else if (col=="size") columns.push_back(SIZE);
                 else if (col=="time") columns.push_back(TIME);
             }
+            int s = -1, e = -1, cnt = 0;
+            for (auto i : columns) {
+                if (i==INDENT)
+                    s = cnt;
+                else if (i==ICON)
+                    e = cnt;
+                cnt ++;
+            }
+            margin = e - s - 1;
         }
         else{
             cout<<"Unsupported member: "<<k<<endl;
