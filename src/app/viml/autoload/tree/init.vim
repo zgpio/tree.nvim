@@ -26,14 +26,14 @@ function! tree#init#_channel() abort
   endif
 
   " TODO: temporary, ~ cant work
-  if has('unix') && !has('macunix') && !has('win32unix')
-    call jobstart([s:project_root . '/bin/tree-nvim', '--server', v:servername])
-  elseif tree#util#is_windows()
-    echom s:project_root . '\bin\tree-nvim.exe'
-    call jobstart([s:project_root . '\bin\tree-nvim.exe', '--server', v:servername])
-  else
-    call jobstart([s:project_root . '/bin/tree-nvim.app/Contents/MacOS/tree-nvim', '--server', v:servername])
-  endif
+  " if has('unix') && !has('macunix') && !has('win32unix')
+  "   call jobstart([s:project_root . '/bin/tree-nvim', '--server', v:servername])
+  " elseif tree#util#is_windows()
+  "   echom s:project_root . '\bin\tree-nvim.exe'
+  "   call jobstart([s:project_root . '\bin\tree-nvim.exe', '--server', v:servername])
+  " else
+  "   call jobstart([s:project_root . '/bin/tree-nvim.app/Contents/MacOS/tree-nvim', '--server', v:servername])
+  " endif
   sleep 100m
   echom 'jobstart success'
   return v:true

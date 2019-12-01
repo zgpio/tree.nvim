@@ -105,10 +105,12 @@ void App::handleNvimNotification(const string &method, const vector<nvim::Object
         // cout << "context:" << context;
         m_ctx = context;
         // cout << "\t" <<trees<< m_ctx.prev_bufnr;
-        // if (trees.contains(m_ctx.prev_bufnr)) {
-        //     // if (action == "quit" && args.size() > 0)
-        //     trees[m_ctx.prev_bufnr]->action(action, act_args, context);
-        // }
+
+        auto search = trees.find(m_ctx.prev_bufnr);
+        if (search != trees.end()) {
+            // if (action == "quit" && args.size() > 0)
+            search->second->action(action, act_args, context);
+        }
     }
     // else if (method=="function") {
     //     QString fn = vl.at(0).toString();

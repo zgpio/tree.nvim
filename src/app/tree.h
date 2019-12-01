@@ -30,33 +30,35 @@ public:
     string input;
 
     void changeRoot(const string &path);
-    void action(const string &action, const list<nvim::Object> &args, const unordered_map<string, nvim::Object> context);
+    void action(const string &action, const nvim::Array &args, const Map &context);
 
-    inline void buf_set_lines(int s, int e, bool strict, vector<string> &replacement)
+    void open_tree(const nvim::Array &args);
+
+    inline void buf_set_lines(int s, int e, bool strict, const vector<string> &replacement)
     {
-        api->nvim_buf_set_option(bufnr, "modifiable", true);
-        api->nvim_buf_set_lines(bufnr, s, e, strict, replacement);
-        api->nvim_buf_set_option(bufnr, "modifiable", false);
+        api->async_nvim_buf_set_option(bufnr, "modifiable", true);
+        api->async_nvim_buf_set_lines(bufnr, s, e, strict, replacement);
+        api->async_nvim_buf_set_option(bufnr, "modifiable", false);
         // TODO: Fine-grained targets update
         // collect_targets();
     };
 
 private:
-    list<FileItem *> m_fileitem;
-    unordered_map<int, list<Cell>> col_map;
+    vector<FileItem *> m_fileitem;
+    unordered_map<int, vector<Cell>> col_map;
     unordered_map<string, bool> expandStore;
     list<int> targets;
-    void set_last(list<FileItem*> &fileitems);
+    void set_last(vector<FileItem*> &fileitems);
     void hline(int sl, int el);
     int find_parent(int l);
     std::tuple<int, int> find_range(int l);
-    void insert_entrylist(const list<FileItem*> &, const int pos, vector<string>& ret);
+    void insert_entrylist(const vector<FileItem*> &, const int pos, vector<string>& ret);
     void insert_item(const int pos);
     void collect_targets();
     void insert_rootcell(const int pos);
     void erase_entrylist(const int s, const int e);
     void makeline(const int pos, string &line);
-    void entryInfoListRecursively(const FileItem &, list<FileItem*>& fileitem_lst);
+    void entryInfoListRecursively(const FileItem &, vector<FileItem*>& fileitem_lst);
 
     void shrinkRecursively(const string &path);
     void expandRecursively(const FileItem&, list<FileItem*> &fileitem_lst);

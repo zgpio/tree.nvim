@@ -60,6 +60,8 @@ https://github.com/cquery-project/cquery/wiki/Compilation-database
     std::cout << demangle(rv.type().name()) << std::endl;
     std::cout << demangle(typeid(int).name()) << std::endl;
 
+    // std::advance 和 std::next
+    auto it = std::next(col_map[col].begin(), pos);
     ```
 * NOTE
     * 理解UTF-8与Unicode

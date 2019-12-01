@@ -302,7 +302,6 @@ void FileItem::update_gmap(string p)
     c.wait();
     c2.wait();
 
-    std::cout << "----------------------------------" << std::endl;
     for (int i = 0; i<lines.size();++i) {
         string & line = lines[i];
         if (line.size()<4) continue;
@@ -370,7 +369,7 @@ Context::Context(const Map &ctx)
             visual_end = v.as_uint64_t();
         }
         else{
-            cout<<"Unsupported member:"<<k;
+            cout<<"Unsupported member: "<<k <<endl;
         }
     }
 }
@@ -395,7 +394,7 @@ void Config::update(const Map &ctx)
     for (auto i : ctx) {
         auto k = i.first.as_string();
         auto &v = i.second;
-        std::cout << __FUNCTION__ << k << " type: "<< type_name(v)<< std::endl;
+        // std::cout << __FUNCTION__ << k << " type: "<< type_name(v)<< std::endl;
         if (k == "auto_recursive_level") {
             auto_recursive_level = v.as_int64_t();
         }
@@ -471,7 +470,7 @@ void Config::update(const Map &ctx)
             }
         }
         else{
-            cout<<"Unsupported member:"<<k<<endl;
+            cout<<"Unsupported member: "<<k<<endl;
         }
     }
 }

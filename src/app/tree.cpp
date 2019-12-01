@@ -10,6 +10,7 @@ extern int mk_wcwidth(wchar_t ucs);
 using namespace boost::filesystem;
 using std::string;
 using std::cout;
+using std::endl;
 
 Tree::ClipboardMode Tree::paste_mode;
 list<string> Tree::clipboard;
@@ -83,9 +84,7 @@ void Tree::makeline(const int pos, string &line)
     assert(0<=pos&&pos<col_map[FILENAME].size());
     int start = 0;
     for (int col : cfg.columns) {
-        auto & column = col_map[col];
-        auto it = std::next(column.begin(), pos);
-        const Cell & cell = *it;
+        const Cell & cell = col_map[col][pos];
         line.append(string(cell.col_start-start, ' '));
         line.append(cell.text);
         int len = cell.byte_end - cell.byte_start - cell.text.size();
@@ -131,10 +130,9 @@ void Tree::changeRoot(const string &root)
     makeline(0, line);
     ret.push_back(line);
 
-    list<FileItem*> child_fileitem;
+    vector<FileItem*> child_fileitem;
 
-    auto it = std::next(m_fileitem.begin(), 0);
-    entryInfoListRecursively(*(*it), child_fileitem);
+    entryInfoListRecursively(*m_fileitem[0], child_fileitem);
     set_last(child_fileitem);
     for (auto item:child_fileitem) {
         m_fileitem.push_back(item);
@@ -150,8 +148,7 @@ void Tree::changeRoot(const string &root)
 /// Insert columns
 void Tree::insert_item(const int pos)
 {
-    auto it = std::next(m_fileitem.begin(), pos);
-    const FileItem &fileitem = *(*it);
+    const FileItem &fileitem = *m_fileitem[pos];
     int start = 0;
     int byte_start = 0;
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
@@ -192,18 +189,16 @@ void Tree::insert_item(const int pos)
 
         auto search = col_map.find(col);
         if (search != col_map.end()) {
-            auto it = std::next(col_map[col].begin(), pos);
-            col_map[col].insert(it, std::move(cell));
+            col_map[col].emplace(search->second.begin()+pos, std::move(cell));
         } else {
-            col_map.insert({col, list<Cell>()});
+            col_map.insert({col, vector<Cell>()});
         }
     }
 }
 
 void Tree::insert_rootcell(const int pos)
 {
-    auto it = std::next(m_fileitem.begin(), pos);
-    const FileItem &fileitem = *(*it);
+    const FileItem &fileitem = *m_fileitem[pos];
     int start = 0;
     int byte_start = 0;
     for (int col : cfg.columns) {
@@ -239,15 +234,14 @@ void Tree::insert_rootcell(const int pos)
 
         auto search = col_map.find(col);
         if (search != col_map.end()) {
-            auto it = std::next(col_map[col].begin(), pos);
-            col_map[col].insert(it, std::move(cell));
+            col_map[col].insert(search->second.begin()+pos, std::move(cell));
         } else {
-            col_map.insert({col, list<Cell>()});
+            col_map.insert({col, vector<Cell>()});
         }
     }
 }
 /// pos is 0-based row number.
-void Tree::insert_entrylist(const list<FileItem*>& fil, const int pos, vector<string>& ret)
+void Tree::insert_entrylist(const vector<FileItem*>& fil, const int pos, vector<string>& ret)
 {
     int file_count = fil.size();
     for (int i = 0; i < file_count; ++i) {
@@ -266,12 +260,10 @@ void Tree::insert_entrylist(const list<FileItem*>& fil, const int pos, vector<st
 /// NOTE: root.level=-1
 int Tree::find_parent(int l)
 {
-    auto it = std::next(m_fileitem.begin(), l);
-    int level = (*it)->level;
+    int level = m_fileitem[l]->level;
     for (int i=l-1;i>=0;--i)
     {
-        auto it = std::next(m_fileitem.begin(), i);
-        const FileItem &fn = *(*it);
+        const FileItem &fn = *m_fileitem[i];
         if (fn.level == level-1)
             return i;
     }
@@ -282,12 +274,10 @@ int Tree::find_parent(int l)
 std::tuple<int, int> Tree::find_range(int l)
 {
     int s=l, i;
-    auto it = std::next(m_fileitem.begin(), l);
-    int level = (*it)->level;
+    int level = m_fileitem[l]->level;
     for (i=l+1;i<m_fileitem.size();++i)
     {
-        auto it = std::next(m_fileitem.begin(), i);
-        int l = (*it)->level;
+        int l = m_fileitem[i]->level;
         if (level >= l)
             break;
     }
@@ -302,13 +292,11 @@ void Tree::hline(int sl, int el)
     api->nvim_buf_clear_namespace(bufnr, icon_ns_id, sl, el);
     for (int i = sl;i<el;++i)
     {
-        auto it = std::next(m_fileitem.begin(), i);
-        const FileItem &fileitem = **it;
+        const FileItem &fileitem = *m_fileitem[i];
         char name[40];
 
         for (const int col : cfg.columns) {
-            auto it = std::next(col_map[col].begin(), i);
-            const Cell & cell = *it;
+            const Cell & cell = col_map[col][i];
 
             if(col==FILENAME) {
                 sprintf(name, "tree_%u_%u", col, is_directory(fileitem.fi));
@@ -330,31 +318,23 @@ void Tree::hline(int sl, int el)
     }
 }
 
+// Checked
 /// erase [s, e)
 void Tree::erase_entrylist(const int s, const int e)
 {
-    for (int col : cfg.columns) {
-        list<Cell> & cell = col_map[col];
-        auto it = std::next(cell.begin(), s);
-        for (int i=0;i<e-s;++i) {
-            auto nit = std::next(it);
-            cell.erase(it);
-            it = nit;
-        }
+    for (const int col : cfg.columns) {
+        vector<Cell> & cell = col_map[col];
+        cell.erase(cell.begin()+s, cell.begin()+e);
     }
     for (int i = s; i < e; ++i) {
-        auto it = std::next(m_fileitem.begin(), i);
-        delete (*it);
+        delete m_fileitem[i];
     }
-    auto start = m_fileitem.begin();
-    std::advance(start, s);
-    auto end = std::next(m_fileitem.begin(), e);
-    m_fileitem.erase(start, end);
+    m_fileitem.erase(m_fileitem.begin()+s, m_fileitem.begin()+e);
 }
 
 // get entryInfoList recursively
 void Tree::entryInfoListRecursively(const FileItem& item,
-                                   list<FileItem*> &fileitem_lst)
+                                   vector<FileItem*> &fileitem_lst)
 {
     path dir(item.p);
     const int level = item.level+1;
@@ -374,11 +354,19 @@ void Tree::entryInfoListRecursively(const FileItem& item,
         //     entryInfoListRecursively(*fileitem, fileitem_lst);
         // }
         // else
+
+        auto search = expandStore.find(fileitem->p.string());
+        if (search != expandStore.end() && search->second) {
+            fileitem->opened_tree = true;
+            fileitem_lst.push_back(fileitem);
+            entryInfoListRecursively(*fileitem, fileitem_lst);
+        }
+        else
             fileitem_lst.push_back(fileitem);
     }
 }
 
-void Tree::set_last(list<FileItem *> &fileitems)
+void Tree::set_last(vector<FileItem *> &fileitems)
 {
     unordered_map<int, FileItem *> m;
     for (auto &i : fileitems) {
@@ -389,11 +377,11 @@ void Tree::set_last(list<FileItem *> &fileitems)
     }
 }
 
-typedef void (Tree::*Action)(const list<nvim::Object>& args);
+typedef void (Tree::*Action)(const nvim::Array& args);
 std::unordered_map<string, Action> action_map {
     // {"cd"                   , &Tree::cd},
     // {"goto"                 , &Tree::goto_},
-    // {"open_or_close_tree"   , &Tree::open_tree},
+    {"open_or_close_tree"   , &Tree::open_tree},
     // {"open"                 , &Tree::open},
     // {"copy"                 , &Tree::copy},
     // {"move"                 , &Tree::move},
@@ -413,19 +401,98 @@ std::unordered_map<string, Action> action_map {
     // {"call"                 , &Tree::call},
     // {"open_tree_recursive"  , &Tree::open_or_close_tree_recursively},
 };
-void Tree::action(const string &action, const list<nvim::Object> &args,
-                  const unordered_map<string, nvim::Object> context)
+void Tree::action(const string &action, const nvim::Array &args,
+                  const Map &context)
 {
-    cout << __PRETTY_FUNCTION__ << action;
+    cout << __FUNCTION__ << action << endl;
 
-    // cout << "context:" << context;
-    // this->ctx = context;
-    // cout << "cursor position(1-based): " << ctx.cursor;
-    //
-    // if (action_map.contains(action)) {
-    //     (this->*action_map[action])(args);
-    // }
-    // else {
-    //     api->nvim_call_function("tree#util#print_message", {QString("Unknown Action: %1").arg(action)});
-    // }
+    this->ctx = context;
+    cout << "cursor position(1-based): " << ctx.cursor << endl;
+
+    auto search = action_map.find(action);
+    if (search != action_map.end()) {
+        (this->*action_map[action])(args);
+    }
+    else {
+        api->nvim_call_function("tree#util#print_message", {"Unknown Action: " + action});
+    }
 }
+
+/// l is 0-based row number.
+void Tree::open_tree(const nvim::Array &args)
+{
+    const int l = ctx.cursor - 1;
+    cout << __PRETTY_FUNCTION__ << endl;
+    assert(0 <= l && l < m_fileitem.size());
+    // if (l == 0) return;
+    vector<string> ret;
+    FileItem &cur = *m_fileitem[l];
+
+    if (is_directory(cur.fi) && !cur.opened_tree) {
+
+        cur.opened_tree = true;
+        const string & rootPath = cur.p.string();
+        expandStore.insert({rootPath, true});
+        // redraw_line(l, l + 1);
+        vector<FileItem*> child_fileitem;
+        std::cout << "1111111111111111111" << std::endl;
+        entryInfoListRecursively(cur, child_fileitem);
+        std::cout << "22222222222222222" << std::endl;
+        int file_count = child_fileitem.size();
+        for (int i=0;i<file_count;++i) {
+            m_fileitem.insert(m_fileitem.begin()+l+1+i, child_fileitem[i]);
+        }
+
+        if (file_count <= 0) {
+            return;
+        }
+
+
+        std::cout << "3sssssssssssssssssssssssss" << std::endl;
+        insert_entrylist(child_fileitem, l + 1, ret);
+        std::cout << "3eeeeeeeeeeeeeeeeeeeeeeeeee" << std::endl;
+
+        buf_set_lines(l+1, l+1, true, ret);
+        std::cout << "4444444444444444444444444" << std::endl;
+        hline(l + 1, l + 1 + ret.size());
+
+    }
+    else if (cur.opened_tree) {
+        const string & p = cur.p.string();
+        // if (expandStore.contains(p) && expandStore[p]) {
+        //     expandStore[p] = false;
+        // }
+        std::tuple<int, int> se = find_range(l);
+        int s = std::get<0>(se) + 1;
+        int e = std::get<1>(se) + 1;
+        printf("\tclose range(1-based): [%d, %d]", s+1, e);
+        // buf_set_lines(s, e, true, {});
+
+        erase_entrylist(s, e);
+        cur.opened_tree = false;
+        // redraw_line(l, l + 1);
+    }
+    else if (find_parent(l) >= 0) {
+        int parent = find_parent(l);
+        std::tuple<int, int> se = find_range(parent);
+        int s = std::get<0>(se) + 1;
+        int e = std::get<1>(se) + 1;
+
+        printf("\tclose range(1-based): [%d, %d]", s+1, e);
+
+        buf_set_lines(s, e, true, {});
+        // ref to https://github.com/equalsraf/neovim-qt/issues/596
+        api->nvim_win_set_cursor(0, {0, s});
+        erase_entrylist(s, e);
+
+        FileItem &father = *m_fileitem[parent];
+        father.opened_tree = false;
+        const string & p = father.p.string();
+        // if (expandStore.contains(p) && expandStore[p]) {
+        //     expandStore[p] = false;
+        // }
+        // redraw_line(parent, parent + 1);
+    }
+    return;
+}
+
