@@ -53,6 +53,8 @@ public:
     void call(const std::string &method, nullptr_t res, const U&...u);
     inline bool send_response(uint64_t msgid, const Object &err, const Object &res);
 
+    template<typename...U>
+    void async_call(const std::string &method, const U&...u);
 private:
     template<typename...U>
     Object do_call(const std::string &method, const U&...u);

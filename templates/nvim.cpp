@@ -23,4 +23,9 @@ void Nvim::connect_tcp(const std::string &host,
 }
 {% endfor %}
 
+{% for func in functions %}
+void Nvim::async_{{func.name}}({% for arg in func.args %}{{arg.type}} {{arg.name}}{% if not loop.last %}, {% endif %}{% endfor %}) {
+    client_.async_call("{{func.name}}"{% for arg in func.args %}, {{arg.name}}{% endfor %});
+}
+{% endfor %}
 } //namespace nvim

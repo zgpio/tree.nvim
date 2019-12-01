@@ -77,3 +77,7 @@ https://github.com/cquery-project/cquery/wiki/Compilation-database
     * boost::filesystem::path 支持 cout
     * [STL map, hash_map, unordered_map区别](https://blog.csdn.net/haluoluo211/article/details/80877558)
     * `__PRETTY_FUNCTION__` 不是标准预定义宏(Predefined Macros)
+    * :h api-types
+    * 去掉nullptr_t导致变参模板无法区分, 例如:
+        `void NvimRPC::call(const std::string &method, Object& res, const U& ...u) ` 与
+        `void NvimRPC::call(const std::string &method, nullptr_t res, const U&...u)`

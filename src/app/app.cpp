@@ -188,7 +188,7 @@ void App::handleRequest(nvim::NvimRPC & rpc, uint64_t msgid, const string& metho
                 {"direction", tree.cfg.direction.c_str()}
             };
 
-            b->nvim_execute_lua("resume(...)", {bufnrs, tree_cfg});
+            b->async_nvim_execute_lua("resume(...)", {bufnrs, tree_cfg});
 
             // TODO: columns 状态更新需要清除不需要的columns
         }

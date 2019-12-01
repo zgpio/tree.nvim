@@ -16,6 +16,10 @@ public:
     {{func.return}} {{func.name}}({% for arg in func.args %}{{arg.type}} {{arg.name}}{% if not loop.last %}, {% endif %}{% endfor %});
 {%- endfor %}
 
+{%- for func in functions %}
+    void async_{{func.name}}({% for arg in func.args %}{{arg.type}} {{arg.name}}{% if not loop.last %}, {% endif %}{% endfor %});
+{%- endfor %}
+
 private:
     NvimRPC client_;
 

@@ -45,6 +45,7 @@ void eventloop(nvim::Nvim &nvim) {
 
         uint64_t type = obj.via.array.ptr[0].via.u64;
 
+        cout << "res = " << obj << endl;
         switch(type) {
         case 0:
             if (obj.via.array.ptr[1].type != msgpack::type::POSITIVE_INTEGER) {
@@ -104,7 +105,6 @@ void eventloop(nvim::Nvim &nvim) {
         default:
             cerr << "Unsupported msg type" << type;
         }
-        cout << "res = " << obj << endl;
     }
 }
 

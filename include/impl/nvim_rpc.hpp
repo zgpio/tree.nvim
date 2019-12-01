@@ -89,6 +89,20 @@ Object NvimRPC::do_call(const std::string &method, const U&...u) {
     return dst.get<3>();
 }
 
+template<typename...U>
+void NvimRPC::async_call(const std::string &method, const U&...u) {
+    msgpack::sbuffer sbuf;
+    detail::Packer pk(&sbuf);
+    pk.pack_array(4) << (uint64_t)REQUEST
+                     << msgid_++
+                     << method;
+
+    pk.pack_array(sizeof...(u));
+    detail::pack(pk, u...);
+
+    socket_.write(sbuf.data(), sbuf.size(), 5);
+}
+
 bool NvimRPC::send_response(uint64_t msgid, const Object &err, const Object &res)
 {
     msgpack::sbuffer sbuf;
