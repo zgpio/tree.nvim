@@ -300,7 +300,7 @@ void Tree::hline(int sl, int el)
 
             if(col==FILENAME) {
                 sprintf(name, "tree_%u_%u", col, is_directory(fileitem.fi));
-                api->nvim_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
+                api->async_nvim_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
             } else if(col==ICON || col==GIT || col==MARK) {
                 // :hi tree_<tab>
                 sprintf(name, "tree_%u_%u", col, cell.color);
@@ -309,10 +309,10 @@ void Tree::hline(int sl, int el)
                 // cout << icon.text;
                 // auto req_hl = api->nvim_buf_add_highlight(bufnr, 0, "String", 0, 0, 3);
                 // call nvim_buf_add_highlight(0, -1, "Identifier", 0, 5, -1)
-                api->nvim_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
+                api->async_nvim_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
             } else if (col==SIZE || col==TIME ){//|| col==INDENT
                 sprintf(name, "tree_%u", col);
-                api->nvim_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
+                api->async_nvim_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
             }
         }
     }
@@ -435,9 +435,7 @@ void Tree::open_tree(const nvim::Array &args)
         expandStore.insert({rootPath, true});
         // redraw_line(l, l + 1);
         vector<FileItem*> child_fileitem;
-        std::cout << "1111111111111111111" << std::endl;
         entryInfoListRecursively(cur, child_fileitem);
-        std::cout << "22222222222222222" << std::endl;
         int file_count = child_fileitem.size();
         for (int i=0;i<file_count;++i) {
             m_fileitem.insert(m_fileitem.begin()+l+1+i, child_fileitem[i]);
@@ -447,26 +445,23 @@ void Tree::open_tree(const nvim::Array &args)
             return;
         }
 
-
-        std::cout << "3sssssssssssssssssssssssss" << std::endl;
         insert_entrylist(child_fileitem, l + 1, ret);
-        std::cout << "3eeeeeeeeeeeeeeeeeeeeeeeeee" << std::endl;
 
         buf_set_lines(l+1, l+1, true, ret);
-        std::cout << "4444444444444444444444444" << std::endl;
         hline(l + 1, l + 1 + ret.size());
-
+        std::cout << "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" << std::endl;
     }
     else if (cur.opened_tree) {
         const string & p = cur.p.string();
-        // if (expandStore.contains(p) && expandStore[p]) {
-        //     expandStore[p] = false;
-        // }
+        auto search = expandStore.find(p);
+        if (search != expandStore.end() && expandStore[p]) {
+            expandStore[p] = false;
+        }
         std::tuple<int, int> se = find_range(l);
         int s = std::get<0>(se) + 1;
         int e = std::get<1>(se) + 1;
         printf("\tclose range(1-based): [%d, %d]", s+1, e);
-        // buf_set_lines(s, e, true, {});
+        buf_set_lines(s, e, true, {});
 
         erase_entrylist(s, e);
         cur.opened_tree = false;

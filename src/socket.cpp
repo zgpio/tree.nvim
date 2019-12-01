@@ -63,12 +63,12 @@ size_t Socket::read(char *rbuf, size_t capacity, double timeout_sec) {
 msgpack::unpacked Socket::read2(double timeout_sec)
 {
     size_t rlen = 0;
-    // msgpack::unpacker unp;
-    msgpack::unpacker unp(
-            [](msgpack::type::object_type /*type*/, std::size_t /*len*/, void*) -> bool { return true; },
-            MSGPACK_NULLPTR,
-            32
-            );
+    msgpack::unpacker unp;
+    // msgpack::unpacker unp(
+    //         [](msgpack::type::object_type /*type*/, std::size_t /*len*/, void*) -> bool { return true; },
+    //         MSGPACK_NULLPTR,
+    //         32
+    //         );
 
     do {
         deadline_.expires_from_now(boost::posix_time::seconds(long(timeout_sec)));

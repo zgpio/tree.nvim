@@ -40,7 +40,7 @@ void eventloop(nvim::Nvim &nvim) {
         msgpack::object obj(result.get());
         if (obj.type != msgpack::type::ARRAY) {
             cerr << "Received Invalid msgpack: not an array";
-            return;
+            continue;
         }
 
         uint64_t type = obj.via.array.ptr[0].via.u64;
