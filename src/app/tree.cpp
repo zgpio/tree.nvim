@@ -410,7 +410,7 @@ std::unordered_map<string, Action> action_map {
     {"cd"                   , &Tree::cd},
     // {"goto"                 , &Tree::goto_},
     {"open_or_close_tree"   , &Tree::open_tree},
-    // {"open"                 , &Tree::open},
+    {"open"                 , &Tree::open},
     // {"copy"                 , &Tree::copy},
     // {"move"                 , &Tree::move},
     // {"paste"                , &Tree::pre_paste},
@@ -517,6 +517,24 @@ void Tree::open_tree(const nvim::Array &args)
         // redraw_line(parent, parent + 1);
     }
     return;
+}
+
+void Tree::open(const nvim::Array &args)
+{
+    //save_cursor();
+    const int l = ctx.cursor - 1;
+    const file_status &fi = m_fileitem[l]->fi;
+    const path &p = m_fileitem[l]->p;
+    if (is_directory(fi)) {
+        changeRoot(p.string());
+    }
+    else if (args.size()>0 && args[0].as_string()=="vsplit") {
+        cout << "vsplit" << p;
+        api->async_nvim_call_function("tree#util#execute_path", {"rightbelow vsplit", p.string()});
+    }
+    else {
+        api->async_nvim_call_function("tree#util#execute_path", {"drop", p.string()});
+    }
 }
 
 void Tree::cd(const nvim::Array &args)
