@@ -425,7 +425,7 @@ std::unordered_map<string, Action> action_map {
     // {"new_file"             , &Tree::new_file},
     // {"execute_system"       , &Tree::execute_system},
     // {"rename"               , &Tree::rename},
-    // {"drop"                 , &Tree::drop},
+    {"drop"                 , &Tree::drop},
     // {"call"                 , &Tree::call},
     // {"open_tree_recursive"  , &Tree::open_or_close_tree_recursively},
 };
@@ -537,6 +537,20 @@ void Tree::open(const nvim::Array &args)
     }
 }
 
+void Tree::drop(const nvim::Array &args)
+{
+    FileItem &cur = *m_fileitem[ctx.cursor - 1];
+    const auto p = cur.p;
+    // qDebug()<<args;
+    if (is_directory(cur.fi))
+        changeRoot(p.string());
+    else {
+        if (args.size()>0)
+            api->nvim_execute_lua("drop(...)", {args[0].as_string(), p.string()});
+        else
+            api->nvim_execute_lua("drop(...)", {"", p.string()});
+    }
+}
 void Tree::cd(const nvim::Array &args)
 {
     if (args.size()>0) {
