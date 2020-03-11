@@ -424,7 +424,7 @@ std::unordered_map<string, Action> action_map {
     // {"redraw"               , &Tree::redraw},
     // {"new_file"             , &Tree::new_file},
     // {"execute_system"       , &Tree::execute_system},
-    // {"rename"               , &Tree::rename},
+    {"rename"               , &Tree::rename},
     {"drop"                 , &Tree::drop},
     {"call"                 , &Tree::call},
     // {"open_tree_recursive"  , &Tree::open_or_close_tree_recursively},
@@ -537,6 +537,26 @@ void Tree::open(const nvim::Array &args)
     }
 }
 
+// XXX: It override the builtin 'input()' function.
+void Tree::vim_input(string prompt="", string text="", string completion="", string handle="")
+{
+    cout << __PRETTY_FUNCTION__;
+    nvim::Array args = {prompt.c_str(), text.c_str(), completion.c_str()};
+    // qDebug() << args;
+    api->async_nvim_call_function("input", args);
+    if (handle=="rename")
+        ;
+    else if(handle=="new_file")
+        ;
+}
+void Tree::rename(const nvim::Array &args)
+{
+    // qDebug() << action << args;
+    FileItem &cur = *m_fileitem[ctx.cursor - 1];
+    string info = cur.p.string();
+    // NOTE: specify handle for vim_input
+    vim_input("Rename: " + info + " -> ", info, "file", "rename");
+}
 void Tree::drop(const nvim::Array &args)
 {
     FileItem &cur = *m_fileitem[ctx.cursor - 1];
