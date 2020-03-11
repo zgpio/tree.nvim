@@ -35,6 +35,7 @@ public:
     void open_tree(const nvim::Array &args);
     void open(const nvim::Array &args);
     void drop(const nvim::Array &args);
+    void call(const nvim::Array &args);
     void expandRecursively(const FileItem &item, vector<FileItem*> &fileitem_lst);
     void cd(const nvim::Array &args);
 
