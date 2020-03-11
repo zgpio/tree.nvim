@@ -67,7 +67,9 @@ void App::createTree(string &path)
     count++;
 
     int ns_id = b->nvim_create_namespace("tree_icon");
-    cout << __FUNCTION__ << "bufnr:" << bufnr << "ns_id:" << ns_id << path << endl;
+    if (path.back()=='/')  // path("/foo/bar/").parent_path();    // "/foo/bar"
+        path.pop_back();
+    cout << __FUNCTION__ << "bufnr: " << bufnr << "ns_id: " << ns_id << path << endl;
 
     Tree &tree = *(new Tree(bufnr, ns_id));
     trees.insert({bufnr, &tree});

@@ -338,14 +338,18 @@ void Tree::entryInfoListRecursively(const FileItem& item,
 {
     path dir(item.p);
     const int level = item.level+1;
+    typedef vector<path> vec;             // store paths,
+    vec v;                                // so we can sort them later
+    copy(directory_iterator(item.p), directory_iterator(), back_inserter(v));
+    sort(v.begin(), v.end(), [](path x, path y){return is_directory(x)>is_directory(y);});
 
-    for (directory_entry &x : directory_iterator(dir)) {
+    for (auto x : v) {
         FileItem *fileitem = new FileItem;
-        fileitem->fi = x.status();
+        fileitem->fi = status(x);
         fileitem->level = level;
         fileitem->parent = &item;
-        fileitem->p = x.path();
-        fileitem->filename = x.path().filename().string();
+        fileitem->p = x;
+        fileitem->filename = x.filename().string();
 
         // TODO: 临时
         // if (is_directory(x)) {
@@ -363,6 +367,30 @@ void Tree::entryInfoListRecursively(const FileItem& item,
         }
         else
             fileitem_lst.push_back(fileitem);
+    }
+}
+
+// Checked
+void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
+{
+    const int level = item.level+1;
+    auto it = directory_iterator(item.p);
+
+    for (directory_entry &x : it) {
+        FileItem *fileitem = new FileItem;
+        fileitem->fi = x.status();
+        fileitem->level = level;
+        fileitem->parent = &item;
+        fileitem->p = x.path();
+        fileitem->filename = x.path().filename().string();
+
+        if (is_directory(x)) {
+            fileitem->opened_tree = true;
+            fileitems.push_back(fileitem);
+            entryInfoListRecursively(*fileitem, fileitems);
+        }
+        else
+            fileitems.push_back(fileitem);
     }
 }
 

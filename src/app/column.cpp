@@ -225,6 +225,7 @@ void Cell::update_icon(const FileItem & fn)
 {
     const file_status &fi = fn.fi;
     string suffix = boost::filesystem::extension(fn.filename);
+    suffix.erase(suffix.begin());
 
     auto search = extensions.find(suffix);
 

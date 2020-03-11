@@ -33,6 +33,7 @@ public:
     void action(const string &action, const nvim::Array &args, const Map &context);
 
     void open_tree(const nvim::Array &args);
+    void expandRecursively(const FileItem &item, vector<FileItem*> &fileitem_lst);
     void cd(const nvim::Array &args);
 
     inline void buf_set_lines(int s, int e, bool strict, const vector<string> &replacement)
