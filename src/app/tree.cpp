@@ -416,7 +416,7 @@ std::unordered_map<string, Action> action_map {
     // {"paste"                , &Tree::pre_paste},
     // {"remove"               , &Tree::pre_remove},
     {"yank_path"            , &Tree::yank_path},
-    // {"toggle_select"        , &Tree::toggle_select},
+    {"toggle_select"        , &Tree::toggle_select},
     // {"toggle_select_all"    , &Tree::toggle_select_all},
     {"print"                , &Tree::print},
     {"debug"                , &Tree::debug},
@@ -649,4 +649,83 @@ void Tree::redraw(const nvim::Array &args)
 {
     FileItem &root = *m_fileitem[0];
     changeRoot(root.p.string());
+}
+/// 0-based [sl, el).
+void Tree::redraw_line(int sl, int el)
+{
+    char format[] = "%s (1-based): [%d, %d]";
+    printf(format, __PRETTY_FUNCTION__, sl+1, el);
+
+    vector<string> ret;
+    for (int i = sl; i < el; ++i) {
+        FileItem & fileitem = *m_fileitem[i];
+
+        int start = 0;
+        int byte_start = 0;
+        for (const int col : cfg.columns) {
+            Cell& cell = col_map[col][i];
+            if (col==MARK){
+            }else if(col==INDENT){
+            }else if(col==GIT){
+                // TODO: Git::update_gmap(fn);
+                cell.update_git(fileitem);
+            }else if(col==ICON){
+                cell.update_icon(fileitem);
+            } else if(col==FILENAME){
+            }else if(col==SIZE){
+                cell.update_size(fileitem);
+            }
+            std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+            std::wstring cell_str = converter.from_bytes(cell.text.c_str());
+            cell.col_start =start;
+            cell.col_end = start + countgrid(cell_str);
+            cell.byte_start = byte_start;
+            cell.byte_end = byte_start+cell.text.size();
+
+            // qDebug() << col;
+            if (col==FILENAME)
+            {
+                int tmp = kStop - cell.col_end;
+                if (tmp >0)
+                {
+                    cell.col_end+=tmp;
+                    cell.byte_end+=tmp;
+                }
+            }
+            int sep = (col==INDENT?0:1);
+            start = cell.col_end + sep;
+            byte_start = cell.byte_end + sep;
+        }
+
+        string line;
+        makeline(i, line);
+        ret.push_back(std::move(line));
+    }
+    buf_set_lines(sl, el, true, std::move(ret));
+    hline(sl, el);
+}
+void Tree::_toggle_select(const int pos)
+{
+    // TODO: mark may not available
+    Cell &cur = col_map[MARK][pos];
+    FileItem& item = *m_fileitem[pos];
+
+    item.selected = !item.selected;
+    if (item.selected) {
+        cur.text = mark_indicators["selected_icon"];
+        cur.color = BLUE;
+        targets.push_back(pos);
+    }
+    else {
+        cur.text=" ";
+        cur.color = WHITE;
+        // targets.removeOne(pos);
+    }
+
+    redraw_line(pos, pos+1);
+}
+void Tree::toggle_select(const nvim::Array &args)
+{
+    const int pos = ctx.cursor - 1;
+    _toggle_select(pos);
 }
