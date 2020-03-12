@@ -374,9 +374,12 @@ void Tree::entryInfoListRecursively(const FileItem& item,
 void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
 {
     const int level = item.level+1;
-    auto it = directory_iterator(item.p);
+    typedef vector<directory_entry> vec;             // store paths,
+    vec v;                                // so we can sort them later
+    copy(directory_iterator(item.p), directory_iterator(), back_inserter(v));
+    sort(v.begin(), v.end(), [](path x, path y){return is_directory(x)>is_directory(y);});
 
-    for (directory_entry &x : it) {
+    for (directory_entry &x : v) {
         FileItem *fileitem = new FileItem;
         fileitem->fi = x.status();
         fileitem->level = level;
@@ -387,7 +390,7 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
         if (is_directory(x)) {
             fileitem->opened_tree = true;
             fileitems.push_back(fileitem);
-            entryInfoListRecursively(*fileitem, fileitems);
+            expandRecursively(*fileitem, fileitems);
         }
         else
             fileitems.push_back(fileitem);
@@ -427,7 +430,7 @@ std::unordered_map<string, Action> action_map {
     {"rename"               , &Tree::rename},
     {"drop"                 , &Tree::drop},
     {"call"                 , &Tree::call},
-    // {"open_tree_recursive"  , &Tree::open_or_close_tree_recursively},
+    {"open_tree_recursive"  , &Tree::open_or_close_tree_recursively},
 };
 void Tree::action(const string &action, const nvim::Array &args,
                   const Map &context)
@@ -730,6 +733,99 @@ void Tree::toggle_select_all(const nvim::Array &args)
     for (int i=1;i<m_fileitem.size();++i) {
         _toggle_select(i);
     }
+}
+// shrink recursively
+void Tree::shrinkRecursively(const string &p)
+{
+    path dir(p);
+    // set_dir(dir);
+    typedef vector<path> vec;             // store paths,
+    vec v;                                // so we can sort them later
+    copy(directory_iterator(p), directory_iterator(), back_inserter(v));
+
+    for (auto x : v) {
+        string p = x.string();
+
+        auto got = expandStore.find(p);
+        if (got != expandStore.end() && expandStore[p]) {
+            expandStore[p] = false;
+            shrinkRecursively(p);
+        }
+    }
+    return;
+}
+void Tree::open_or_close_tree_recursively(const nvim::Array &args)
+{
+    const int l = ctx.cursor - 1;
+    cout << __PRETTY_FUNCTION__;
+    assert(0 <= l && l < m_fileitem.size());
+    if (l == 0) return;
+    vector<string> ret;
+    FileItem &cur = *m_fileitem[l];
+
+    if (is_directory(cur.fi) && !cur.opened_tree) {
+        cur.opened_tree = true;
+        const string &rootPath = cur.p.string();
+        expandStore.insert({rootPath, true});
+        redraw_line(l, l + 1);
+        vector<FileItem*> child_fileitem;
+        expandRecursively(cur, child_fileitem);
+        int file_count = child_fileitem.size();
+        for (int i = 0; i < file_count; ++i)
+            m_fileitem.insert(m_fileitem.begin() + l + 1 + i, child_fileitem[i]);
+
+        if (file_count <= 0) {
+            return;
+        }
+
+        insert_entrylist(child_fileitem, l + 1, ret);
+        buf_set_lines(l+1, l+1, true, ret);
+        hline(l + 1, l + 1 + ret.size());
+        return;
+    }
+    else if (cur.opened_tree) {
+        const string &p = cur.p.string();
+        auto got = expandStore.find(p);
+        if (got != expandStore.end() && expandStore[p]) {
+            expandStore[p] = false;
+        }
+        std::tuple<int, int> se = find_range(l);
+        int s = std::get<0>(se) + 1;
+        int e = std::get<1>(se) + 1;
+        printf("\tclose range(1-based): [%d, %d]", s+1, e);
+        buf_set_lines(s, e, true, {});
+        shrinkRecursively(p);
+        erase_entrylist(s, e);
+        cur.opened_tree = false;
+        redraw_line(l, l + 1);
+        return;
+    }
+    else if (find_parent(l) >= 0) {
+        int parent = find_parent(l);
+        std::tuple<int, int> se = find_range(parent);
+        int s = std::get<0>(se) + 1;
+        int e = std::get<1>(se) + 1;
+
+        printf("\tclose range(1-based): [%d, %d]", s+1, e);
+
+        buf_set_lines(s, e, true, {});
+        // ref to https://github.com/equalsraf/neovim-qt/issues/596
+        api->nvim_win_set_cursor(0, {s, 0});
+
+        FileItem &father = *m_fileitem[parent];
+        father.opened_tree = false;
+        const string &p = father.p.string();
+        auto got = expandStore.find(p);
+        if (got != expandStore.end() && expandStore[p]) {
+            expandStore[p] = false;
+        }
+        shrinkRecursively(p);
+        erase_entrylist(s, e);
+        redraw_line(parent, parent + 1);
+        return;
+    }
+
+    return;
 }
 void Tree::goto_(const nvim::Array &args)
 {

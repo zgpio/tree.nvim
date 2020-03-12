@@ -41,6 +41,7 @@ public:
     void print(const nvim::Array &args);
     void debug(const nvim::Array &args);
     void open_tree(const nvim::Array &args);
+    void open_or_close_tree_recursively(const nvim::Array &args);
     void open(const nvim::Array &args);
     void drop(const nvim::Array &args);
     void call(const nvim::Array &args);
