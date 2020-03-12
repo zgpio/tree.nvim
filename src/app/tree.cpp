@@ -352,13 +352,6 @@ void Tree::entryInfoListRecursively(const FileItem& item,
         if (&x == &(*(v.end()-1))) {
             fileitem->last = true;
         }
-        // TODO: 临时
-        // if (is_directory(x)) {
-        //     fileitem->opened_tree = true;
-        //     fileitem_lst.push_back(fileitem);
-        //     entryInfoListRecursively(*fileitem, fileitem_lst);
-        // }
-        // else
 
         auto search = expandStore.find(fileitem->p.string());
         if (search != expandStore.end() && search->second) {
@@ -525,7 +518,7 @@ void Tree::open(const nvim::Array &args)
         changeRoot(p.string());
     }
     else if (args.size()>0 && args[0].as_string()=="vsplit") {
-        cout << "vsplit" << p;
+        cout << "vsplit " << p;
         api->async_nvim_call_function("tree#util#execute_path", {"rightbelow vsplit", p.string()});
     }
     else {
@@ -581,8 +574,8 @@ void Tree::cd(const nvim::Array &args)
             // if (cur.opened_tree)
             //     dir = cur.fi.absoluteFilePath();
             string cmd = "cd " + dir;
-            api->async_nvim_call_function("tree#util#print_message", {cmd});
-            api->nvim_command(cmd);
+            api->async_nvim_execute_lua("tree.print_message(...)", {cmd});
+            api->async_nvim_command(cmd);
         }
         else {
             changeRoot(dir);
@@ -674,7 +667,7 @@ void Tree::redraw_line(int sl, int el)
             cell.byte_start = byte_start;
             cell.byte_end = byte_start+cell.text.size();
 
-            // qDebug() << col;
+            // cout << col;
             if (col==FILENAME)
             {
                 int tmp = kStop - cell.col_end;
