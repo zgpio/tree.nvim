@@ -114,36 +114,35 @@ void App::handleNvimNotification(const string &method, const vector<nvim::Object
             search->second->action(action, act_args, context);
         }
     }
-    // else if (method=="function") {
-    //     QString fn = vl.at(0).toString();
-    //     if (fn == "paste") {
-    //         QList<QVariant> fargs = vl.at(1).toList();
-    //         QList<QVariant> pos = fargs[0].toList();
-    //         QString src = fargs[1].toString();
-    //         QString dest = fargs[2].toString();
-    //         int buf = pos[0].toInt();
-    //         int line = pos[1].toInt();
-    //         qDebug()<<fargs;
-    //         trees[buf]->paste(line, src, dest);
-    //     }
-    //     else if (fn == "remove") {
-    //         QList<QVariant> fargs = vl.at(1).toList();
-    //         int buf = fargs[0].toInt();
-    //         int choice = fargs[1].toInt();
-    //         qDebug() << fargs;
-    //         trees[buf]->remove();
-    //     }
-    //     else if (fn == "on_detach") {
-    //         const int buf = vl.at(1).toInt();
-    //         if (trees.contains(buf)) {
-    //             delete trees[buf];
-    //             trees.remove(buf);
-    //             // TODO: 修改tree_buf
-    //             qDebug() << "\tAfter remove"<< vl.at(1) <<" trees:"<<trees;
-    //         }
-    //     }
-    // }
-
+    else if (method=="function") {
+        string fn = args.at(0).as_string();
+        if (fn == "paste") {
+            // QList<QVariant> fargs = vl.at(1).toList();
+            // QList<QVariant> pos = fargs[0].toList();
+            // QString src = fargs[1].toString();
+            // QString dest = fargs[2].toString();
+            // int buf = pos[0].toInt();
+            // int line = pos[1].toInt();
+            // qDebug()<<fargs;
+            // trees[buf]->paste(line, src, dest);
+        }
+        else if (fn == "remove") {
+            // QList<QVariant> fargs = vl.at(1).toList();
+            // int buf = fargs[0].toInt();
+            // int choice = fargs[1].toInt();
+            // qDebug() << fargs;
+            // trees[buf]->remove();
+        }
+        else if (fn == "on_detach") {
+            // const int buf = vl.at(1).toInt();
+            // if (trees.contains(buf)) {
+            //     delete trees[buf];
+            //     trees.remove(buf);
+            //     // TODO: 修改tree_buf
+            //     qDebug() << "\tAfter remove"<< vl.at(1) <<" trees:"<<trees;
+            // }
+        }
+    }
 }
 
 void App::handleRequest(nvim::NvimRPC & rpc, uint64_t msgid, const string& method,

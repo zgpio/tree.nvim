@@ -478,7 +478,6 @@ void Tree::open_tree(const nvim::Array &args)
 
         buf_set_lines(l+1, l+1, true, ret);
         hline(l + 1, l + 1 + ret.size());
-        std::cout << "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" << std::endl;
     }
     else if (cur.opened_tree) {
         const string & p = cur.p.string();
@@ -506,7 +505,7 @@ void Tree::open_tree(const nvim::Array &args)
 
         buf_set_lines(s, e, true, {});
         // ref to https://github.com/equalsraf/neovim-qt/issues/596
-        api->nvim_win_set_cursor(0, {0, s});
+        api->async_nvim_win_set_cursor(0, {s, 0});
         erase_entrylist(s, e);
 
         FileItem &father = *m_fileitem[parent];
@@ -749,4 +748,10 @@ void Tree::goto_(const nvim::Array &args)
     }
     else {
     }
+}
+void Tree::toggle_ignored_files(const nvim::Array &args)
+{
+    cfg.show_ignored_files = !cfg.show_ignored_files;
+    FileItem &root = *m_fileitem[0];
+    changeRoot(root.p.string());
 }
