@@ -415,13 +415,13 @@ std::unordered_map<string, Action> action_map {
     // {"move"                 , &Tree::move},
     // {"paste"                , &Tree::pre_paste},
     // {"remove"               , &Tree::pre_remove},
-    // {"yank_path"            , &Tree::yank_path},
+    {"yank_path"            , &Tree::yank_path},
     // {"toggle_select"        , &Tree::toggle_select},
     // {"toggle_select_all"    , &Tree::toggle_select_all},
     {"print"                , &Tree::print},
-    // {"debug"                , &Tree::debug},
+    {"debug"                , &Tree::debug},
     // {"toggle_ignored_files" , &Tree::toggle_ignored_files},
-    // {"redraw"               , &Tree::redraw},
+    {"redraw"               , &Tree::redraw},
     // {"new_file"             , &Tree::new_file},
     // {"execute_system"       , &Tree::execute_system},
     {"rename"               , &Tree::rename},
@@ -617,4 +617,36 @@ void Tree::print(const nvim::Array &args)
     string msg2 = "last=" + string(cur.last ? "true" : "false");
     string msg3 = "level=" + std::to_string(cur.level);
     api->async_nvim_execute_lua("print_message(...)", {msg+" "+msg2+" "+msg3});
+}
+void Tree::debug(const nvim::Array &args)
+{
+    for (auto i : cfg.columns) {
+        cout << i << ":";
+    }
+    cout << endl;
+}
+void Tree::yank_path(const nvim::Array &args)
+{
+    vector<string> yank;
+    // foreach (const int &pos, targets) {
+    //     yank.append(m_fileitem[pos]->p);
+    // }
+    if (yank.size()==0) {
+        FileItem &cur = *m_fileitem[ctx.cursor - 1];
+        yank.push_back(cur.p.string());
+    }
+    string reg;
+    for (auto i : yank) {
+        reg += i;
+        reg += '\n';
+    }
+    api->nvim_call_function("setreg", {"\"", reg});
+
+    // yank.insert(0, "yank_path");
+    api->nvim_execute_lua("print_message(...)", {reg});
+}
+void Tree::redraw(const nvim::Array &args)
+{
+    FileItem &root = *m_fileitem[0];
+    changeRoot(root.p.string());
 }
