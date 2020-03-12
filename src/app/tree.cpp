@@ -289,7 +289,7 @@ std::tuple<int, int> Tree::find_range(int l)
 void Tree::hline(int sl, int el)
 {
     int bufnr = this->bufnr;
-    api->nvim_buf_clear_namespace(bufnr, icon_ns_id, sl, el);
+    api->async_nvim_buf_clear_namespace(bufnr, icon_ns_id, sl, el);
     for (int i = sl;i<el;++i)
     {
         const FileItem &fileitem = *m_fileitem[i];
@@ -417,7 +417,7 @@ std::unordered_map<string, Action> action_map {
     // {"remove"               , &Tree::pre_remove},
     {"yank_path"            , &Tree::yank_path},
     {"toggle_select"        , &Tree::toggle_select},
-    // {"toggle_select_all"    , &Tree::toggle_select_all},
+    {"toggle_select_all"    , &Tree::toggle_select_all},
     {"print"                , &Tree::print},
     {"debug"                , &Tree::debug},
     // {"toggle_ignored_files" , &Tree::toggle_ignored_files},
@@ -728,4 +728,10 @@ void Tree::toggle_select(const nvim::Array &args)
 {
     const int pos = ctx.cursor - 1;
     _toggle_select(pos);
+}
+void Tree::toggle_select_all(const nvim::Array &args)
+{
+    for (int i=1;i<m_fileitem.size();++i) {
+        _toggle_select(i);
+    }
 }

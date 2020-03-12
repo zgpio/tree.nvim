@@ -30,6 +30,7 @@ public:
     string input;
 
     void toggle_select(const nvim::Array &args);
+    void toggle_select_all(const nvim::Array &args);
     void redraw_line(int sl, int el);
     void changeRoot(const string &path);
     void action(const string &action, const nvim::Array &args, const Map &context);
