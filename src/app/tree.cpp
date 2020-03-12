@@ -457,7 +457,7 @@ void Tree::open_tree(const nvim::Array &args)
         cur.opened_tree = true;
         const string & rootPath = cur.p.string();
         expandStore.insert({rootPath, true});
-        // redraw_line(l, l + 1);
+        redraw_line(l, l + 1);
         vector<FileItem*> child_fileitem;
         entryInfoListRecursively(cur, child_fileitem);
         int file_count = child_fileitem.size();
@@ -488,7 +488,7 @@ void Tree::open_tree(const nvim::Array &args)
 
         erase_entrylist(s, e);
         cur.opened_tree = false;
-        // redraw_line(l, l + 1);
+        redraw_line(l, l + 1);
     }
     else if (find_parent(l) >= 0) {
         int parent = find_parent(l);
@@ -506,10 +506,11 @@ void Tree::open_tree(const nvim::Array &args)
         FileItem &father = *m_fileitem[parent];
         father.opened_tree = false;
         const string & p = father.p.string();
-        // if (expandStore.contains(p) && expandStore[p]) {
-        //     expandStore[p] = false;
-        // }
-        // redraw_line(parent, parent + 1);
+        auto got = expandStore.find(p);
+        if (got != expandStore.end() && expandStore[p]) {
+            expandStore[p] = false;
+        }
+        redraw_line(parent, parent + 1);
     }
     return;
 }
