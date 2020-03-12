@@ -28,9 +28,9 @@ Tree::Tree(int bufnr, int ns_id)
     api->nvim_buf_set_option(bufnr, "ft", "tree");
     api->nvim_buf_set_option(bufnr, "modifiable", false);
 
-    api->nvim_command("lua require('tree')");
+    api->nvim_command("lua tree = require('tree')");
     // b->nvim_buf_attach(bufnr, false, {});
-    api->nvim_execute_lua("buf_attach(...)", {bufnr});
+    api->nvim_execute_lua("tree.buf_attach(...)", {bufnr});
 }
 
 // Checked
@@ -567,9 +567,9 @@ void Tree::drop(const nvim::Array &args)
         changeRoot(p.string());
     else {
         if (args.size()>0)
-            api->nvim_execute_lua("drop(...)", {args[0].as_string(), p.string()});
+            api->nvim_execute_lua("tree.drop(...)", {args[0].as_string(), p.string()});
         else
-            api->nvim_execute_lua("drop(...)", {"", p.string()});
+            api->nvim_execute_lua("tree.drop(...)", {"", p.string()});
     }
 }
 void Tree::cd(const nvim::Array &args)
@@ -616,7 +616,7 @@ void Tree::print(const nvim::Array &args)
     string msg = cur.p.string();
     string msg2 = "last=" + string(cur.last ? "true" : "false");
     string msg3 = "level=" + std::to_string(cur.level);
-    api->async_nvim_execute_lua("print_message(...)", {msg+" "+msg2+" "+msg3});
+    api->async_nvim_execute_lua("tree.print_message(...)", {msg+" "+msg2+" "+msg3});
 }
 void Tree::debug(const nvim::Array &args)
 {
@@ -643,7 +643,7 @@ void Tree::yank_path(const nvim::Array &args)
     api->nvim_call_function("setreg", {"\"", reg});
 
     // yank.insert(0, "yank_path");
-    api->nvim_execute_lua("print_message(...)", {reg});
+    api->nvim_execute_lua("tree.print_message(...)", {reg});
 }
 void Tree::redraw(const nvim::Array &args)
 {

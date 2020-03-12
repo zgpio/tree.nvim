@@ -3,28 +3,11 @@
 " AUTHOR: Shougo Matsushita <Shougo.Matsu at gmail.com>
 " License: MIT license
 "=============================================================================
-
-let s:is_windows = has('win32') || has('win64')
-let s:is_mac = !s:is_windows && !has('win32unix')
-      \ && (has('mac') || has('macunix') || has('gui_macvim') ||
-      \   (!isdirectory('/proc') && executable('sw_vers')))
+lua require 'tree'
 
 function! tree#util#print_error(string) abort
   echohl Error | echomsg '[tree] '
         \ . tree#util#string(a:string) | echohl None
-endfunction
-function! tree#util#print_warning(string) abort
-  echohl WarningMsg | echomsg '[tree] '
-        \ . tree#util#string(a:string) | echohl None
-endfunction
-function! tree#util#print_debug(string) abort
-  echomsg '[tree] ' . tree#util#string(a:string)
-endfunction
-function! tree#util#print_message(string) abort
-  echo '[tree] ' . tree#util#string(a:string)
-endfunction
-function! tree#util#is_windows() abort
-  return s:is_windows
 endfunction
 
 function! tree#util#convert2list(expr) abort
@@ -32,9 +15,6 @@ function! tree#util#convert2list(expr) abort
 endfunction
 function! tree#util#string(expr) abort
   return type(a:expr) ==# type('') ? a:expr : string(a:expr)
-endfunction
-function! tree#util#split(string) abort
-  return split(a:string, '\s*,\s*')
 endfunction
 
 function! tree#util#execute_path(command, path) abort
@@ -60,12 +40,12 @@ function! s:expand_complete(path) abort
         \ a:path)
 endfunction
 function! s:substitute_path_separator(path) abort
-  return s:is_windows ? substitute(a:path, '\\', '/', 'g') : a:path
+  return v:lua.tree.windows() ? substitute(a:path, '\\', '/', 'g') : a:path
 endfunction
 
 function! tree#util#call_tree(command, args) abort
   let [paths, context] = tree#util#_parse_options_args(a:args)
-  call tree#start(paths, context)
+  call v:lua.start(paths, context)
 endfunction
 
 function! tree#util#_parse_options_args(cmdline) abort
@@ -111,7 +91,7 @@ function! s:parse_options(cmdline) abort
             \ s:remove_quote_pairs(arg[len(arg_key) :]) : v:true
     endif
 
-    let template_opts = tree#init#_user_options()
+    let template_opts = v:lua.user_options()
     if index(keys(template_opts), name) >= 0
       if type(template_opts[name]) == type(42)
         let options[name] = str2nr(value)
@@ -151,10 +131,10 @@ function! tree#util#complete(arglead, cmdline, cursorpos) abort
 
   if a:arglead =~# '^-'
     " Option names completion.
-    let bool_options = keys(filter(copy(tree#init#_user_options()),
+    let bool_options = keys(filter(copy(v:lua.user_options()),
           \ 'type(v:val) == type(v:true) || type(v:val) == type(v:false)'))
     let _ += map(copy(bool_options), "'-' . tr(v:val, '_', '-')")
-    let string_options = keys(filter(copy(tree#init#_user_options()),
+    let string_options = keys(filter(copy(v:lua.user_options()),
           \ 'type(v:val) != type(v:true) && type(v:val) != type(v:false)'))
     let _ += map(copy(string_options), "'-' . tr(v:val, '_', '-') . '='")
 
@@ -179,26 +159,12 @@ function! tree#util#complete(arglead, cmdline, cursorpos) abort
   return uniq(sort(filter(_, 'stridx(v:val, a:arglead) == 0')))
 endfunction
 
-function! tree#util#rpcrequest(method, args, is_async) abort
-  if !tree#init#_check_channel()
-    " TODO: temporary
-    echom "g:tree#_channel_id is not ready"
-    return -1
-  endif
-
-  if a:is_async
-    return rpcnotify(g:tree#_channel_id, a:method, a:args)
-  else
-    return rpcrequest(g:tree#_channel_id, a:method, a:args)
-  endif
-endfunction
-
 " Open a file.
 function! tree#util#open(filename) abort
   let filename = fnamemodify(a:filename, ':p')
 
   " Detect desktop environment.
-  if s:is_windows
+  if v:lua.tree.windows()
     " For URI only.
     " Note:
     "   # and % required to be escaped (:help cmdline-special)
@@ -226,7 +192,7 @@ function! tree#util#open(filename) abort
     " Xfce.
     call system(printf('%s %s &', 'exo-open',
           \ shellescape(filename)))
-  elseif s:is_mac && executable('open')
+  elseif v:lua.tree.macos() && executable('open')
     " Mac OS.
     call system(printf('%s %s &', 'open',
           \ shellescape(filename)))
@@ -244,40 +210,6 @@ function! tree#util#cd(path) abort
   endif
 endfunction
 
-function! tree#util#truncate_skipping(str, max, footer_width, separator) abort
-  let width = strwidth(a:str)
-  if width <= a:max
-    let ret = a:str
-  else
-    let header_width = a:max - strwidth(a:separator) - a:footer_width
-    let ret = s:strwidthpart(a:str, header_width) . a:separator
-         \ . s:strwidthpart_reverse(a:str, a:footer_width)
-  endif
-  return s:truncate(ret, a:max)
-endfunction
-function! s:truncate(str, width) abort
-  " Original function is from mattn.
-  " http://github.com/mattn/googlereader-vim/tree/master
-
-  if a:str =~# '^[\x00-\x7f]*$'
-    return len(a:str) < a:width
-          \ ? printf('%-' . a:width . 's', a:str)
-          \ : strpart(a:str, 0, a:width)
-  endif
-
-  let ret = a:str
-  let width = strwidth(a:str)
-  if width > a:width
-    let ret = s:strwidthpart(ret, a:width)
-    let width = strwidth(ret)
-  endif
-
-  if width < a:width
-    let ret .= repeat(' ', a:width - width)
-  endif
-
-  return ret
-endfunction
 function! s:strwidthpart(str, width) abort
   let str = tr(a:str, "\t", ' ')
   let vcol = a:width + 2

@@ -61,23 +61,21 @@ nnoremap <silent> <Space>xdf :Tree -new -split=vertical -winwidth=20
             \ -columns=mark:indent:git:icon:filename:type:size -show-ignored-files
             \ -direction=topleft `expand('%:p:h')` -search=`expand('%:p')`<CR>
 
-call tree#custom#option('_', {
-      \ 'root_marker': '',
-      \ })
-
-" TODO: deprecate custom#column
-call tree#custom#column('filename', {
-      \ 'root_marker_highlight': 'Ignore',
-      \ 'max_width': 1000,
-      \ })
+lua << EOF
+local tree = require 'tree'
+tree.custom_option('_', {root_marker='', })
+tree.custom_column('filename', {
+  root_marker_highlight='Ignore',
+  max_width=1000,
+})
+EOF
 
 autocmd FileType tree call s:set_tree()
 
-" TODO: support call
 function! CdNode(context) abort
   echom string(a:context)
-    let [curdir] = a:context.targets
-    :py3 << EOF
+  let [curdir] = a:context.targets
+:py3 << EOF
 import vim
 from pathlib import Path
 str = vim.eval('curdir')
@@ -92,22 +90,22 @@ endfunction
 
 func! s:set_tree() abort
   " Define mappings
-  nnoremap <silent><buffer><expr> s tree#action('multi', [['drop', 'split'], 'quit'])
+  " nnoremap <silent><buffer><expr> s tree#action('multi', [['drop', 'split'], 'quit'])
   " nnoremap <silent><buffer><expr> se tree#action('save_session')
   " nnoremap <silent><buffer><expr> sl tree#action('load_session')
-  nnoremap <silent><buffer><expr> ! tree#action('execute_command')
-  nnoremap <silent><buffer><expr> P tree#action('open', 'pedit')
-  nnoremap <silent><buffer><expr> M tree#action('new_multiple_files')
-  nnoremap <silent><buffer><expr> C tree#action('toggle_columns', 'mark:filename:type:size:time')
-  nnoremap <silent><buffer><expr> S tree#action('toggle_sort', 'Time')
-  nnoremap <silent><buffer><expr> d tree#action('remove_trash')
-  nnoremap <silent><buffer><expr> . tree#action('repeat')
+  " nnoremap <silent><buffer><expr> ! tree#action('execute_command')
+  " nnoremap <silent><buffer><expr> P tree#action('open', 'pedit')
+  " nnoremap <silent><buffer><expr> M tree#action('new_multiple_files')
+  " nnoremap <silent><buffer><expr> C tree#action('toggle_columns', 'mark:filename:type:size:time')
+  " nnoremap <silent><buffer><expr> S tree#action('toggle_sort', 'Time')
+  " nnoremap <silent><buffer><expr> d tree#action('remove_trash')
+  " nnoremap <silent><buffer><expr> . tree#action('repeat')
   "nnoremap <silent><buffer><expr> <Tab> winnr('$') != 1 ? ':<C-u>wincmd w<CR>' : ':<C-u>tree -buffer-name=temp -split=vertical<CR>'
   "nnoremap <silent><buffer><expr> q tree#action('quit')
+
   nnoremap <silent><buffer><expr> cp tree#action('copy')
   nnoremap <silent><buffer><expr> m tree#action('move')
   nnoremap <silent><buffer><expr> p tree#action('paste')
-
   nnoremap <silent><buffer><expr> d tree#action('remove')
   nnoremap <silent><buffer><expr> cD tree#action('call', 'CdNode')
   nnoremap <silent><buffer><expr> > tree#action('toggle_ignored_files')
@@ -124,6 +122,7 @@ func! s:set_tree() abort
   nnoremap <silent><buffer><expr> x tree#action('execute_system')
   nnoremap <silent><buffer><expr> N tree#action('new_file')
   nnoremap <silent><buffer><expr> h tree#action('cd', ['..'])
+  nnoremap <silent><buffer><expr> cd tree#action('cd', ['.'])
   nnoremap <silent><buffer><expr> cd tree#action('cd', '.')
   nnoremap <silent><buffer><expr> \ tree#action('cd', getcwd())
   nnoremap <silent><buffer><expr> ~ tree#action('cd')

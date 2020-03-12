@@ -87,7 +87,7 @@ void App::createTree(string &path)
         {"toggle", tree.cfg.toggle},
         {"direction", tree.cfg.direction.c_str()},
     };
-    b->nvim_execute_lua("resume(...)", {m_ctx.prev_bufnr, tree_cfg});
+    b->nvim_execute_lua("tree.resume(...)", {m_ctx.prev_bufnr, tree_cfg});
 }
 
 void App::handleNvimNotification(const string &method, const vector<nvim::Object> &args)
@@ -182,7 +182,6 @@ void App::handleRequest(nvim::NvimRPC & rpc, uint64_t msgid, const string& metho
             for (const int item : treebufs)
                 bufnrs.push_back(item);
 
-            b->nvim_command("lua require('tree')");
             Map tree_cfg = {
                 {"winwidth",  tree.cfg.winwidth},
                 {"winheight", tree.cfg.winheight},
@@ -192,7 +191,7 @@ void App::handleRequest(nvim::NvimRPC & rpc, uint64_t msgid, const string& metho
                 {"direction", tree.cfg.direction.c_str()}
             };
 
-            b->async_nvim_execute_lua("resume(...)", {bufnrs, tree_cfg});
+            b->async_nvim_execute_lua("tree.resume(...)", {bufnrs, tree_cfg});
 
             // TODO: columns 状态更新需要清除不需要的columns
         }
