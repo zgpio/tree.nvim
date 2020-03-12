@@ -423,7 +423,7 @@ std::unordered_map<string, Action> action_map {
     // {"toggle_ignored_files" , &Tree::toggle_ignored_files},
     {"redraw"               , &Tree::redraw},
     // {"new_file"             , &Tree::new_file},
-    // {"execute_system"       , &Tree::execute_system},
+    {"execute_system"       , &Tree::execute_system},
     {"rename"               , &Tree::rename},
     {"drop"                 , &Tree::drop},
     {"call"                 , &Tree::call},
@@ -565,10 +565,7 @@ void Tree::drop(const nvim::Array &args)
     if (is_directory(cur.fi))
         changeRoot(p.string());
     else {
-        if (args.size()>0)
-            api->nvim_execute_lua("tree.drop(...)", {args[0].as_string(), p.string()});
-        else
-            api->nvim_execute_lua("tree.drop(...)", {"", p.string()});
+        api->nvim_execute_lua("tree.drop(...)", {args, p.string()});
     }
 }
 void Tree::cd(const nvim::Array &args)
@@ -748,6 +745,12 @@ void Tree::goto_(const nvim::Array &args)
     }
     else {
     }
+}
+void Tree::execute_system(const nvim::Array &args)
+{
+    FileItem &cur = *m_fileitem[ctx.cursor - 1];
+    string info = cur.p.string();
+    api->nvim_call_function("tree#util#open", {info});
 }
 void Tree::toggle_ignored_files(const nvim::Array &args)
 {
