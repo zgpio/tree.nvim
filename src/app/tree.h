@@ -66,7 +66,6 @@ private:
     unordered_map<int, vector<Cell>> col_map;
     unordered_map<string, bool> expandStore;
     list<int> targets;
-    void set_last(vector<FileItem*> &fileitems);
     void hline(int sl, int el);
     int find_parent(int l);
     std::tuple<int, int> find_range(int l);

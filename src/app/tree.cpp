@@ -133,7 +133,6 @@ void Tree::changeRoot(const string &root)
     vector<FileItem*> child_fileitem;
 
     entryInfoListRecursively(*m_fileitem[0], child_fileitem);
-    set_last(child_fileitem);
     for (auto item:child_fileitem) {
         m_fileitem.push_back(item);
     }
@@ -343,14 +342,16 @@ void Tree::entryInfoListRecursively(const FileItem& item,
     copy(directory_iterator(item.p), directory_iterator(), back_inserter(v));
     sort(v.begin(), v.end(), [](path x, path y){return is_directory(x)>is_directory(y);});
 
-    for (auto x : v) {
+    for (auto &x : v) {
         FileItem *fileitem = new FileItem;
         fileitem->fi = status(x);
         fileitem->level = level;
         fileitem->parent = &item;
         fileitem->p = x;
         fileitem->filename = x.filename().string();
-
+        if (&x == &(*(v.end()-1))) {
+            fileitem->last = true;
+        }
         // TODO: 临时
         // if (is_directory(x)) {
         //     fileitem->opened_tree = true;
@@ -386,6 +387,9 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
         fileitem->parent = &item;
         fileitem->p = x.path();
         fileitem->filename = x.path().filename().string();
+        if (&x == &(*(v.end()-1))) {
+            fileitem->last = true;
+        }
 
         if (is_directory(x)) {
             fileitem->opened_tree = true;
@@ -394,17 +398,6 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
         }
         else
             fileitems.push_back(fileitem);
-    }
-}
-
-void Tree::set_last(vector<FileItem *> &fileitems)
-{
-    unordered_map<int, FileItem *> m;
-    for (auto &i : fileitems) {
-        m[i->level] = i;
-    }
-    for (auto &i : m) {
-        i.second->last = true;
     }
 }
 
@@ -467,7 +460,6 @@ void Tree::open_tree(const nvim::Array &args)
         // redraw_line(l, l + 1);
         vector<FileItem*> child_fileitem;
         entryInfoListRecursively(cur, child_fileitem);
-        set_last(child_fileitem);
         int file_count = child_fileitem.size();
         for (int i=0;i<file_count;++i) {
             m_fileitem.insert(m_fileitem.begin()+l+1+i, child_fileitem[i]);
