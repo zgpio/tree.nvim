@@ -29,6 +29,8 @@ public:
     Context ctx;
     string input;
 
+    void toggle_select(const nvim::Array &args);
+    void redraw_line(int sl, int el);
     void changeRoot(const string &path);
     void action(const string &action, const nvim::Array &args, const Map &context);
 
@@ -65,6 +67,7 @@ private:
     std::tuple<int, int> find_range(int l);
     void insert_entrylist(const vector<FileItem*> &, const int pos, vector<string>& ret);
     void insert_item(const int pos);
+    void _toggle_select(const int pos);
     void collect_targets();
     void insert_rootcell(const int pos);
     void erase_entrylist(const int s, const int e);
