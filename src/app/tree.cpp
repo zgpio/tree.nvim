@@ -620,9 +620,9 @@ void Tree::debug(const nvim::Array &args)
 void Tree::yank_path(const nvim::Array &args)
 {
     vector<string> yank;
-    // foreach (const int &pos, targets) {
-    //     yank.append(m_fileitem[pos]->p);
-    // }
+    for (const int &pos : targets) {
+        yank.push_back(m_fileitem[pos]->p.string());
+    }
     if (yank.size()==0) {
         FileItem &cur = *m_fileitem[ctx.cursor - 1];
         yank.push_back(cur.p.string());
@@ -634,7 +634,7 @@ void Tree::yank_path(const nvim::Array &args)
     }
     api->nvim_call_function("setreg", {"\"", reg});
 
-    // yank.insert(0, "yank_path");
+    reg.insert(0, "yank_path\n");
     api->nvim_execute_lua("tree.print_message(...)", {reg});
 }
 void Tree::redraw(const nvim::Array &args)
@@ -711,7 +711,7 @@ void Tree::_toggle_select(const int pos)
     else {
         cur.text=" ";
         cur.color = WHITE;
-        // targets.removeOne(pos);
+        targets.remove(pos);
     }
 
     redraw_line(pos, pos+1);
@@ -803,7 +803,7 @@ void Tree::open_or_close_tree_recursively(const nvim::Array &args)
 
         buf_set_lines(s, e, true, {});
         // ref to https://github.com/equalsraf/neovim-qt/issues/596
-        api->nvim_win_set_cursor(0, {s, 0});
+        api->async_nvim_win_set_cursor(0, {s, 0});
 
         FileItem &father = *m_fileitem[parent];
         father.opened_tree = false;
