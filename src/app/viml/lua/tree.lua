@@ -105,6 +105,10 @@ function drop(args, file)
     end
 end
 
+function print_message(str)
+  local cmd = string.format('echo "[tree] %s"', str)
+  vim.api.nvim_command(cmd)
+end
 -- 仅仅用于处理同名文件
 -- def check_overwrite(view: View, dest: Path, src: Path) -> Path:
 -- dest/src: {mtime=, path=, size=}

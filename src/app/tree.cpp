@@ -418,7 +418,7 @@ std::unordered_map<string, Action> action_map {
     // {"yank_path"            , &Tree::yank_path},
     // {"toggle_select"        , &Tree::toggle_select},
     // {"toggle_select_all"    , &Tree::toggle_select_all},
-    // {"print"                , &Tree::print},
+    {"print"                , &Tree::print},
     // {"debug"                , &Tree::debug},
     // {"toggle_ignored_files" , &Tree::toggle_ignored_files},
     // {"redraw"               , &Tree::redraw},
@@ -464,6 +464,7 @@ void Tree::open_tree(const nvim::Array &args)
         // redraw_line(l, l + 1);
         vector<FileItem*> child_fileitem;
         entryInfoListRecursively(cur, child_fileitem);
+        set_last(child_fileitem);
         int file_count = child_fileitem.size();
         for (int i=0;i<file_count;++i) {
             m_fileitem.insert(m_fileitem.begin()+l+1+i, child_fileitem[i]);
@@ -607,4 +608,13 @@ void Tree::call(const nvim::Array &args)
         {"targets", cur.p.string()}
     };
     api->async_nvim_call_function(func, {ctx});
+}
+
+void Tree::print(const nvim::Array &args)
+{
+    FileItem &cur = *m_fileitem[ctx.cursor - 1];
+    string msg = cur.p.string();
+    string msg2 = "last=" + string(cur.last ? "true" : "false");
+    string msg3 = "level=" + std::to_string(cur.level);
+    api->async_nvim_execute_lua("print_message(...)", {msg+" "+msg2+" "+msg3});
 }
