@@ -47,6 +47,7 @@ public:
     void vim_input(string prompt, string text, string completion, string handle);
     void expandRecursively(const FileItem &item, vector<FileItem*> &fileitem_lst);
     void cd(const nvim::Array &args);
+    void goto_(const nvim::Array &args);
 
     inline void buf_set_lines(int s, int e, bool strict, const vector<string> &replacement)
     {

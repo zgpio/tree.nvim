@@ -408,7 +408,7 @@ void Tree::set_last(vector<FileItem *> &fileitems)
 typedef void (Tree::*Action)(const nvim::Array& args);
 std::unordered_map<string, Action> action_map {
     {"cd"                   , &Tree::cd},
-    // {"goto"                 , &Tree::goto_},
+    {"goto"                 , &Tree::goto_},
     {"open_or_close_tree"   , &Tree::open_tree},
     {"open"                 , &Tree::open},
     // {"copy"                 , &Tree::copy},
@@ -432,7 +432,7 @@ std::unordered_map<string, Action> action_map {
 void Tree::action(const string &action, const nvim::Array &args,
                   const Map &context)
 {
-    cout << __FUNCTION__ << action << endl;
+    cout << __FUNCTION__ << ":" << action << endl;
 
     this->ctx = context;
     cout << "cursor position(1-based): " << ctx.cursor << endl;
@@ -733,5 +733,20 @@ void Tree::toggle_select_all(const nvim::Array &args)
 {
     for (int i=1;i<m_fileitem.size();++i) {
         _toggle_select(i);
+    }
+}
+void Tree::goto_(const nvim::Array &args)
+{
+    const int l = ctx.cursor - 1;
+
+    if (args.size()>0) {
+        string dest = args.at(0).as_string();
+
+        if (dest=="parent") {
+            int p = find_parent(l);
+            api->async_nvim_win_set_cursor(0, {p+1, 0});
+        }
+    }
+    else {
     }
 }
