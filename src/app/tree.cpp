@@ -485,6 +485,18 @@ void Tree::vim_input(string prompt="", string text="", string completion="", str
     else if(handle=="new_file")
         ;
 }
+/// 收集无序targets
+/// 视图变化之后 targets 要更新
+void Tree::collect_targets()
+{
+    targets.clear();
+    for (int i = 0; i < m_fileitem.size(); ++i) {
+        const FileItem &item = *m_fileitem[i];
+        if (item.selected) {
+            targets.push_back(i);
+        }
+    }
+}
 typedef void (Tree::*Action)(const nvim::Array& args);
 std::unordered_map<string, Action> action_map {
     {"cd"                   , &Tree::cd},
