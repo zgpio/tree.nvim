@@ -29,6 +29,7 @@ public:
     Context ctx;
     string input;
 
+    void handleNewFile(const string &input);
     void toggle_select(const nvim::Array &args);
     void toggle_select_all(const nvim::Array &args);
     void execute_system(const nvim::Array &args);
@@ -36,6 +37,7 @@ public:
     void changeRoot(const string &path);
     void action(const string &action, const nvim::Array &args, const Map &context);
 
+    void new_file(const nvim::Array &args);
     void redraw(const nvim::Array &args);
     void redraw_recursively(int l);
     void yank_path(const nvim::Array &args);

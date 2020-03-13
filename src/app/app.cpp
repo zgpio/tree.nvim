@@ -92,17 +92,17 @@ void App::createTree(string &path)
 
 void App::handleNvimNotification(const string &method, const vector<nvim::Object> &args)
 {
-    cout << __FUNCTION__ << method;
-
-    for (auto i : args[2].as_multimap()) {
-        std::cout << i.first.as_string() << std::endl;
-    }
+    cout << __FUNCTION__ << ":" << method;
 
     if(method=="_tree_async_action" && args.size() > 0) {
         // _tree_async_action [action: string, args: vector, context: multimap]
         string action = args.at(0).as_string();
         vector<nvim::Object> act_args = args.at(1).as_vector();
         auto context = args.at(2).as_multimap();
+        for (auto i : args[2].as_multimap()) {
+            std::cout << i.first.as_string() << std::endl;
+        }
+
         // cout << "\t" << "action:" << action << "args:" << act_args;
         // cout << "context:" << context;
         m_ctx = context;
@@ -126,6 +126,12 @@ void App::handleNvimNotification(const string &method, const vector<nvim::Object
             // qDebug()<<fargs;
             // trees[buf]->paste(line, src, dest);
         }
+        else if (fn == "new_file") {
+            vector<nvim::Object> fargs = args.at(1).as_vector();
+            string input = fargs[0].as_string();
+            int bufnr = fargs[1].as_uint64_t();
+            trees[bufnr]->handleNewFile(input);
+        }
         else if (fn == "remove") {
             // QList<QVariant> fargs = vl.at(1).toList();
             // int buf = fargs[0].toInt();
@@ -134,13 +140,18 @@ void App::handleNvimNotification(const string &method, const vector<nvim::Object
             // trees[buf]->remove();
         }
         else if (fn == "on_detach") {
-            // const int buf = vl.at(1).toInt();
-            // if (trees.contains(buf)) {
-            //     delete trees[buf];
-            //     trees.remove(buf);
-            //     // TODO: 修改tree_buf
-            //     qDebug() << "\tAfter remove"<< vl.at(1) <<" trees:"<<trees;
-            // }
+            const int buf = args.at(1).as_uint64_t();
+            auto got = trees.find(buf);
+            if (got != trees.end()) {
+                delete trees[buf];
+                trees.erase(buf);
+                // TODO: 修改tree_buf
+                printf("\tAfter remove %d, trees:", buf);
+                for (auto i:trees) {
+                    std::cout << i.first << ",";
+                }
+                std::cout << std::endl;
+            }
         }
     }
 }

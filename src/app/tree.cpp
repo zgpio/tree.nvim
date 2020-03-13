@@ -505,6 +505,47 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
     }
 }
 
+void Tree::handleNewFile(const string &input)
+{
+    if (input=="") {
+        api->nvim_execute_lua("tree.print_message(...)", {"Canceled"});
+        return;
+    }
+    cout << __PRETTY_FUNCTION__ << input;
+
+    // Cell & cur = col_map["filename"][ctx.cursor-1];
+    FileItem & item = *m_fileitem[ctx.cursor-1];
+
+    // fileitem.fi.absolutePath() -> QString
+    path dest = item.opened_tree ? item.p.parent_path() : item.p.parent_path();
+
+    dest += path::preferred_separator + input;
+    std::cout << dest << std::endl;
+    // QFileInfo fi(dest.filePath(input));
+    // NOTE: failed when same name file exists
+    if (boost::filesystem::exists(dest)) {
+        api->nvim_execute_lua("tree.print_message(...)", {"File already exists!"});
+        return;
+    }
+    else if(input.back() == '/'){
+        if(!create_directory(dest))
+            api->nvim_execute_lua("tree.print_message(...)", {"Failed to create dir!"});
+    } else {
+        // QFile file(dest.filePath(input));
+        // file.open(QIODevice::WriteOnly);
+        // file.close();
+    }
+
+    if (item.opened_tree) {
+        redraw_recursively(ctx.cursor-1);
+    } else{
+        // TODO: location: find_child
+        int pidx = find_parent(ctx.cursor-1);
+        // NOTE: root.level=-1
+        // TODO: consider named redraw_family
+        redraw_recursively(pidx);
+    }
+}
 // XXX: It override the builtin 'input()' function.
 void Tree::vim_input(string prompt="", string text="", string completion="", string handle="")
 {
@@ -546,7 +587,7 @@ std::unordered_map<string, Action> action_map {
     {"debug"                , &Tree::debug},
     // {"toggle_ignored_files" , &Tree::toggle_ignored_files},
     {"redraw"               , &Tree::redraw},
-    // {"new_file"             , &Tree::new_file},
+    {"new_file"             , &Tree::new_file},
     {"execute_system"       , &Tree::execute_system},
     {"rename"               , &Tree::rename},
     {"drop"                 , &Tree::drop},
@@ -757,6 +798,20 @@ void Tree::redraw(const nvim::Array &args)
 {
     FileItem &root = *m_fileitem[0];
     changeRoot(root.p.string());
+}
+void Tree::new_file(const nvim::Array &args)
+{
+    FileItem &cur = *m_fileitem[ctx.cursor - 1];
+    string info = cur.p.string();
+    // vim_input("New File: " + info + "/", "", "file", "new_file");
+    nvim::Dictionary cfg{
+        {"prompt", "New File: " + info + "/"},
+        {"text", ""},
+        {"completion", "file"},
+        {"handle", "new_file"},
+        {"bufnr", bufnr}
+    };
+    api->async_nvim_execute_lua("tree.new_file(...)", {cfg});
 }
 void Tree::_toggle_select(const int pos)
 {

@@ -172,6 +172,12 @@ function M.buf_attach(buf)
 end
 
 -------------------- start of util.vim --------------------
+function M.new_file(args)
+  print(inspect(args))
+  ret = fn.input(args.prompt, args.text, args.completion)
+  print(ret)
+  rpcrequest('function', {"new_file", {ret, args.bufnr}}, true)
+end
 function M.error(str)
   local cmd = string.format('echomsg "[tree] %s"', str)
   vim.api.nvim_command('echohl Error')
