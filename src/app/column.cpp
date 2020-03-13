@@ -159,7 +159,15 @@ Cell::Cell(const Config &cfg, const FileItem& fileitem, const int type)
     else if (type == TIME) {
         const file_status & fi = fileitem.fi;
         // TODO: custom column time format
-        // text = fi.lastModified().toString("dd.MM.yyyy").toUtf8();
+        try {
+            std::time_t t = boost::filesystem::last_write_time(fileitem.p);;
+            char mbstr[64];
+            if (std::strftime(mbstr, sizeof(mbstr), "%d.%M.%Y", std::localtime(&t))) {
+                text = mbstr;
+            }
+        } catch(std::exception& e) {
+            cout << "------->" << e.what() << endl;
+        }
         color = BLUE;
     }
     else{

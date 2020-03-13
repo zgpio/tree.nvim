@@ -33,7 +33,6 @@ Tree::Tree(int bufnr, int ns_id)
     api->nvim_execute_lua("tree.buf_attach(...)", {bufnr});
 }
 
-// Checked
 int countgrid(const std::wstring &s)
 {
     int n = s.size();
@@ -54,7 +53,6 @@ int countgrid(const std::wstring &s)
     }
     return n + ans;  // screen cells
 }
-// Checked
 void truncate(const int l, Cell &cell)
 {
     int old_bytesize = cell.text.size();
@@ -131,7 +129,6 @@ void Tree::changeRoot(const string &root)
     ret.push_back(line);
 
     vector<FileItem*> child_fileitem;
-
     entryInfoListRecursively(*m_fileitem[0], child_fileitem);
     for (auto item:child_fileitem) {
         m_fileitem.push_back(item);
@@ -140,6 +137,10 @@ void Tree::changeRoot(const string &root)
     insert_entrylist(child_fileitem, 1, ret);
 
     buf_set_lines(0, -1, true, ret);
+    string k = (*m_fileitem[0]).p.string();
+    // if (cursorHistory.contains(k)) {
+    //     api->nvim_win_set_cursor(0, QPoint{0, cursorHistory[k]});
+    // }
 
     hline(0, m_fileitem.size());
 }
@@ -200,6 +201,7 @@ void Tree::insert_rootcell(const int pos)
     const FileItem &fileitem = *m_fileitem[pos];
     int start = 0;
     int byte_start = 0;
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
     for (int col : cfg.columns) {
         Cell cell(cfg, fileitem, col);
         cell.col_start = start;
@@ -212,10 +214,16 @@ void Tree::insert_rootcell(const int pos)
             filename.insert(0, cfg.root_marker.c_str());
             cell.text = filename;
         }
+        std::wstring ws = converter.from_bytes(cell.text.c_str());
         string cell_str(cell.text);
         cell.byte_end = byte_start+cell.text.size();
 
-            cell.col_end = start + cell_str.size();
+        if (col==FILENAME) {
+            cell.col_end = start + countgrid(ws);
+        }
+        else {
+            cell.col_end = start + ws.size();
+        }
 
         // NOTE: alignment
         if (col==FILENAME) {
@@ -244,9 +252,6 @@ void Tree::insert_entrylist(const vector<FileItem*>& fil, const int pos, vector<
 {
     int file_count = fil.size();
     for (int i = 0; i < file_count; ++i) {
-        // string absolute_file_path = file_info.absoluteFilePath();
-        // string absolute_file_path(file_info.absoluteFilePath().toUtf8());
-
         insert_item(pos+i);
 
         string line;
@@ -283,7 +288,6 @@ std::tuple<int, int> Tree::find_range(int l)
     return std::make_tuple(s, i-1);
 }
 
-// Checked
 /// 0-based [sl, el).
 void Tree::hline(int sl, int el)
 {
@@ -317,7 +321,60 @@ void Tree::hline(int sl, int el)
     }
 }
 
-// Checked
+/// 0-based [sl, el).
+void Tree::redraw_line(int sl, int el)
+{
+    char format[] = "%s (1-based): [%d, %d]";
+    printf(format, __PRETTY_FUNCTION__, sl+1, el);
+
+    vector<string> ret;
+    for (int i = sl; i < el; ++i) {
+        FileItem & fileitem = *m_fileitem[i];
+
+        int start = 0;
+        int byte_start = 0;
+        for (const int col : cfg.columns) {
+            Cell& cell = col_map[col][i];
+            if (col==MARK){
+            }else if(col==INDENT){
+            }else if(col==GIT){
+                // TODO: Git::update_gmap(fn);
+                cell.update_git(fileitem);
+            }else if(col==ICON){
+                cell.update_icon(fileitem);
+            } else if(col==FILENAME){
+            }else if(col==SIZE){
+                cell.update_size(fileitem);
+            }
+            std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+            std::wstring cell_str = converter.from_bytes(cell.text.c_str());
+            cell.col_start =start;
+            cell.col_end = start + countgrid(cell_str);
+            cell.byte_start = byte_start;
+            cell.byte_end = byte_start+cell.text.size();
+
+            // cout << col;
+            if (col==FILENAME)
+            {
+                int tmp = kStop - cell.col_end;
+                if (tmp >0)
+                {
+                    cell.col_end+=tmp;
+                    cell.byte_end+=tmp;
+                }
+            }
+            int sep = (col==INDENT?0:1);
+            start = cell.col_end + sep;
+            byte_start = cell.byte_end + sep;
+        }
+
+        string line;
+        makeline(i, line);
+        ret.push_back(std::move(line));
+    }
+    buf_set_lines(sl, el, true, std::move(ret));
+    hline(sl, el);
+}
 /// erase [s, e)
 void Tree::erase_entrylist(const int s, const int e)
 {
@@ -364,7 +421,27 @@ void Tree::entryInfoListRecursively(const FileItem& item,
     }
 }
 
-// Checked
+// shrink recursively
+void Tree::shrinkRecursively(const string &p)
+{
+    path dir(p);
+    // set_dir(dir);
+    typedef vector<path> vec;             // store paths,
+    vec v;                                // so we can sort them later
+    copy(directory_iterator(p), directory_iterator(), back_inserter(v));
+
+    for (auto x : v) {
+        string p = x.string();
+
+        auto got = expandStore.find(p);
+        if (got != expandStore.end() && expandStore[p]) {
+            expandStore[p] = false;
+            shrinkRecursively(p);
+        }
+    }
+    return;
+}
+
 void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
 {
     const int level = item.level+1;
@@ -385,6 +462,8 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
         }
 
         if (is_directory(x)) {
+            string p = x.path().string();
+            expandStore.insert({p, true});
             fileitem->opened_tree = true;
             fileitems.push_back(fileitem);
             expandRecursively(*fileitem, fileitems);
@@ -394,6 +473,18 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
     }
 }
 
+// XXX: It override the builtin 'input()' function.
+void Tree::vim_input(string prompt="", string text="", string completion="", string handle="")
+{
+    cout << __PRETTY_FUNCTION__;
+    nvim::Array args = {prompt.c_str(), text.c_str(), completion.c_str()};
+    // qDebug() << args;
+    api->async_nvim_call_function("input", args);
+    if (handle=="rename")
+        ;
+    else if(handle=="new_file")
+        ;
+}
 typedef void (Tree::*Action)(const nvim::Array& args);
 std::unordered_map<string, Action> action_map {
     {"cd"                   , &Tree::cd},
@@ -526,18 +617,6 @@ void Tree::open(const nvim::Array &args)
     }
 }
 
-// XXX: It override the builtin 'input()' function.
-void Tree::vim_input(string prompt="", string text="", string completion="", string handle="")
-{
-    cout << __PRETTY_FUNCTION__;
-    nvim::Array args = {prompt.c_str(), text.c_str(), completion.c_str()};
-    // qDebug() << args;
-    api->async_nvim_call_function("input", args);
-    if (handle=="rename")
-        ;
-    else if(handle=="new_file")
-        ;
-}
 void Tree::rename(const nvim::Array &args)
 {
     // qDebug() << action << args;
@@ -635,60 +714,6 @@ void Tree::redraw(const nvim::Array &args)
     FileItem &root = *m_fileitem[0];
     changeRoot(root.p.string());
 }
-/// 0-based [sl, el).
-void Tree::redraw_line(int sl, int el)
-{
-    char format[] = "%s (1-based): [%d, %d]";
-    printf(format, __PRETTY_FUNCTION__, sl+1, el);
-
-    vector<string> ret;
-    for (int i = sl; i < el; ++i) {
-        FileItem & fileitem = *m_fileitem[i];
-
-        int start = 0;
-        int byte_start = 0;
-        for (const int col : cfg.columns) {
-            Cell& cell = col_map[col][i];
-            if (col==MARK){
-            }else if(col==INDENT){
-            }else if(col==GIT){
-                // TODO: Git::update_gmap(fn);
-                cell.update_git(fileitem);
-            }else if(col==ICON){
-                cell.update_icon(fileitem);
-            } else if(col==FILENAME){
-            }else if(col==SIZE){
-                cell.update_size(fileitem);
-            }
-            std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
-            std::wstring cell_str = converter.from_bytes(cell.text.c_str());
-            cell.col_start =start;
-            cell.col_end = start + countgrid(cell_str);
-            cell.byte_start = byte_start;
-            cell.byte_end = byte_start+cell.text.size();
-
-            // cout << col;
-            if (col==FILENAME)
-            {
-                int tmp = kStop - cell.col_end;
-                if (tmp >0)
-                {
-                    cell.col_end+=tmp;
-                    cell.byte_end+=tmp;
-                }
-            }
-            int sep = (col==INDENT?0:1);
-            start = cell.col_end + sep;
-            byte_start = cell.byte_end + sep;
-        }
-
-        string line;
-        makeline(i, line);
-        ret.push_back(std::move(line));
-    }
-    buf_set_lines(sl, el, true, std::move(ret));
-    hline(sl, el);
-}
 void Tree::_toggle_select(const int pos)
 {
     // TODO: mark may not available
@@ -719,26 +744,6 @@ void Tree::toggle_select_all(const nvim::Array &args)
     for (int i=1;i<m_fileitem.size();++i) {
         _toggle_select(i);
     }
-}
-// shrink recursively
-void Tree::shrinkRecursively(const string &p)
-{
-    path dir(p);
-    // set_dir(dir);
-    typedef vector<path> vec;             // store paths,
-    vec v;                                // so we can sort them later
-    copy(directory_iterator(p), directory_iterator(), back_inserter(v));
-
-    for (auto x : v) {
-        string p = x.string();
-
-        auto got = expandStore.find(p);
-        if (got != expandStore.end() && expandStore[p]) {
-            expandStore[p] = false;
-            shrinkRecursively(p);
-        }
-    }
-    return;
 }
 void Tree::open_or_close_tree_recursively(const nvim::Array &args)
 {
