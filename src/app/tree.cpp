@@ -375,6 +375,38 @@ void Tree::redraw_line(int sl, int el)
     buf_set_lines(sl, el, true, std::move(ret));
     hline(sl, el);
 }
+/// redraw parent and children
+/// assert l is 0-based parent index
+void Tree::redraw_recursively(int l)
+{
+    assert(0 <= l && l < m_fileitem.size());
+    FileItem &cur = *m_fileitem[l];
+
+    std::tuple<int, int> se = find_range(l);
+    int s = std::get<0>(se) + 1;
+    int e = std::get<1>(se) + 1;
+    printf("%s redraw range(1-based): [%d, %d]", __PRETTY_FUNCTION__, s+1, e);
+
+    erase_entrylist(s, e);
+
+    vector<FileItem*> child_fileitem;
+    // const QString &p = cur.fi.absoluteFilePath();
+    entryInfoListRecursively(cur, child_fileitem);
+    int file_count = child_fileitem.size();
+    for (int i = 0; i < file_count; ++i)
+        m_fileitem.insert(m_fileitem.begin() + l + 1 + i, child_fileitem[i]);
+
+    if (file_count <= 0) {
+        return;
+    }
+
+    vector<string> ret;
+    insert_entrylist(child_fileitem, l + 1, ret);
+    buf_set_lines(s, e, true, ret);
+    hline(l + 1, l + 1 + ret.size());
+
+    return;
+}
 /// erase [s, e)
 void Tree::erase_entrylist(const int s, const int e)
 {
