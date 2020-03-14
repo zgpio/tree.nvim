@@ -20,6 +20,14 @@ https://github.com/cquery-project/cquery/wiki/Compilation-database
     (cd build; cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=YES ..)
     ln -s build/compile_commands.json
     ```
+# Build
+```sh
+# Ubuntu 16.04 上安装1.58版本的boost
+sudo apt-get install libboost-all-dev
+
+sudo add-apt-repository ppa:mhier/libboost-latest
+sudo apt install libboost1.70-dev
+```
 
 # 尝试实现异步接受rpc请求/通知
 * [Boost异步套接字client](https://www.boost.org/doc/libs/1_45_0/doc/html/boost_asio/example/timeouts/async_tcp_client.cpp)

@@ -233,8 +233,8 @@ void Cell::update_icon(const FileItem & fn)
 {
     const file_status &fi = fn.fi;
     string suffix = boost::filesystem::extension(fn.filename);
-    suffix.erase(suffix.begin());
-
+    if (suffix.size()>0)
+        suffix.erase(suffix.begin());
     auto search = extensions.find(suffix);
 
     if (boost::filesystem::is_directory(fi)){
