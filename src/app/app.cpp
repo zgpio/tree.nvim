@@ -132,6 +132,12 @@ void App::handleNvimNotification(const string &method, const vector<nvim::Object
             int bufnr = fargs[1].as_uint64_t();
             trees[bufnr]->handleNewFile(input);
         }
+        else if (fn == "rename") {
+            vector<nvim::Object> fargs = args.at(1).as_vector();
+            string input = fargs[0].as_string();
+            int bufnr = fargs[1].as_uint64_t();
+            trees[bufnr]->handleRename(input);
+        }
         else if (fn == "remove") {
             // QList<QVariant> fargs = vl.at(1).toList();
             // int buf = fargs[0].toInt();

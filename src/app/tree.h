@@ -30,6 +30,7 @@ public:
     string input;
 
     void handleNewFile(const string &input);
+    void handleRename(string &input);
     void toggle_select(const nvim::Array &args);
     void toggle_select_all(const nvim::Array &args);
     void execute_system(const nvim::Array &args);

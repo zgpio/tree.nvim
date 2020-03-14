@@ -520,6 +520,33 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
     }
 }
 
+void Tree::handleRename(string &input)
+{
+    cout << __PRETTY_FUNCTION__;
+
+    Cell & cur = col_map[FILENAME][ctx.cursor-1];
+    FileItem & item = *m_fileitem[ctx.cursor-1];
+    if (!is_directory(item.p) && input.back() == '/')
+        input.pop_back();
+    string fn = item.p.string();
+    boost::filesystem::rename(item.p, input);
+    api->nvim_execute_lua("tree.print_message(...)", {"Rename Success"});
+    item.fi = status(item.p);
+    string text(item.p.filename().string());
+    if (is_directory(item.p))
+        text.append("/");
+    cur.text = text;
+
+    // NOTE: gmap may update
+    // FileItem::update_gmap(item.fi.absolutePath());
+    // redraw_line(ctx.cursor-1, ctx.cursor);
+    // TODO: 细粒度redraw
+    FileItem &root = *m_fileitem[0];
+    changeRoot(root.p.string());
+
+    // api->nvim_execute_lua("tree.print_message(...)", {"Rename failed"});
+
+}
 void Tree::handleNewFile(const string &input)
 {
     if (input=="") {
@@ -546,9 +573,7 @@ void Tree::handleNewFile(const string &input)
         if(!create_directory(dest))
             api->nvim_execute_lua("tree.print_message(...)", {"Failed to create dir!"});
     } else {
-        // QFile file(dest.filePath(input));
-        // file.open(QIODevice::WriteOnly);
-        // file.close();
+        boost::filesystem::ofstream(dest.string());
     }
 
     if (item.opened_tree) {
@@ -569,8 +594,6 @@ void Tree::vim_input(string prompt="", string text="", string completion="", str
     // qDebug() << args;
     api->async_nvim_call_function("input", args);
     if (handle=="rename")
-        ;
-    else if(handle=="new_file")
         ;
 }
 /// 收集无序targets
@@ -723,7 +746,14 @@ void Tree::rename(const nvim::Array &args)
     FileItem &cur = *m_fileitem[ctx.cursor - 1];
     string info = cur.p.string();
     // NOTE: specify handle for vim_input
-    vim_input("Rename: " + info + " -> ", info, "file", "rename");
+    nvim::Dictionary cfg{
+        {"prompt", "Rename: " + info + " -> "},
+        {"text", info},
+        {"completion", "file"},
+        {"handle", "rename"},
+        {"bufnr", bufnr}
+    };
+    api->async_nvim_execute_lua("tree.rename(...)", {cfg});
 }
 void Tree::drop(const nvim::Array &args)
 {
