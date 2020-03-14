@@ -428,7 +428,12 @@ void Tree::entryInfoListRecursively(const FileItem& item,
     const int level = item.level+1;
     typedef vector<path> vec;             // store paths,
     vec v;                                // so we can sort them later
-    copy(directory_iterator(item.p), directory_iterator(), back_inserter(v));
+    try {
+        copy(directory_iterator(item.p), directory_iterator(), back_inserter(v));
+    } catch(std::exception& e) {
+        cout << "------->" << e.what() << endl;
+        return;
+    }
     sort(v.begin(), v.end(), [](path x, path y){return is_directory(x)>is_directory(y);});
 
     for (auto &x : v) {
@@ -460,7 +465,12 @@ void Tree::shrinkRecursively(const string &p)
     // set_dir(dir);
     typedef vector<path> vec;             // store paths,
     vec v;                                // so we can sort them later
-    copy(directory_iterator(p), directory_iterator(), back_inserter(v));
+    try {
+        copy(directory_iterator(p), directory_iterator(), back_inserter(v));
+    } catch(std::exception& e) {
+        cout << "------->" << e.what() << endl;
+        return;
+    }
 
     for (auto x : v) {
         string p = x.string();
@@ -479,7 +489,12 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
     const int level = item.level+1;
     typedef vector<directory_entry> vec;             // store paths,
     vec v;                                // so we can sort them later
-    copy(directory_iterator(item.p), directory_iterator(), back_inserter(v));
+    try {
+        copy(directory_iterator(item.p), directory_iterator(), back_inserter(v));
+    } catch(std::exception& e) {
+        cout << "------->" << e.what() << endl;
+        return;
+    }
     sort(v.begin(), v.end(), [](path x, path y){return is_directory(x)>is_directory(y);});
 
     for (directory_entry &x : v) {
