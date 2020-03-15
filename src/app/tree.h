@@ -39,6 +39,7 @@ public:
     void action(const string &action, const nvim::Array &args, const Map &context);
 
     void remove();
+    void move(const nvim::Array &args);
     void new_file(const nvim::Array &args);
     void redraw(const nvim::Array &args);
     void redraw_recursively(int l);

@@ -646,7 +646,7 @@ std::unordered_map<string, Action> action_map {
     {"open_or_close_tree"   , &Tree::open_tree},
     {"open"                 , &Tree::open},
     {"copy"                 , &Tree::copy_},
-    // {"move"                 , &Tree::move},
+    {"move"                 , &Tree::move},
     {"paste"                , &Tree::pre_paste},
     {"remove"               , &Tree::pre_remove},
     {"yank_path"            , &Tree::yank_path},
@@ -1011,6 +1011,12 @@ void Tree::copy_(const nvim::Array &args)
     paste_mode = COPY;
     _copy_or_move(args);
     api->async_execute_lua("tree.print_message(...)", {"Copy to clipboard"});
+}
+void Tree::move(const nvim::Array &args)
+{
+    paste_mode = MOVE;
+    _copy_or_move(args);
+    api->async_execute_lua("tree.print_message(...)", {"Move to clipboard"});
 }
 void Tree::open_or_close_tree_recursively(const nvim::Array &args)
 {
