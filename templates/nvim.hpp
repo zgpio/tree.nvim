@@ -13,11 +13,11 @@ public:
             const std::string &service, double timeout_sec = 1.0);
 
 {% for func in functions %}
-    {{func.return}} {{func.name}}({% for arg in func.args %}{{arg.type}} {{arg.name}}{% if not loop.last %}, {% endif %}{% endfor %});
+    {{func.return}} {{func.short_name}}({% for arg in func.args %}{{arg.type}} {{arg.name}}{% if not loop.last %}, {% endif %}{% endfor %});
 {%- endfor %}
 
 {%- for func in functions %}
-    void async_{{func.name}}({% for arg in func.args %}{{arg.type}} {{arg.name}}{% if not loop.last %}, {% endif %}{% endfor %});
+    void async_{{func.short_name}}({% for arg in func.args %}{{arg.type}} {{arg.name}}{% if not loop.last %}, {% endif %}{% endfor %});
 {%- endfor %}
 
 private:

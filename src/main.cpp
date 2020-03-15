@@ -18,14 +18,14 @@ void eventloop(nvim::Nvim &nvim) {
     using std::cout;
     using std::endl;
     using std::string;
-    nvim::Array info = nvim.nvim_get_api_info();
+    nvim::Array info = nvim.get_api_info();
     int chan_id = info[0].as_uint64_t();
     cout << "type(api-metadata): " << type_name(info[1]) << endl;
     cout << "Channel Id: " << chan_id << endl;
 
     App app(&nvim, chan_id);
 
-    string line = nvim.nvim_get_current_line();
+    string line = nvim.get_current_line();
     cout << "get_current_line = " << line << endl;
 
     cout << "eventloop started" << endl;
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     nvim.connect_tcp("localhost", "6666");
 
     string expr = "( 3 + 2 ) * 4";
-    nvim::Object rv = nvim.nvim_eval(expr);
+    nvim::Object rv = nvim.eval(expr);
     std::cout << type_name(rv) << std::endl;
     uint64_t res = rv.as_uint64_t();
     printf("nvim_eval('%s') = %llu\n", expr.c_str(), res);

@@ -12,7 +12,7 @@ void Nvim::connect_tcp(const std::string &host,
 
 
 {% for func in functions %}
-{{func.return}} Nvim::{{func.name}}({% for arg in func.args %}{{arg.type}} {{arg.name}}{% if not loop.last %}, {% endif %}{% endfor %}) {
+{{func.return}} Nvim::{{func.short_name}}({% for arg in func.args %}{{arg.type}} {{arg.name}}{% if not loop.last %}, {% endif %}{% endfor %}) {
     {%- if func.return != "void" %}
     {{func.return}} res;
     client_.call("{{func.name}}", res{% for arg in func.args %}, {{arg.name}}{% endfor %});
@@ -24,7 +24,7 @@ void Nvim::connect_tcp(const std::string &host,
 {% endfor %}
 
 {% for func in functions %}
-void Nvim::async_{{func.name}}({% for arg in func.args %}{{arg.type}} {{arg.name}}{% if not loop.last %}, {% endif %}{% endfor %}) {
+void Nvim::async_{{func.short_name}}({% for arg in func.args %}{{arg.type}} {{arg.name}}{% if not loop.last %}, {% endif %}{% endfor %}) {
     client_.async_call("{{func.name}}"{% for arg in func.args %}, {{arg.name}}{% endfor %});
 }
 {% endfor %}

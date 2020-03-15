@@ -58,9 +58,9 @@ public:
 
     inline void buf_set_lines(int s, int e, bool strict, const vector<string> &replacement)
     {
-        api->async_nvim_buf_set_option(bufnr, "modifiable", true);
-        api->async_nvim_buf_set_lines(bufnr, s, e, strict, replacement);
-        api->async_nvim_buf_set_option(bufnr, "modifiable", false);
+        api->async_buf_set_option(bufnr, "modifiable", true);
+        api->async_buf_set_lines(bufnr, s, e, strict, replacement);
+        api->async_buf_set_option(bufnr, "modifiable", false);
         // TODO: Fine-grained targets update
         collect_targets();
     };

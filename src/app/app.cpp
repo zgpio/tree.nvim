@@ -14,7 +14,7 @@ App::App(nvim::Nvim *nvim, int chan_id) : m_nvim(nvim), chan_id(chan_id)
 
     // call rpcnotify(g:tree#_channel_id, "_tree_start", "/Users/zgp/")
     auto &a = *m_nvim;
-    a.nvim_set_var("tree#_channel_id", chan_id);
+    a.set_var("tree#_channel_id", chan_id);
     Tree::api = m_nvim;
 
     // init highlight
@@ -24,33 +24,33 @@ App::App(nvim::Nvim *nvim, int chan_id) : m_nvim(nvim), chan_id(chan_id)
     // sprintf(cmd, "silent hi %s guifg=%s", name, cell.color.toStdString().c_str());
     sprintf(name, "tree_%d_0", FILENAME); // file
     sprintf(cmd, "hi %s guifg=%s", name, gui_colors[YELLOW].data());
-    a.nvim_command(cmd);
+    a.command(cmd);
     sprintf(name, "tree_%d_1", FILENAME); // dir
     sprintf(cmd, "hi %s guifg=%s", name, gui_colors[BLUE].data());
-    a.nvim_command(cmd);
+    a.command(cmd);
 
     sprintf(name, "tree_%d", SIZE);
     sprintf(cmd, "hi %s guifg=%s", name, gui_colors[GREEN].data());
-    a.nvim_command(cmd);
+    a.command(cmd);
 
     sprintf(name, "tree_%d", TIME);
     sprintf(cmd, "hi %s guifg=%s", name, gui_colors[BLUE].data());
-    a.nvim_command(cmd);
+    a.command(cmd);
 
     for (int i = 0; i < 83; ++i) {
         sprintf(name, "tree_%d_%d", ICON, i);
         sprintf(cmd, "hi %s guifg=%s", name, icons[i][1].data());
-        a.nvim_command(cmd);
+        a.command(cmd);
     }
     for (int i = 0; i < 16; ++i) {
         sprintf(name, "tree_%d_%d", MARK, i);
         sprintf(cmd, "hi %s guifg=%s", name, gui_colors[i].data());
-        a.nvim_command(cmd);
+        a.command(cmd);
     }
     for (int i = 0; i < 8; ++i) {
         sprintf(name, "tree_%d_%d", GIT, i);
         sprintf(cmd, "hi %s guifg=%s", name, git_indicators[i][1].data());
-        a.nvim_command(cmd);
+        a.command(cmd);
     }
 }
 
@@ -59,14 +59,14 @@ void App::createTree(string &path)
     static int count = 0;
     auto &b = m_nvim;
 
-    int bufnr = b->nvim_create_buf(false, true);
+    int bufnr = b->create_buf(false, true);
     char name[64];
     sprintf(name, "Tree-%d", count);
     string bufname(name);
-    b->nvim_buf_set_name(bufnr, bufname);
+    b->buf_set_name(bufnr, bufname);
     count++;
 
-    int ns_id = b->nvim_create_namespace("tree_icon");
+    int ns_id = b->create_namespace("tree_icon");
     if (path.back()=='/')  // path("/foo/bar/").parent_path();    // "/foo/bar"
         path.pop_back();
     cout << __FUNCTION__ << " bufnr: " << bufnr << "ns_id: " << ns_id << path << endl;
@@ -87,7 +87,7 @@ void App::createTree(string &path)
         {"toggle", tree.cfg.toggle},
         {"direction", tree.cfg.direction.c_str()},
     };
-    b->nvim_execute_lua("tree.resume(...)", {m_ctx.prev_bufnr, tree_cfg});
+    b->execute_lua("tree.resume(...)", {m_ctx.prev_bufnr, tree_cfg});
 }
 
 void App::handleNvimNotification(const string &method, const vector<nvim::Object> &args)
@@ -207,7 +207,7 @@ void App::handleRequest(nvim::NvimRPC & rpc, uint64_t msgid, const string& metho
                 {"direction", tree.cfg.direction.c_str()}
             };
 
-            b->async_nvim_execute_lua("tree.resume(...)", {bufnrs, tree_cfg});
+            b->async_execute_lua("tree.resume(...)", {bufnrs, tree_cfg});
 
             // TODO: columns 状态更新需要清除不需要的columns
         }

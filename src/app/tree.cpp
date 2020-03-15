@@ -25,12 +25,12 @@ Tree::Tree(int bufnr, int ns_id)
     : bufnr(bufnr), icon_ns_id(ns_id)
 {
 
-    api->nvim_buf_set_option(bufnr, "ft", "tree");
-    api->nvim_buf_set_option(bufnr, "modifiable", false);
+    api->buf_set_option(bufnr, "ft", "tree");
+    api->buf_set_option(bufnr, "modifiable", false);
 
-    api->nvim_command("lua tree = require('tree')");
-    // b->nvim_buf_attach(bufnr, false, {});
-    api->nvim_execute_lua("tree.buf_attach(...)", {bufnr});
+    api->command("lua tree = require('tree')");
+    // b->buf_attach(bufnr, false, {});
+    api->execute_lua("tree.buf_attach(...)", {bufnr});
 }
 
 int countgrid(const std::wstring &s)
@@ -139,7 +139,7 @@ void Tree::changeRoot(const string &root)
     buf_set_lines(0, -1, true, ret);
     string k = (*m_fileitem[0]).p.string();
     // if (cursorHistory.contains(k)) {
-    //     api->nvim_win_set_cursor(0, QPoint{0, cursorHistory[k]});
+    //     api->win_set_cursor(0, QPoint{0, cursorHistory[k]});
     // }
 
     hline(0, m_fileitem.size());
@@ -292,7 +292,7 @@ std::tuple<int, int> Tree::find_range(int l)
 void Tree::hline(int sl, int el)
 {
     int bufnr = this->bufnr;
-    api->async_nvim_buf_clear_namespace(bufnr, icon_ns_id, sl, el);
+    api->async_buf_clear_namespace(bufnr, icon_ns_id, sl, el);
     for (int i = sl;i<el;++i)
     {
         const FileItem &fileitem = *m_fileitem[i];
@@ -303,19 +303,19 @@ void Tree::hline(int sl, int el)
 
             if(col==FILENAME) {
                 sprintf(name, "tree_%u_%u", col, is_directory(fileitem.fi));
-                api->async_nvim_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
+                api->async_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
             } else if(col==ICON || col==GIT || col==MARK) {
                 // :hi tree_<tab>
                 sprintf(name, "tree_%u_%u", col, cell.color);
                 // sprintf(name, "tree_%s", cell.text.data());
                 // cout << icon.col_start<< "->"<<icon.col_end;
                 // cout << icon.text;
-                // auto req_hl = api->nvim_buf_add_highlight(bufnr, 0, "String", 0, 0, 3);
-                // call nvim_buf_add_highlight(0, -1, "Identifier", 0, 5, -1)
-                api->async_nvim_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
+                // auto req_hl = api->buf_add_highlight(bufnr, 0, "String", 0, 0, 3);
+                // call buf_add_highlight(0, -1, "Identifier", 0, 5, -1)
+                api->async_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
             } else if (col==SIZE || col==TIME ){//|| col==INDENT
                 sprintf(name, "tree_%u", col);
-                api->async_nvim_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
+                api->async_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
             }
         }
     }
@@ -530,7 +530,7 @@ void Tree::handleRename(string &input)
         input.pop_back();
     string fn = item.p.string();
     boost::filesystem::rename(item.p, input);
-    api->nvim_execute_lua("tree.print_message(...)", {"Rename Success"});
+    api->execute_lua("tree.print_message(...)", {"Rename Success"});
     item.fi = status(item.p);
     string text(item.p.filename().string());
     if (is_directory(item.p))
@@ -544,13 +544,13 @@ void Tree::handleRename(string &input)
     FileItem &root = *m_fileitem[0];
     changeRoot(root.p.string());
 
-    // api->nvim_execute_lua("tree.print_message(...)", {"Rename failed"});
+    // api->execute_lua("tree.print_message(...)", {"Rename failed"});
 
 }
 void Tree::handleNewFile(const string &input)
 {
     if (input=="") {
-        api->nvim_execute_lua("tree.print_message(...)", {"Canceled"});
+        api->execute_lua("tree.print_message(...)", {"Canceled"});
         return;
     }
     cout << __PRETTY_FUNCTION__ << input;
@@ -566,12 +566,12 @@ void Tree::handleNewFile(const string &input)
     // QFileInfo fi(dest.filePath(input));
     // NOTE: failed when same name file exists
     if (boost::filesystem::exists(dest)) {
-        api->nvim_execute_lua("tree.print_message(...)", {"File already exists!"});
+        api->execute_lua("tree.print_message(...)", {"File already exists!"});
         return;
     }
     else if(input.back() == '/'){
         if(!create_directory(dest))
-            api->nvim_execute_lua("tree.print_message(...)", {"Failed to create dir!"});
+            api->execute_lua("tree.print_message(...)", {"Failed to create dir!"});
     } else {
         boost::filesystem::ofstream(dest.string());
     }
@@ -592,7 +592,7 @@ void Tree::vim_input(string prompt="", string text="", string completion="", str
     cout << __PRETTY_FUNCTION__;
     nvim::Array args = {prompt.c_str(), text.c_str(), completion.c_str()};
     // qDebug() << args;
-    api->async_nvim_call_function("input", args);
+    api->async_call_function("input", args);
     if (handle=="rename")
         ;
 }
@@ -645,7 +645,7 @@ void Tree::action(const string &action, const nvim::Array &args,
         (this->*action_map[action])(args);
     }
     else {
-        api->nvim_call_function("tree#util#print_message", {"Unknown Action: " + action});
+        api->call_function("tree#util#print_message", {"Unknown Action: " + action});
     }
 }
 
@@ -707,7 +707,7 @@ void Tree::open_tree(const nvim::Array &args)
 
         buf_set_lines(s, e, true, {});
         // ref to https://github.com/equalsraf/neovim-qt/issues/596
-        api->async_nvim_win_set_cursor(0, {s, 0});
+        api->async_win_set_cursor(0, {s, 0});
         erase_entrylist(s, e);
 
         FileItem &father = *m_fileitem[parent];
@@ -733,10 +733,10 @@ void Tree::open(const nvim::Array &args)
     }
     else if (args.size()>0 && args[0].as_string()=="vsplit") {
         cout << "vsplit " << p;
-        api->async_nvim_call_function("tree#util#execute_path", {"rightbelow vsplit", p.string()});
+        api->async_call_function("tree#util#execute_path", {"rightbelow vsplit", p.string()});
     }
     else {
-        api->async_nvim_call_function("tree#util#execute_path", {"drop", p.string()});
+        api->async_call_function("tree#util#execute_path", {"drop", p.string()});
     }
 }
 
@@ -753,7 +753,7 @@ void Tree::rename(const nvim::Array &args)
         {"handle", "rename"},
         {"bufnr", bufnr}
     };
-    api->async_nvim_execute_lua("tree.rename(...)", {cfg});
+    api->async_execute_lua("tree.rename(...)", {cfg});
 }
 void Tree::drop(const nvim::Array &args)
 {
@@ -763,7 +763,7 @@ void Tree::drop(const nvim::Array &args)
     if (is_directory(cur.fi))
         changeRoot(p.string());
     else {
-        api->nvim_execute_lua("tree.drop(...)", {args, p.string()});
+        api->execute_lua("tree.drop(...)", {args, p.string()});
     }
 }
 void Tree::cd(const nvim::Array &args)
@@ -783,8 +783,8 @@ void Tree::cd(const nvim::Array &args)
             // if (cur.opened_tree)
             //     dir = cur.fi.absoluteFilePath();
             string cmd = "cd " + dir;
-            api->async_nvim_execute_lua("tree.print_message(...)", {cmd});
-            api->async_nvim_command(cmd);
+            api->async_execute_lua("tree.print_message(...)", {cmd});
+            api->async_command(cmd);
         }
         else {
             changeRoot(dir);
@@ -801,7 +801,7 @@ void Tree::call(const nvim::Array &args)
     Map ctx = {
         {"targets", cur.p.string()}
     };
-    api->async_nvim_call_function(func, {ctx});
+    api->async_call_function(func, {ctx});
 }
 
 void Tree::print(const nvim::Array &args)
@@ -810,7 +810,7 @@ void Tree::print(const nvim::Array &args)
     string msg = cur.p.string();
     string msg2 = "last=" + string(cur.last ? "true" : "false");
     string msg3 = "level=" + std::to_string(cur.level);
-    api->async_nvim_execute_lua("tree.print_message(...)", {msg+" "+msg2+" "+msg3});
+    api->async_execute_lua("tree.print_message(...)", {msg+" "+msg2+" "+msg3});
 }
 void Tree::debug(const nvim::Array &args)
 {
@@ -834,10 +834,10 @@ void Tree::yank_path(const nvim::Array &args)
         reg += i;
         reg += '\n';
     }
-    api->nvim_call_function("setreg", {"\"", reg});
+    api->call_function("setreg", {"\"", reg});
 
     reg.insert(0, "yank_path\n");
-    api->nvim_execute_lua("tree.print_message(...)", {reg});
+    api->execute_lua("tree.print_message(...)", {reg});
 }
 void Tree::redraw(const nvim::Array &args)
 {
@@ -856,7 +856,7 @@ void Tree::new_file(const nvim::Array &args)
         {"handle", "new_file"},
         {"bufnr", bufnr}
     };
-    api->async_nvim_execute_lua("tree.new_file(...)", {cfg});
+    api->async_execute_lua("tree.new_file(...)", {cfg});
 }
 void Tree::_toggle_select(const int pos)
 {
@@ -945,7 +945,7 @@ void Tree::open_or_close_tree_recursively(const nvim::Array &args)
 
         buf_set_lines(s, e, true, {});
         // ref to https://github.com/equalsraf/neovim-qt/issues/596
-        api->async_nvim_win_set_cursor(0, {s, 0});
+        api->async_win_set_cursor(0, {s, 0});
 
         FileItem &father = *m_fileitem[parent];
         father.opened_tree = false;
@@ -971,7 +971,7 @@ void Tree::goto_(const nvim::Array &args)
 
         if (dest=="parent") {
             int p = find_parent(l);
-            api->async_nvim_win_set_cursor(0, {p+1, 0});
+            api->async_win_set_cursor(0, {p+1, 0});
         }
     }
     else {
@@ -981,7 +981,7 @@ void Tree::execute_system(const nvim::Array &args)
 {
     FileItem &cur = *m_fileitem[ctx.cursor - 1];
     string info = cur.p.string();
-    api->nvim_call_function("tree#util#open", {info});
+    api->call_function("tree#util#open", {info});
 }
 void Tree::toggle_ignored_files(const nvim::Array &args)
 {

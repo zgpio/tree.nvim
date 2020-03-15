@@ -67,6 +67,7 @@ def main():
         #     print('This is ui function: ' + f['name'])
         #     continue
         d['name'] = f['name']
+        d['short_name'] = f['name'][5:] if f['name'].startswith('nvim_') else f['name']
 
         try:
             d['return'] = convert_type_to_native(f['return_type'], False)

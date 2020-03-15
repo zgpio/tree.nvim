@@ -27,6 +27,7 @@ sudo apt-get install libboost-all-dev
 
 sudo add-apt-repository ppa:mhier/libboost-latest
 sudo apt install libboost1.70-dev
+# https://www.osetc.com/en/how-to-install-boost-on-ubuntu-16-04-18-04-linux.html
 ```
 
 # 尝试实现异步接受rpc请求/通知
