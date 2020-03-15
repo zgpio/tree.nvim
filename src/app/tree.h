@@ -38,10 +38,12 @@ public:
     void changeRoot(const string &path);
     void action(const string &action, const nvim::Array &args, const Map &context);
 
+    void remove();
     void new_file(const nvim::Array &args);
     void redraw(const nvim::Array &args);
     void redraw_recursively(int l);
     void yank_path(const nvim::Array &args);
+    void pre_remove(const nvim::Array &args);
     void print(const nvim::Array &args);
     void debug(const nvim::Array &args);
     void open_tree(const nvim::Array &args);

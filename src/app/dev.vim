@@ -63,7 +63,7 @@ nnoremap <silent> <Space>xdf :Tree -new -split=vertical -winwidth=20
 
 lua << EOF
 local tree = require 'tree'
-tree.custom_option('_', {root_marker='', })
+tree.custom_option('_', {root_marker='[in]:', })
 tree.custom_column('filename', {
   root_marker_highlight='Ignore',
   max_width=1000,
@@ -129,6 +129,7 @@ func! s:set_tree() abort
   nnoremap <silent><buffer><expr> gk tree#action('goto', 'parent')
   nnoremap <silent><buffer><expr> l tree#action('open')
   nnoremap <silent><buffer><expr> yy tree#action('yank_path')
+  nnoremap <silent><buffer><expr> D tree#action('debug')
 
   " Default key mapping should not affect efficiency
   "nnoremap <silent><buffer><expr> j line('.') == line('$') ? 'gg' : 'j'

@@ -92,7 +92,7 @@ void App::createTree(string &path)
 
 void App::handleNvimNotification(const string &method, const vector<nvim::Object> &args)
 {
-    cout << __FUNCTION__ << ":" << method;
+    cout << __FUNCTION__ << ":" << method << endl;
 
     if(method=="_tree_async_action" && args.size() > 0) {
         // _tree_async_action [action: string, args: vector, context: multimap]
@@ -139,11 +139,11 @@ void App::handleNvimNotification(const string &method, const vector<nvim::Object
             trees[bufnr]->handleRename(input);
         }
         else if (fn == "remove") {
-            // QList<QVariant> fargs = vl.at(1).toList();
-            // int buf = fargs[0].toInt();
-            // int choice = fargs[1].toInt();
-            // qDebug() << fargs;
-            // trees[buf]->remove();
+            vector<nvim::Object> fargs = args.at(1).as_vector();
+            int buf = fargs[0].as_uint64_t();
+            int choice = fargs[1].as_uint64_t();
+            // cout << fargs;
+            trees[buf]->remove();
         }
         else if (fn == "on_detach") {
             const int buf = args.at(1).as_uint64_t();

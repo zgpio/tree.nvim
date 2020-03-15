@@ -73,6 +73,7 @@ sudo apt install libboost1.70-dev
     auto it = std::next(col_map[col].begin(), pos);
     ```
 * NOTE
+    * 对于Nvim类, 其method没有必要使用前缀`nvim_`
     * 理解UTF-8与Unicode
     ```cpp
     string s = "中国"; // (与源文件编码(UTF-8)一致?) byte array

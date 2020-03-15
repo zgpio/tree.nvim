@@ -617,7 +617,7 @@ std::unordered_map<string, Action> action_map {
     // {"copy"                 , &Tree::copy},
     // {"move"                 , &Tree::move},
     // {"paste"                , &Tree::pre_paste},
-    // {"remove"               , &Tree::pre_remove},
+    {"remove"               , &Tree::pre_remove},
     {"yank_path"            , &Tree::yank_path},
     {"toggle_select"        , &Tree::toggle_select},
     {"toggle_select_all"    , &Tree::toggle_select_all},
@@ -663,7 +663,7 @@ void Tree::open_tree(const nvim::Array &args)
 
         cur.opened_tree = true;
         const string & rootPath = cur.p.string();
-        expandStore.insert({rootPath, true});
+        expandStore[rootPath] = true;
         redraw_line(l, l + 1);
         vector<FileItem*> child_fileitem;
         entryInfoListRecursively(cur, child_fileitem);
@@ -742,7 +742,7 @@ void Tree::open(const nvim::Array &args)
 
 void Tree::rename(const nvim::Array &args)
 {
-    // qDebug() << action << args;
+    // cout << action << args;
     FileItem &cur = *m_fileitem[ctx.cursor - 1];
     string info = cur.p.string();
     // NOTE: specify handle for vim_input
@@ -759,7 +759,7 @@ void Tree::drop(const nvim::Array &args)
 {
     FileItem &cur = *m_fileitem[ctx.cursor - 1];
     const auto p = cur.p;
-    // qDebug()<<args;
+    // cout<<args;
     if (is_directory(cur.fi))
         changeRoot(p.string());
     else {
@@ -818,6 +818,9 @@ void Tree::debug(const nvim::Array &args)
         cout << i << ":";
     }
     cout << endl;
+    for (auto i : expandStore) {
+        cout << i.first << ":" << i.second << endl;
+    }
 }
 void Tree::yank_path(const nvim::Array &args)
 {
@@ -838,6 +841,34 @@ void Tree::yank_path(const nvim::Array &args)
 
     reg.insert(0, "yank_path\n");
     api->execute_lua("tree.print_message(...)", {reg});
+}
+void Tree::pre_remove(const nvim::Array &args)
+{
+    int cnt = targets.size();
+    Map farg;
+    farg.insert({"cnt", cnt==0 ? 1:cnt});
+    api->async_execute_lua("tree.pre_remove(...)", {bufnr, farg});
+}
+void Tree::remove()
+{
+    // TODO: remove 之后光标位置
+    vector<string> rmfiles;
+    for (const int &pos : targets) {
+        rmfiles.push_back(m_fileitem[pos]->p.string());
+    }
+    if (rmfiles.size()==0) {
+        FileItem &cur = *m_fileitem[ctx.cursor - 1];
+        rmfiles.push_back(cur.p.string());
+    }
+    for (const string &f : rmfiles) {
+        cout << f << endl;
+        if (is_directory(f))
+            boost::filesystem::remove_all(f);
+        else
+            boost::filesystem::remove(f);
+    }
+    FileItem &root = *m_fileitem[0];
+    changeRoot(root.p.string());
 }
 void Tree::redraw(const nvim::Array &args)
 {
