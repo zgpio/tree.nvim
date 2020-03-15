@@ -558,11 +558,10 @@ void Tree::handleNewFile(const string &input)
     // Cell & cur = col_map["filename"][ctx.cursor-1];
     FileItem & item = *m_fileitem[ctx.cursor-1];
 
-    // fileitem.fi.absolutePath() -> QString
-    path dest = item.opened_tree ? item.p.parent_path() : item.p.parent_path();
+    path dest = item.opened_tree ? item.p : item.p.parent_path();
 
     dest += path::preferred_separator + input;
-    std::cout << dest << std::endl;
+    cout << dest << endl;
     // QFileInfo fi(dest.filePath(input));
     // NOTE: failed when same name file exists
     if (boost::filesystem::exists(dest)) {
@@ -591,10 +590,8 @@ void Tree::vim_input(string prompt="", string text="", string completion="", str
 {
     cout << __PRETTY_FUNCTION__;
     nvim::Array args = {prompt.c_str(), text.c_str(), completion.c_str()};
-    // qDebug() << args;
+    // cout << args;
     api->async_call_function("input", args);
-    if (handle=="rename")
-        ;
 }
 /// 收集无序targets
 /// 视图变化之后 targets 要更新
@@ -608,15 +605,49 @@ void Tree::collect_targets()
         }
     }
 }
+void Tree::paste(const int ln, const string &src, const string &dest)
+{
+    if (is_directory(src)) {
+        if (paste_mode == COPY) {
+            copy(src, dest);
+            api->async_execute_lua("tree.print_message(...)", {"Copyed"});
+            cout<<"Copy Paste dir"<<endl;
+            int pidx = find_parent(ln);
+            redraw_recursively(pidx);
+        }
+        else if (paste_mode == MOVE){
+            boost::filesystem::rename(src, dest);
+            cout<<"Move Paste dir"<<endl;
+            FileItem &root = *m_fileitem[0];
+            changeRoot(root.p.string());
+        }
+    }
+    else {
+        if (paste_mode == COPY) {
+            copy(src, dest);
+            api->async_execute_lua("tree.print_message(...)", {"Copyed"});
+            cout<<"Copy Paste"<<endl;
+            int pidx = find_parent(ln);
+            redraw_recursively(pidx);
+        }
+        else if (paste_mode == MOVE){
+            boost::filesystem::rename(src, dest);
+            cout<<"Move Paste"<<endl;
+            FileItem &root = *m_fileitem[0];
+            changeRoot(root.p.string());
+        }
+    }
+    return;
+}
 typedef void (Tree::*Action)(const nvim::Array& args);
 std::unordered_map<string, Action> action_map {
     {"cd"                   , &Tree::cd},
     {"goto"                 , &Tree::goto_},
     {"open_or_close_tree"   , &Tree::open_tree},
     {"open"                 , &Tree::open},
-    // {"copy"                 , &Tree::copy},
+    {"copy"                 , &Tree::copy_},
     // {"move"                 , &Tree::move},
-    // {"paste"                , &Tree::pre_paste},
+    {"paste"                , &Tree::pre_paste},
     {"remove"               , &Tree::pre_remove},
     {"yank_path"            , &Tree::yank_path},
     {"toggle_select"        , &Tree::toggle_select},
@@ -812,6 +843,44 @@ void Tree::print(const nvim::Array &args)
     string msg3 = "level=" + std::to_string(cur.level);
     api->async_execute_lua("tree.print_message(...)", {msg+" "+msg2+" "+msg3});
 }
+void Tree::pre_paste(const nvim::Array &args)
+{
+    // TODO: 批量paste
+    if (clipboard.size() <= 0) {
+        api->async_execute_lua("tree.print_message(...)", {"Nothing in clipboard"});
+        return;
+    }
+    for (const string &f : clipboard) {
+        FileItem &cur = *m_fileitem[ctx.cursor - 1];
+        string fname = path(f).filename().string();
+        path curdir = cur.p.parent_path();
+        if (cur.opened_tree) curdir = cur.p.string();
+        string destfile = curdir.string() + path::preferred_separator + fname;
+        cout << "destfile:" << destfile << endl;
+        cout << "fname:" << fname << endl;
+        if (exists(destfile)) {
+            // api->async_execute_lua("tree.print_message(...)", {"Destination file exists"});
+
+            Map dest {
+                {"mtime", last_write_time(destfile)},
+                {"path", destfile},
+                {"size", file_size(destfile)},
+            };
+
+            Map src {
+                {"mtime", last_write_time(f)},
+                {"path", f},
+                {"size", file_size(f)},
+            };
+            api->async_execute_lua("tree.pre_paste(...)",
+                {nvim::Array{bufnr, ctx.cursor - 1}, dest, src});
+        }
+        else {
+            paste(ctx.cursor-1, f, destfile);
+        }
+    }
+}
+
 void Tree::debug(const nvim::Array &args)
 {
     for (auto i : cfg.columns) {
@@ -879,7 +948,6 @@ void Tree::new_file(const nvim::Array &args)
 {
     FileItem &cur = *m_fileitem[ctx.cursor - 1];
     string info = cur.p.string();
-    // vim_input("New File: " + info + "/", "", "file", "new_file");
     nvim::Dictionary cfg{
         {"prompt", "New File: " + info + "/"},
         {"text", ""},
@@ -919,6 +987,30 @@ void Tree::toggle_select_all(const nvim::Array &args)
     for (int i=1;i<m_fileitem.size();++i) {
         _toggle_select(i);
     }
+}
+void Tree::_copy_or_move(const nvim::Array &args)
+{
+    Tree::clipboard.clear();
+
+    for (const int &pos : targets) {
+        const FileItem *p = m_fileitem[pos]->parent;
+        // NOTE: root item or parent selected
+        if (p==nullptr || !p->selected)
+            Tree::clipboard.push_back(m_fileitem[pos]->p.string()) ;
+    }
+    if (clipboard.size()==0) {
+        FileItem &cur = *m_fileitem[ctx.cursor - 1];
+        Tree::clipboard.push_back(cur.p.string());
+    }
+    for (auto i:clipboard)
+        cout << i << endl;
+}
+
+void Tree::copy_(const nvim::Array &args)
+{
+    paste_mode = COPY;
+    _copy_or_move(args);
+    api->async_execute_lua("tree.print_message(...)", {"Copy to clipboard"});
 }
 void Tree::open_or_close_tree_recursively(const nvim::Array &args)
 {

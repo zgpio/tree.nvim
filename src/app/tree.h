@@ -51,12 +51,16 @@ public:
     void open(const nvim::Array &args);
     void drop(const nvim::Array &args);
     void call(const nvim::Array &args);
+    void copy_(const nvim::Array &args);
+    void _copy_or_move(const nvim::Array &args);
     void rename(const nvim::Array &args);
     void vim_input(string prompt, string text, string completion, string handle);
     void expandRecursively(const FileItem &item, vector<FileItem*> &fileitem_lst);
     void cd(const nvim::Array &args);
     void goto_(const nvim::Array &args);
     void toggle_ignored_files(const nvim::Array &args);
+    void paste(const int ln, const string &src, const string &dest);
+    void pre_paste(const nvim::Array &args);
 
     inline void buf_set_lines(int s, int e, bool strict, const vector<string> &replacement)
     {

@@ -117,14 +117,14 @@ void App::handleNvimNotification(const string &method, const vector<nvim::Object
     else if (method=="function") {
         string fn = args.at(0).as_string();
         if (fn == "paste") {
-            // QList<QVariant> fargs = vl.at(1).toList();
-            // QList<QVariant> pos = fargs[0].toList();
-            // QString src = fargs[1].toString();
-            // QString dest = fargs[2].toString();
-            // int buf = pos[0].toInt();
-            // int line = pos[1].toInt();
-            // qDebug()<<fargs;
-            // trees[buf]->paste(line, src, dest);
+            vector<nvim::Object> fargs = args.at(1).as_vector();
+            vector<nvim::Object> pos = fargs[0].as_vector();
+            string src = fargs[1].as_string();
+            string dest = fargs[2].as_string();
+            int buf = pos[0].as_uint64_t();
+            int line = pos[1].as_uint64_t();
+            // cout<<fargs;
+            trees[buf]->paste(line, src, dest);
         }
         else if (fn == "new_file") {
             vector<nvim::Object> fargs = args.at(1).as_vector();
