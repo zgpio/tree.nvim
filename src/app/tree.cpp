@@ -753,6 +753,18 @@ void Tree::open_tree(const nvim::Array &args)
     return;
 }
 
+Map Tree::get_candidate(const int pos)
+{
+    // 'word': 'column.cpp',
+    FileItem & item = *m_fileitem[pos];
+    return {
+        {"is_directory", is_directory(item.p)},
+        {"action__path", item.p.string()},
+        {"level", item.level},
+        {"is_opened_tree", item.opened_tree},
+        {"is_selected", item.selected}
+    };
+}
 void Tree::open(const nvim::Array &args)
 {
     //save_cursor();

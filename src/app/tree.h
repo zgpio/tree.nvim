@@ -40,6 +40,7 @@ public:
 
     void remove();
     void move(const nvim::Array &args);
+    Map get_candidate(const int pos);
     void new_file(const nvim::Array &args);
     void redraw(const nvim::Array &args);
     void redraw_recursively(int l);

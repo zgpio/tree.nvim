@@ -166,16 +166,15 @@ void App::handleNvimNotification(const string &method, const vector<nvim::Object
 void App::handleRequest(nvim::NvimRPC & rpc, uint64_t msgid, const string& method,
         const vector<nvim::Object> &args)
 {
-    cout << __FUNCTION__ << method << endl;
-
-    auto method_args = args[0].as_vector();
-    auto context = args[1].as_multimap();
+    cout << __FUNCTION__ << ":" << method << " args.size:" << args.size() << endl;
 
     if(method=="_tree_start" && args.size() > 0)
     {
         // _tree_start [paths: List, context: Dictionary]
-        string path = method_args[0].as_string();
-        m_cfgmap = context;
+        auto paths = args[0].as_vector();
+        // TODO: 支持path列表(多个path源)
+        string path = paths[0].as_string();
+        m_cfgmap = args[1].as_multimap();
         auto *b = m_nvim;
 
         auto search = m_cfgmap.find("new");
@@ -214,6 +213,12 @@ void App::handleRequest(nvim::NvimRPC & rpc, uint64_t msgid, const string& metho
         }
 
         rpc.send_response(msgid, {}, {});
+    } else if(method=="_tree_get_candidate") {
+        Map context = args[0].as_multimap();
+        Tree & tree = *trees[m_ctx.prev_bufnr];
+        auto search = context.find("cursor");
+        auto rv = tree.get_candidate(search->second.as_uint64_t()-1);
+        rpc.send_response(msgid, {}, rv);
     } else {
         // be sure to return early or this message will be sent
         rpc.send_response(msgid, {"Unknown method"}, {});
