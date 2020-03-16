@@ -293,22 +293,22 @@ void FileItem::update_gmap(string p)
     string cmd1 = "git -C " + p + " rev-parse --show-toplevel";
     child c(cmd1, std_out > pipe_stream);
 
-    std::string line;
+    string line;
 
     if (pipe_stream && std::getline(pipe_stream, line) && !line.empty())
-        std::cerr << line << std::endl;
+        cerr << line << endl;
     if (line=="")
         return;
     string topdir(line+boost::filesystem::path::preferred_separator);
-    std::cout << __FUNCTION__ << " top dir: " << topdir << std::endl;
+    cout << __FUNCTION__ << " top dir: " << topdir << endl;
 
     ipstream pipe_stream2;
     string cmd2 = "git -C " + p + " status --porcelain -u";
-    std::cerr << cmd2 << std::endl;
+    cerr << cmd2 << endl;
     child c2(cmd2, std_out > pipe_stream2);
     vector<string> lines;
     while (pipe_stream2 && std::getline(pipe_stream2, line) && !line.empty()) {
-        std::cerr << line << std::endl;
+        cerr << line << endl;
         lines.push_back(line);
     }
     c.wait();
@@ -328,40 +328,11 @@ void FileItem::update_gmap(string p)
         }
         else {
             string key = topdir + line.substr(3);
-            std::cout << key << std::endl;
+            cout << key << endl;
             FileItem::git_map[key] = status;
         }
     }
-    std::cout << "-----------------------------------" << std::endl;
-    /////////////////////////////
-
-    // QStringList lst = res.split("\n");
-    // // qDebug().noquote()<<lst;
-    // QDir top_dir(topdir);
-    // for (int i = 0; i < lst.size(); ++i) {
-    //     QString & line = lst[i];
-    //     if (line.size()<4) continue;
-    //
-    //     QChar X=line[0], Y=line[1];
-    //     // QStringRef line(&lst[i], 3, line.length() - 3);
-    //     QString remain = line.mid(3);
-    //     QStringList LR = remain.split(" -> ");
-    //     // TODO: how to reverse escape
-    //     // qDebug()<<"LR"<<LR;
-    //
-    //     git_status status = get_indicator_name(X, Y);
-    //     // TODO: Check compatible in Windows
-    //     QString key = top_dir.filePath(status == Renamed ? LR[1] : LR[0]);
-    //     QDir keyDir(key);
-    //     while (keyDir!=top_dir) {
-    //         FileItem::git_map[keyDir.absolutePath()] = status;
-    //         keyDir.cdUp();
-    //     }
-    // }
-    // foreach (const QString &name, git_map.keys())
-    //     qDebug().noquote() << name << ":" << git_map.value(name);
-    //
-    // proc.close();
+    cout << "-----------------------------------" << endl;
 }
 
 Context::Context(const Map &ctx)
@@ -406,7 +377,7 @@ void Config::update(const Map &ctx)
     for (auto i : ctx) {
         auto k = i.first.as_string();
         auto &v = i.second;
-        // std::cout << __FUNCTION__ << k << " type: "<< type_name(v)<< std::endl;
+        // cout << __FUNCTION__ << k << " type: "<< type_name(v)<< endl;
         if (k == "auto_recursive_level") {
             auto_recursive_level = v.as_int64_t();
         }
