@@ -6,10 +6,13 @@ namespace nvim {
 
 void Nvim::connect_tcp(const std::string &host,
         const std::string &service, double timeout_sec) {
-
     client_.connect_tcp(host, service, timeout_sec);
 }
 
+void Nvim::connect_pipe(const std::string &name,
+        double timeout_sec) {
+    client_.connect_pipe(name, timeout_sec);
+}
 
 
 Integer Nvim::buf_line_count(Buffer buffer) {

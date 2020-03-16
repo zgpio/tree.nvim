@@ -40,6 +40,10 @@ public:
         socket_.connect_tcp(host, service, timeout_sec);
     }
 
+    void connect_pipe(const std::string &name, double timeout_sec) {
+        socket_.connect_pipe(name, timeout_sec);
+    }
+
     template<typename T, typename...U>
     void call(const std::string &method, T& res, const U&...u);
 

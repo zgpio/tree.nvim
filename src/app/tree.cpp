@@ -890,6 +890,9 @@ void Tree::debug(const nvim::Array &args)
     for (auto i : expandStore) {
         cout << i.first << ":" << i.second << endl;
     }
+    for (auto i : FileItem::git_map) {
+        cout << i.first << ":" << i.second << endl;
+    }
 }
 void Tree::yank_path(const nvim::Array &args)
 {

@@ -11,6 +11,8 @@ class Nvim {
 public:
     void connect_tcp(const std::string &host,
             const std::string &service, double timeout_sec = 1.0);
+    void connect_pipe(const std::string &name,
+            double timeout_sec = 1.0);
 
 {% for func in functions %}
     {{func.return}} {{func.short_name}}({% for arg in func.args %}{{arg.type}} {{arg.name}}{% if not loop.last %}, {% endif %}{% endfor %});

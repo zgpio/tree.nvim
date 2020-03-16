@@ -6,6 +6,7 @@
 #include <boost/asio/read.hpp>
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/local/stream_protocol.hpp>
 
 #define BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
 
@@ -45,6 +46,11 @@ void Socket::connect_tcp(const std::string& host,
         ec ? ec : boost::asio::error::host_not_found);
 }
 
+void Socket::connect_pipe(const std::string& name, double timeout_sec)
+{
+    boost::asio::local::stream_protocol::endpoint ep(name);
+    socket_.connect(ep);
+}
 size_t Socket::read(char *rbuf, size_t capacity, double timeout_sec) {
     deadline_.expires_from_now(boost::posix_time::seconds(long(timeout_sec)));
     boost::system::error_code ec = boost::asio::error::would_block;

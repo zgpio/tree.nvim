@@ -29,6 +29,7 @@ public:
 
     void connect_tcp(const std::string& host, 
                const std::string& service, double timeout_sec);
+    void connect_pipe(const std::string& name, double timeout_sec);
 
     size_t read(char *rbuf, size_t capacity, double timeout_sec);
     msgpack::unpacked read2(double timeout_sec);

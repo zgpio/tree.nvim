@@ -11,6 +11,8 @@ class Nvim {
 public:
     void connect_tcp(const std::string &host,
             const std::string &service, double timeout_sec = 1.0);
+    void connect_pipe(const std::string &name,
+            double timeout_sec = 1.0);
 
 
     Integer buf_line_count(Buffer buffer);
