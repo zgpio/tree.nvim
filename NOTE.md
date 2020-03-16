@@ -29,6 +29,16 @@ sudo add-apt-repository ppa:mhier/libboost-latest
 sudo apt install libboost1.70-dev
 # https://www.osetc.com/en/how-to-install-boost-on-ubuntu-16-04-18-04-linux.html
 ```
+# Test
+```vim
+" config.vim
+set rtp+=~/project/nvim.cpp/src/app/viml
+so ~/project/nvim.cpp/src/app/dev.vim
+```
+```sh
+nvim -u config.vim --listen 127.0.0.1:6666
+nvim -u config.vim --listen /tmp/xxxxxxxxx
+```
 
 # 尝试实现异步接受rpc请求/通知
 * [Boost异步套接字client](https://www.boost.org/doc/libs/1_45_0/doc/html/boost_asio/example/timeouts/async_tcp_client.cpp)
@@ -47,13 +57,6 @@ sudo apt install libboost1.70-dev
     ```
 * initial_buffer_size=25 时unpack得到的消息可能出现错误, 设置为17不会, 设置得这么小是为了验证reserve buffer正确工作.
 * [msgpack controls a buffer](https://github.com/msgpack/msgpack-c/wiki/v2_0_cpp_unpacker)
-* try
-    ```cpp
-    try {
-    }catch(std::exception& e) {
-        std::cout << e.what() << std::endl;
-    }
-    ```
 * 验证消息传递
     ```vim
     while 1
@@ -73,9 +76,9 @@ sudo apt install libboost1.70-dev
     // std::advance 和 std::next
     auto it = std::next(col_map[col].begin(), pos);
     ```
-* NOTE
-    * 对于Nvim类, 其method没有必要使用前缀`nvim_`
-    * 理解UTF-8与Unicode
+# NOTE
+* 对于Nvim类, 其method没有必要使用前缀`nvim_`
+* 理解UTF-8与Unicode
     ```cpp
     string s = "中国"; // (与源文件编码(UTF-8)一致?) byte array
     cout << s.at(0) << s.at(1) << s.at(2) << endl; // 中
@@ -87,10 +90,10 @@ sudo apt install libboost1.70-dev
     cout << wcwidth(L'中') << endl; // 2; 如果不设置locale, 输出-1.
     cout << "sizeof(wchar_t): "<< sizeof(wchar_t) << endl; // 4
     ```
-    * boost::filesystem::path 支持 cout
-    * [STL map, hash_map, unordered_map区别](https://blog.csdn.net/haluoluo211/article/details/80877558)
-    * `__PRETTY_FUNCTION__` 不是标准预定义宏(Predefined Macros)
-    * :h api-types
-    * 去掉nullptr_t导致变参模板无法区分, 例如:
-        `void NvimRPC::call(const std::string &method, Object& res, const U& ...u) ` 与
-        `void NvimRPC::call(const std::string &method, nullptr_t res, const U&...u)`
+* boost::filesystem::path 支持 cout
+* [STL map, hash_map, unordered_map区别](https://blog.csdn.net/haluoluo211/article/details/80877558)
+* `__PRETTY_FUNCTION__` 不是标准预定义宏(Predefined Macros)
+* :h api-types
+* 去掉nullptr_t导致变参模板无法区分, 例如:
+    `void NvimRPC::call(const std::string &method, Object& res, const U& ...u) ` 与
+    `void NvimRPC::call(const std::string &method, nullptr_t res, const U&...u)`
