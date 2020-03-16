@@ -324,7 +324,7 @@ void Tree::hline(int sl, int el)
 /// 0-based [sl, el).
 void Tree::redraw_line(int sl, int el)
 {
-    char format[] = "%s (1-based): [%d, %d]";
+    char format[] = "%s (1-based): [%d, %d]\n";
     printf(format, __PRETTY_FUNCTION__, sl+1, el);
 
     vector<string> ret;
@@ -390,7 +390,7 @@ void Tree::redraw_recursively(int l)
     erase_entrylist(s, e);
 
     vector<FileItem*> child_fileitem;
-    // const QString &p = cur.fi.absoluteFilePath();
+    // const string &p = cur.p.string();
     entryInfoListRecursively(cur, child_fileitem);
     int file_count = child_fileitem.size();
     for (int i = 0; i < file_count; ++i)
@@ -522,7 +522,7 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
 
 void Tree::handleRename(string &input)
 {
-    cout << __PRETTY_FUNCTION__;
+    cout << __PRETTY_FUNCTION__ << endl;
 
     Cell & cur = col_map[FILENAME][ctx.cursor-1];
     FileItem & item = *m_fileitem[ctx.cursor-1];
@@ -721,7 +721,7 @@ void Tree::open_tree(const nvim::Array &args)
         std::tuple<int, int> se = find_range(l);
         int s = std::get<0>(se) + 1;
         int e = std::get<1>(se) + 1;
-        printf("\tclose range(1-based): [%d, %d]", s+1, e);
+        printf("\tclose range(1-based): [%d, %d]\n", s+1, e);
         buf_set_lines(s, e, true, {});
 
         erase_entrylist(s, e);
@@ -734,7 +734,7 @@ void Tree::open_tree(const nvim::Array &args)
         int s = std::get<0>(se) + 1;
         int e = std::get<1>(se) + 1;
 
-        printf("\tclose range(1-based): [%d, %d]", s+1, e);
+        printf("\tclose range(1-based): [%d, %d]\n", s+1, e);
 
         buf_set_lines(s, e, true, {});
         // ref to https://github.com/equalsraf/neovim-qt/issues/596
@@ -1056,7 +1056,7 @@ void Tree::open_or_close_tree_recursively(const nvim::Array &args)
         std::tuple<int, int> se = find_range(l);
         int s = std::get<0>(se) + 1;
         int e = std::get<1>(se) + 1;
-        printf("\tclose range(1-based): [%d, %d]", s+1, e);
+        printf("\tclose range(1-based): [%d, %d]\n", s+1, e);
         buf_set_lines(s, e, true, {});
         shrinkRecursively(p);
         erase_entrylist(s, e);
@@ -1070,7 +1070,7 @@ void Tree::open_or_close_tree_recursively(const nvim::Array &args)
         int s = std::get<0>(se) + 1;
         int e = std::get<1>(se) + 1;
 
-        printf("\tclose range(1-based): [%d, %d]", s+1, e);
+        printf("\tclose range(1-based): [%d, %d]\n", s+1, e);
 
         buf_set_lines(s, e, true, {});
         // ref to https://github.com/equalsraf/neovim-qt/issues/596

@@ -69,7 +69,7 @@ void App::createTree(string &path)
     int ns_id = b->create_namespace("tree_icon");
     if (path.back()=='/')  // path("/foo/bar/").parent_path();    // "/foo/bar"
         path.pop_back();
-    cout << __FUNCTION__ << " bufnr: " << bufnr << "ns_id: " << ns_id << path << endl;
+    cout << __FUNCTION__ << " bufnr:" << bufnr << " ns_id:" << ns_id << " path:" << path << endl;
 
     Tree &tree = *(new Tree(bufnr, ns_id));
     trees.insert({bufnr, &tree});
@@ -100,8 +100,9 @@ void App::handleNvimNotification(const string &method, const vector<nvim::Object
         vector<nvim::Object> act_args = args.at(1).as_vector();
         auto context = args.at(2).as_multimap();
         for (auto i : args[2].as_multimap()) {
-            std::cout << i.first.as_string() << std::endl;
+            cout << i.first.as_string() << ':';
         }
+        cout << endl;
 
         // cout << "\t" << "action:" << action << "args:" << act_args;
         // cout << "context:" << context;
@@ -154,9 +155,9 @@ void App::handleNvimNotification(const string &method, const vector<nvim::Object
                 // TODO: 修改tree_buf
                 printf("\tAfter remove %d, trees:", buf);
                 for (auto i:trees) {
-                    std::cout << i.first << ",";
+                    cout << i.first << ",";
                 }
-                std::cout << std::endl;
+                cout << endl;
             }
         }
     }
