@@ -585,14 +585,7 @@ void Tree::handleNewFile(const string &input)
         redraw_recursively(pidx);
     }
 }
-// XXX: It override the builtin 'input()' function.
-void Tree::vim_input(string prompt="", string text="", string completion="", string handle="")
-{
-    cout << __PRETTY_FUNCTION__;
-    nvim::Array args = {prompt.c_str(), text.c_str(), completion.c_str()};
-    // cout << args;
-    api->async_call_function("input", args);
-}
+
 /// 收集无序targets
 /// 视图变化之后 targets 要更新
 void Tree::collect_targets()
@@ -788,7 +781,6 @@ void Tree::rename(const nvim::Array &args)
     // cout << action << args;
     FileItem &cur = *m_fileitem[ctx.cursor - 1];
     string info = cur.p.string();
-    // NOTE: specify handle for vim_input
     nvim::Dictionary cfg{
         {"prompt", "Rename: " + info + " -> "},
         {"text", info},
@@ -798,6 +790,7 @@ void Tree::rename(const nvim::Array &args)
     };
     api->async_execute_lua("tree.rename(...)", {cfg});
 }
+
 void Tree::drop(const nvim::Array &args)
 {
     FileItem &cur = *m_fileitem[ctx.cursor - 1];
