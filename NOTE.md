@@ -35,6 +35,7 @@ sudo apt install libboost1.70-dev
 * pynvim 的test中有广播的测试, broadcast needs `nvim_subscribe`
 
 # 问题
+* libc++abi.dylib: terminating with uncaught exception of type boost::filesystem::filesystem_error: boost::filesystem::directory_iterator::construct: Permission denied: "/etc/cups/certs"
 * initial_buffer_size=25*1024ul 时读取nvim_get_api_info()的结果时崩溃
     ```cpp
     msgpack::unpacker unpacker(
