@@ -113,6 +113,8 @@ public:
     bool new_ = false;
     bool toggle = false;
 
+    int filename_colstop = 40;
+    string time_format = "%d.%M.%Y";
     // targets: typing.List[typing.Dict[str, typing.Any]] = []
 };
 

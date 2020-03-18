@@ -79,6 +79,7 @@ void App::createTree(string &path)
     m_ctx.prev_bufnr = bufnr;
     tree.changeRoot(path);
 
+    b->async_buf_set_option(bufnr, "buflisted", tree.cfg.listed);
     nvim::Dictionary tree_cfg{
         {"winwidth", tree.cfg.winwidth},
         {"winheight", tree.cfg.winheight},
@@ -86,6 +87,8 @@ void App::createTree(string &path)
         {"new", tree.cfg.new_},
         {"toggle", tree.cfg.toggle},
         {"direction", tree.cfg.direction.c_str()},
+        {"winrow", tree.cfg.winrow},
+        {"wincol", tree.cfg.wincol},
     };
     b->execute_lua("tree.resume(...)", {m_ctx.prev_bufnr, tree_cfg});
 }
@@ -204,7 +207,9 @@ void App::handleRequest(nvim::NvimRPC & rpc, uint64_t msgid, const string& metho
                 {"split", tree.cfg.split.c_str()},
                 {"new", tree.cfg.new_},
                 {"toggle", tree.cfg.toggle},
-                {"direction", tree.cfg.direction.c_str()}
+                {"direction", tree.cfg.direction.c_str()},
+                {"winrow", tree.cfg.winrow},
+                {"wincol", tree.cfg.wincol},
             };
 
             b->async_execute_lua("tree.resume(...)", {bufnrs, tree_cfg});

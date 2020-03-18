@@ -162,7 +162,7 @@ Cell::Cell(const Config &cfg, const FileItem& fileitem, const int type)
         try {
             std::time_t t = boost::filesystem::last_write_time(fileitem.p);;
             char mbstr[64];
-            if (std::strftime(mbstr, sizeof(mbstr), "%d.%M.%Y", std::localtime(&t))) {
+            if (std::strftime(mbstr, sizeof(mbstr), cfg.time_format.c_str(), std::localtime(&t))) {
                 text = mbstr;
             }
         } catch(std::exception& e) {
@@ -460,6 +460,29 @@ void Config::update(const Map &ctx)
                 cnt ++;
             }
             margin = e - s - 1;
+        }
+        else if (k == "custom") {
+            auto custom = v.as_multimap();
+            auto got = custom.find("column");
+            if (got != custom.end()) {
+                auto column = got->second.as_multimap();
+                for (auto c : column) {
+                    auto name = c.first.as_string();
+                    auto opts = c.second.as_multimap();
+                    if (name=="filename") {
+                        auto got = opts.find("max_width");
+                        if (got != opts.end()) {
+                            filename_colstop = got->second.as_uint64_t();
+                        }
+                    }
+                    else if (name=="time") {
+                        auto got = opts.find("format");
+                        if (got != opts.end()) {
+                            time_format = got->second.as_string();
+                        }
+                    }
+                }
+            }
         }
         else{
             cout<<"Unsupported member: "<<k<<endl;

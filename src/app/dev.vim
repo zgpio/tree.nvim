@@ -66,8 +66,15 @@ local tree = require 'tree'
 tree.custom_option('_', {root_marker='[in]:', })
 tree.custom_column('filename', {
   root_marker_highlight='Ignore',
-  max_width=1000,
+  max_width=40,
 })
+tree.custom_column('time', {
+  format="%d-%M-%Y",
+})
+-- tree.custom_column('mark', {
+--   readonly_icon="X",
+--   selected_icon="*",
+-- })
 EOF
 
 autocmd FileType tree call s:set_tree()

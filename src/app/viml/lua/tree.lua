@@ -72,27 +72,37 @@ function M.resume(bufnrs, cfg)
     resize_cmd = string.format('vertical resize %d', cfg['winwidth'])
   elseif cfg.split == 'horizontal' then
     resize_cmd = string.format('resize %d', cfg.winheight)
+  elseif cfg.split == 'floating' then
+    local winid = api.nvim_open_win(bufnr, true, {
+      relative='editor',
+      row=cfg.winrow,
+      col=cfg.wincol,
+      width=cfg.winwidth,
+      height=cfg.winheight,
+    })
   else
     command = 'buffer'
   end
 
-  local direction = 'topleft'
-  if cfg.direction == 'botright' then
-    direction = 'botright'
-  end
-  str = string.format("silent keepalt %s %s %s %d", direction, vertical, command, bufnr)
+  if cfg.split ~= 'floating' then
+    local direction = 'topleft'
+    if cfg.direction == 'botright' then
+      direction = 'botright'
+    end
+    str = string.format("silent keepalt %s %s %s %d", direction, vertical, command, bufnr)
 
-  if not find then
-    cmd(str)
-  end
+    if not find then
+      cmd(str)
+    end
 
-  cmd(resize_cmd)
+    cmd(resize_cmd)
+  end
 
   cmd("se nonu");
   cmd("se nornu");
-  cmd("se nowrap");
   cmd("se nolist");
   cmd("se signcolumn=no");
+  api.nvim_win_set_option(winid, 'wrap', false)
 end
 
 --- Drop file.

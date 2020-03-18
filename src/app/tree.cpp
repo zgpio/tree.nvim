@@ -15,7 +15,6 @@ using std::endl;
 Tree::ClipboardMode Tree::paste_mode;
 list<string> Tree::clipboard;
 nvim::Nvim *Tree::api;
-const int kStop = 90;
 
 Tree::~Tree()
 {
@@ -151,6 +150,7 @@ void Tree::insert_item(const int pos)
     const FileItem &fileitem = *m_fileitem[pos];
     int start = 0;
     int byte_start = 0;
+    const int kStop = cfg.filename_colstop;
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
     for (const int col : cfg.columns) {
         Cell cell(cfg, fileitem, col);
@@ -201,6 +201,7 @@ void Tree::insert_rootcell(const int pos)
     const FileItem &fileitem = *m_fileitem[pos];
     int start = 0;
     int byte_start = 0;
+    const int kStop = cfg.filename_colstop;
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
     for (int col : cfg.columns) {
         Cell cell(cfg, fileitem, col);
@@ -328,6 +329,7 @@ void Tree::redraw_line(int sl, int el)
     printf(format, __PRETTY_FUNCTION__, sl+1, el);
 
     vector<string> ret;
+    const int kStop = cfg.filename_colstop;
     for (int i = sl; i < el; ++i) {
         FileItem & fileitem = *m_fileitem[i];
 
@@ -429,7 +431,11 @@ void Tree::entryInfoListRecursively(const FileItem& item,
     typedef vector<path> vec;             // store paths,
     vec v;                                // so we can sort them later
     try {
-        copy(directory_iterator(item.p), directory_iterator(), back_inserter(v));
+        if (cfg.show_ignored_files)
+            copy(directory_iterator(item.p), directory_iterator(), back_inserter(v));
+        else
+            copy_if(directory_iterator(item.p), directory_iterator(), back_inserter(v),
+                [](auto x){return (x.path().filename().string().front() != '.');});
     } catch(std::exception& e) {
         cout << "------->" << e.what() << endl;
         return;
@@ -647,7 +653,7 @@ std::unordered_map<string, Action> action_map {
     {"toggle_select_all"    , &Tree::toggle_select_all},
     {"print"                , &Tree::print},
     {"debug"                , &Tree::debug},
-    // {"toggle_ignored_files" , &Tree::toggle_ignored_files},
+    {"toggle_ignored_files" , &Tree::toggle_ignored_files},
     {"redraw"               , &Tree::redraw},
     {"new_file"             , &Tree::new_file},
     {"execute_system"       , &Tree::execute_system},
@@ -898,6 +904,7 @@ void Tree::debug(const nvim::Array &args)
     for (auto i : FileItem::git_map) {
         cout << i.first << ":" << i.second << endl;
     }
+    FileItem &cur = *m_fileitem[ctx.cursor - 1];
 }
 void Tree::yank_path(const nvim::Array &args)
 {

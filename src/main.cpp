@@ -1,23 +1,19 @@
 #include "nvim.hpp"
 #include "app/app.h"
 #include "util.h"
-#include <boost/filesystem.hpp>
 #include <iostream>
 #include <string>
 #include <locale>
 
+using std::cerr;
 using std::cout;
+using std::endl;
 using std::string;
-using namespace boost::filesystem;
 #define BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
 
 // TODO: 临时
 void eventloop(nvim::Nvim &nvim) {
     using nvim::Object;
-    using std::cerr;
-    using std::cout;
-    using std::endl;
-    using std::string;
     nvim::Array info = nvim.get_api_info();
     int chan_id = info[0].as_uint64_t();
     cout << "type(api-metadata): " << type_name(info[1]) << endl;
@@ -67,7 +63,7 @@ void eventloop(nvim::Nvim &nvim) {
                 obj.convert(msg);
                 int msgid = msg.get<1>();
                 string method = msg.get<2>().as_string();
-                std::cout << "msgid: " << msgid << std::endl;
+                cout << "msgid: " << msgid << endl;
                 cout << "method: " << method << endl;
                 cout << "type(msg.get<3>()): " << type_name(msg.get<3>()) << endl;
                 auto argv = msg.get<3>().as_vector();
@@ -110,14 +106,15 @@ void eventloop(nvim::Nvim &nvim) {
 
 int main(int argc, char *argv[])
 {
+    cout << "argc:" << argc << " argv[1]:"<< argv[1] << endl;
     std::locale::global(std::locale(""));
     nvim::Nvim nvim;
     // nvim.connect_tcp("localhost", "6666");
-    nvim.connect_pipe("/tmp/xxxxxxxxxxxxxxxx");
+    nvim.connect_pipe(argv[1]);
 
     string expr = "( 3 + 2 ) * 4";
     nvim::Object rv = nvim.eval(expr);
-    std::cout << type_name(rv) << std::endl;
+    cout << type_name(rv) << endl;
     uint64_t res = rv.as_uint64_t();
     printf("nvim_eval('%s') = %llu\n", expr.c_str(), res);
 
