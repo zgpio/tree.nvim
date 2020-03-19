@@ -1,0 +1,71 @@
+sudo: false
+# dist: bionic
+language: cpp
+os:
+  - linux
+  - osx
+
+addons:
+  apt:
+    update: false
+    sources:
+      - sourceline: 'ppa:neovim-ppa/unstable'
+      - sourceline: 'ppa:mhier/libboost-latest'
+    packages:
+      - neovim
+      - clang
+      - cmake
+      - libboost1.70-dev
+  homebrew:
+    update: false
+    packages:
+      - neovim
+      - cmake
+      - boost
+      - msgpack
+compiler:
+  - gcc
+  - clang
+before_install: |
+  if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+    brew update
+    brew install neovim
+    brew ls | grep -wq cmake || brew install cmake
+    brew ls | grep -wq boost || brew install boost
+    brew ls | grep -wq msgpack || brew install msgpack
+  fi
+script: |
+  nvim --version
+  mkdir build
+  cd build
+  cmake -DUSE_SYSTEM_MSGPACK=OFF -DBoost_USE_STATIC_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=./INSTALL ..
+  make install
+  if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+    tar -zcvf tree-macos.tar.gz  ./INSTALL
+  fi
+  if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+    tar -zcvf tree-linux.tar.gz  ./INSTALL
+  fi
+  # ctest --output-on-failure
+
+before_deploy: |
+  # Set up git user name and tag this commit
+  git config --local user.name "zgpio"
+  git config --local user.email "zgpio@qq.com"
+  git remote set-url origin https://${GITHUB_TOKEN}@github.com/zgpio/tree.nvim.git > /dev/null 2>&1
+  # git push origin :refs/tags/nightly
+  # git tag -f nightly
+deploy:
+  - provider: releases
+    # name: nightly
+    # tag_name: nightly
+    overwrite: true
+    skip_cleanup: true
+    api_key: $GITHUB_TOKEN
+    file:
+      - tree-macos.tar.gz
+      - tree-linux.tar.gz
+    on:
+      # repo: zgpio/tree.nvim
+      all_branches: true
+      tags: true
