@@ -258,7 +258,7 @@ local function init_channel()
   elseif M.windows() then
     cmd = {project_root .. '\\bin\\tree-nvim.exe', '--server', servername}
   elseif M.macos() then
-    cmd = {project_root .. '/bin/tree-nvim.app/Contents/MacOS/tree-nvim', '--server', servername}
+    cmd = {project_root .. '/bin/tree', servername}
   end
   -- print('bin:', bin)
   -- print('servername:', servername)

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 
 project(neovim_client_cpp)
 
+set(Boost_USE_STATIC_LIBS  ON)  # only find static libs
 find_package(Boost 1.55.0 REQUIRED COMPONENTS system coroutine context thread filesystem)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")
@@ -25,7 +26,7 @@ include_directories(
     ${MSGPACK_INCLUDE_DIRS}
 )
 
-add_executable(test 
+add_executable(tree
     src/main.cpp
     src/app/tree.cpp
     src/app/app.cpp
@@ -36,7 +37,9 @@ add_executable(test
     gen/nvim.cpp
 )
 
-target_link_libraries(test ${Boost_LIBRARIES})
+target_link_libraries(tree ${Boost_LIBRARIES})
+install(DIRECTORY src/app/viml/ DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(TARGETS tree DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 find_package(PythonInterp)
 if (PYTHONINTERP_FOUND)
@@ -47,4 +50,4 @@ if (PYTHONINTERP_FOUND)
     )
 endif()
 
-# add_dependencies(test auto_gen_api)
+# add_dependencies(tree auto_gen_api)

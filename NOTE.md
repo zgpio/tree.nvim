@@ -10,10 +10,12 @@
     brew install boost
     brew info boost
 
-    cmake -S ~/Documents/nvim.cpp/ -B ~/Documents/nvim.cpp/build
+    cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=YES -DCMAKE_INSTALL_PREFIX=../INSTALL -DBoost_USE_STATIC_LIBS=ON -DCMAKE_BUILD_TYPE=Release -S ~/project/nvim.cpp/ -B ~/project/nvim.cpp/build
+    make -C ~/project/nvim.cpp/build/
     ```
 
 * CMake
+- [FindBoost](https://cmake.org/cmake/help/v3.15/module/FindBoost.html)
 https://github.com/cquery-project/cquery/wiki/Compilation-database
     ```sh
     mkdir build
