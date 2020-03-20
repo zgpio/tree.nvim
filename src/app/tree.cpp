@@ -113,7 +113,6 @@ void Tree::changeRoot(const string &root)
     FileItem *fileitem = new FileItem;
     fileitem->level = -1;
     fileitem->opened_tree = true;
-    fileitem->fi = status(dir);
     fileitem->p = dir;
     fileitem->filename = rootPath;
     m_fileitem.push_back(fileitem);
@@ -209,7 +208,7 @@ void Tree::insert_rootcell(const int pos)
         cell.byte_start = byte_start;
         if (col==FILENAME) {
             string filename(fileitem.filename);
-            if (filename.back() != '/' && is_directory(fileitem.fi)) {
+            if (filename.back() != '/' && is_directory(fileitem.p)) {
                 filename.append("/");
             }
             filename.insert(0, cfg.root_marker.c_str());
@@ -303,7 +302,7 @@ void Tree::hline(int sl, int el)
             const Cell & cell = col_map[col][i];
 
             if(col==FILENAME) {
-                sprintf(name, "tree_%u_%u", col, is_directory(fileitem.fi));
+                sprintf(name, "tree_%u_%u", col, is_directory(fileitem.p));
                 api->async_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
             } else if(col==ICON || col==GIT || col==MARK) {
                 // :hi tree_<tab>
@@ -444,7 +443,6 @@ void Tree::entryInfoListRecursively(const FileItem& item,
 
     for (auto &x : v) {
         FileItem *fileitem = new FileItem;
-        fileitem->fi = status(x);
         fileitem->level = level;
         fileitem->parent = &item;
         fileitem->p = x;
@@ -505,7 +503,6 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
 
     for (directory_entry &x : v) {
         FileItem *fileitem = new FileItem;
-        fileitem->fi = x.status();
         fileitem->level = level;
         fileitem->parent = &item;
         fileitem->p = x.path();
@@ -537,7 +534,6 @@ void Tree::handleRename(string &input)
     string fn = item.p.string();
     boost::filesystem::rename(item.p, input);
     api->execute_lua("tree.print_message(...)", {"Rename Success"});
-    item.fi = status(item.p);
     string text(item.p.filename().string());
     if (is_directory(item.p))
         text.append("/");
@@ -689,7 +685,7 @@ void Tree::open_tree(const nvim::Array &args)
     vector<string> ret;
     FileItem &cur = *m_fileitem[l];
 
-    if (is_directory(cur.fi) && !cur.opened_tree) {
+    if (is_directory(cur.p) && !cur.opened_tree) {
 
         cur.opened_tree = true;
         const string & rootPath = cur.p.string();
@@ -768,9 +764,8 @@ void Tree::open(const nvim::Array &args)
 {
     //save_cursor();
     const int l = ctx.cursor - 1;
-    const file_status &fi = m_fileitem[l]->fi;
     const path &p = m_fileitem[l]->p;
-    if (is_directory(fi)) {
+    if (is_directory(p)) {
         changeRoot(p.string());
     }
     else if (args.size()>0 && args[0].as_string()=="vsplit") {
@@ -802,7 +797,7 @@ void Tree::drop(const nvim::Array &args)
     FileItem &cur = *m_fileitem[ctx.cursor - 1];
     const auto p = cur.p;
     // cout<<args;
-    if (is_directory(cur.fi))
+    if (is_directory(cur.p))
         changeRoot(p.string());
     else {
         api->execute_lua("tree.drop(...)", {args, p.string()});
@@ -1042,7 +1037,7 @@ void Tree::open_or_close_tree_recursively(const nvim::Array &args)
     vector<string> ret;
     FileItem &cur = *m_fileitem[l];
 
-    if (is_directory(cur.fi) && !cur.opened_tree) {
+    if (is_directory(cur.p) && !cur.opened_tree) {
         cur.opened_tree = true;
         const string &rootPath = cur.p.string();
         expandStore.insert({rootPath, true});

@@ -102,7 +102,8 @@ Cell::Cell(const Config &cfg, const FileItem& fileitem, const int type)
 {
     // https://stackoverflow.com/questions/10681929/how-can-i-determine-the-owner-of-a-file-or-directory-using-boost-filesystem
     if (type==MARK) {
-        if ((fileitem.fi.permissions()&boost::filesystem::owner_write)==boost::filesystem::owner_write){
+        file_status fs = status(fileitem.p);
+        if ((fs.permissions()&boost::filesystem::owner_write)==boost::filesystem::owner_write){
             text = " ";
         }
         else {
@@ -147,7 +148,7 @@ Cell::Cell(const Config &cfg, const FileItem& fileitem, const int type)
     else if (type == FILENAME) {
         color = YELLOW;
         string filename(fileitem.filename);
-        if (is_directory(fileitem.fi)) {
+        if (is_directory(fileitem.p)) {
             filename.append("/");
             color = BLUE;
         }
@@ -157,7 +158,6 @@ Cell::Cell(const Config &cfg, const FileItem& fileitem, const int type)
         update_size(fileitem);
     }
     else if (type == TIME) {
-        const file_status & fi = fileitem.fi;
         // TODO: custom column time format
         try {
             std::time_t t = boost::filesystem::last_write_time(fileitem.p);;
@@ -231,17 +231,16 @@ void Cell::update_size(const FileItem &fi)
 // Checked
 void Cell::update_icon(const FileItem & fn)
 {
-    const file_status &fi = fn.fi;
     string suffix = boost::filesystem::extension(fn.filename);
     if (suffix.size()>0)
         suffix.erase(suffix.begin());
     auto search = extensions.find(suffix);
 
-    if (boost::filesystem::is_directory(fi)){
+    if (boost::filesystem::is_directory(fn.p)){
         if (fn.opened_tree) {
             text = "";
             color = folderOpened;
-        } else if (boost::filesystem::is_symlink(fi)){
+        } else if (boost::filesystem::is_symlink(fn.p)){
             // directory_symlink_icon ''
             text = "";
             color = folderSymlink;

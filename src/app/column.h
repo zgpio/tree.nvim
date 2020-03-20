@@ -28,7 +28,6 @@ public:
     FileItem();
     virtual ~FileItem(){};
 
-    file_status fi;
     boost::filesystem::path p;
     string filename;
     int level = 0;
