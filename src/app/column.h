@@ -57,7 +57,7 @@ public:
     // TODO: 考虑添加highlight_id, 并在highlight时加上列作用域防止冲突,
     //  icon/git/mark可以由text作为id,
     //  而filename以文件种类作为id, size以大小种类作为id, ...
-    int color = -1; // color id, 不同的列用不同的表存储; 也可以是公共的表, 如gui_color
+    int color = 666; // color id, 不同的列用不同的表存储; 也可以是公共的表, 如gui_color
     string tcolor;
     void update_git(const FileItem &fi);
     void update_icon(const FileItem &fn);

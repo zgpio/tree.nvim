@@ -32,6 +32,12 @@ Tree::Tree(int bufnr, int ns_id)
     api->execute_lua("tree.buf_attach(...)", {bufnr});
 }
 
+// Characters can be full-width or half-width (with invisible characters being 0-width).
+// Ref:
+//  https://bugreports.qt.io/browse/QTBUG-9956
+//  https://www.php.net/manual/en/function.mb-strwidth.php
+//  https://www.ibm.com/support/knowledgecenter/beta/fi/ssw_ibm_i_74/rtref/wcwidth.htm
+//  https://embedeo.org/ws/doc/man_windows/
 int countgrid(const std::wstring &s)
 {
     int n = s.size();
@@ -114,7 +120,7 @@ void Tree::changeRoot(const string &root)
     fileitem->level = -1;
     fileitem->opened_tree = true;
     fileitem->p = dir;
-    fileitem->filename = rootPath;
+    fileitem->filename = dir.filename().string();
     m_fileitem.push_back(fileitem);
 
     insert_rootcell(0);
@@ -136,9 +142,10 @@ void Tree::changeRoot(const string &root)
 
     buf_set_lines(0, -1, true, ret);
     string k = (*m_fileitem[0]).p.string();
-    // if (cursorHistory.contains(k)) {
-    //     api->win_set_cursor(0, QPoint{0, cursorHistory[k]});
-    // }
+    auto got = cursorHistory.find(k);
+    if (got != cursorHistory.end()) {
+        api->async_win_set_cursor(0, {cursorHistory[k], 0});
+    }
 
     hline(0, m_fileitem.size());
 }
@@ -207,15 +214,14 @@ void Tree::insert_rootcell(const int pos)
         cell.col_start = start;
         cell.byte_start = byte_start;
         if (col==FILENAME) {
-            string filename(fileitem.filename);
-            if (filename.back() != '/' && is_directory(fileitem.p)) {
-                filename.append("/");
+            string text(fileitem.p.string());
+            if (text.back() != '/' && is_directory(fileitem.p)) {
+                text.append("/");
             }
-            filename.insert(0, cfg.root_marker.c_str());
-            cell.text = filename;
+            text.insert(0, cfg.root_marker.c_str());
+            cell.text = text;
         }
         std::wstring ws = converter.from_bytes(cell.text.c_str());
-        string cell_str(cell.text);
         cell.byte_end = byte_start+cell.text.size();
 
         if (col==FILENAME) {
@@ -296,7 +302,7 @@ void Tree::hline(int sl, int el)
     for (int i = sl;i<el;++i)
     {
         const FileItem &fileitem = *m_fileitem[i];
-        char name[40];
+        char name[32];
 
         for (const int col : cfg.columns) {
             const Cell & cell = col_map[col][i];
@@ -329,6 +335,7 @@ void Tree::redraw_line(int sl, int el)
 
     vector<string> ret;
     const int kStop = cfg.filename_colstop;
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
     for (int i = sl; i < el; ++i) {
         FileItem & fileitem = *m_fileitem[i];
 
@@ -347,7 +354,6 @@ void Tree::redraw_line(int sl, int el)
             }else if(col==SIZE){
                 cell.update_size(fileitem);
             }
-            std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
             std::wstring cell_str = converter.from_bytes(cell.text.c_str());
             cell.col_start =start;
             cell.col_end = start + countgrid(cell_str);
@@ -386,7 +392,7 @@ void Tree::redraw_recursively(int l)
     std::tuple<int, int> se = find_range(l);
     int s = std::get<0>(se) + 1;
     int e = std::get<1>(se) + 1;
-    printf("%s redraw range(1-based): [%d, %d]", __PRETTY_FUNCTION__, s+1, e);
+    printf("%s redraw range(1-based): [%d, %d]\n", __PRETTY_FUNCTION__, s+1, e);
 
     erase_entrylist(s, e);
 
@@ -518,7 +524,7 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
 
         if (is_directory(x)) {
             string p = x.path().string();
-            expandStore.insert({p, true});
+            expandStore[p] = true;
             fileitem->opened_tree = true;
             fileitems.push_back(fileitem);
             expandRecursively(*fileitem, fileitems);
@@ -541,7 +547,7 @@ void Tree::handleRename(string &input)
         input.pop_back();
     string fn = item.p.string();
     boost::filesystem::rename(item.p, input);
-    api->execute_lua("tree.print_message(...)", {"Rename Success"});
+    api->async_execute_lua("tree.print_message(...)", {"Rename Success"});
     string text(item.p.filename().string());
     if (is_directory(item.p))
         text.append("/");
@@ -560,7 +566,7 @@ void Tree::handleRename(string &input)
 void Tree::handleNewFile(const string &input)
 {
     if (input=="") {
-        api->execute_lua("tree.print_message(...)", {"Canceled"});
+        api->async_execute_lua("tree.print_message(...)", {"Canceled"});
         return;
     }
     cout << __PRETTY_FUNCTION__ << input;
@@ -575,12 +581,12 @@ void Tree::handleNewFile(const string &input)
     // QFileInfo fi(dest.filePath(input));
     // NOTE: failed when same name file exists
     if (boost::filesystem::exists(dest)) {
-        api->execute_lua("tree.print_message(...)", {"File already exists!"});
+        api->async_execute_lua("tree.print_message(...)", {"File already exists!"});
         return;
     }
     else if(input.back() == '/'){
         if(!create_directory(dest))
-            api->execute_lua("tree.print_message(...)", {"Failed to create dir!"});
+            api->async_execute_lua("tree.print_message(...)", {"Failed to create dir!"});
     } else {
         boost::filesystem::ofstream(dest.string());
     }
@@ -607,6 +613,12 @@ void Tree::collect_targets()
             targets.push_back(i);
         }
     }
+}
+void Tree::save_cursor()
+{
+    FileItem &item = *m_fileitem[0];
+    cursorHistory[item.p.string()] = ctx.cursor;
+    cout << "cursorHistory:" << item.p.string() << ":"<< ctx.cursor;
 }
 void Tree::paste(const int ln, const string &src, const string &dest)
 {
@@ -770,7 +782,7 @@ Map Tree::get_candidate(const int pos)
 }
 void Tree::open(const nvim::Array &args)
 {
-    //save_cursor();
+    save_cursor();
     const int l = ctx.cursor - 1;
     const path &p = m_fileitem[l]->p;
     if (is_directory(p)) {
@@ -813,6 +825,7 @@ void Tree::drop(const nvim::Array &args)
 }
 void Tree::cd(const nvim::Array &args)
 {
+    save_cursor();
     if (args.size()>0) {
         string dir = args.at(0).as_string();
 

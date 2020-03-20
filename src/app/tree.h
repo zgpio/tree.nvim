@@ -77,6 +77,7 @@ private:
     vector<FileItem *> m_fileitem;
     unordered_map<int, vector<Cell>> col_map;
     unordered_map<string, bool> expandStore;
+    unordered_map<string, int> cursorHistory;
     list<int> targets;
     void hline(int sl, int el);
     int find_parent(int l);
@@ -90,6 +91,7 @@ private:
     void makeline(const int pos, string &line);
     void entryInfoListRecursively(const FileItem &, vector<FileItem*>& fileitem_lst);
 
+    void save_cursor();
     void shrinkRecursively(const string &path);
     void expandRecursively(const FileItem&, list<FileItem*> &fileitem_lst);
 };
