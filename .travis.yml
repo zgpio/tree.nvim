@@ -1,5 +1,5 @@
 sudo: false
-# dist: bionic
+dist: bionic
 language: cpp
 os:
   - linux
@@ -10,12 +10,13 @@ addons:
     update: false
     sources:
       - sourceline: 'ppa:neovim-ppa/unstable'
-      - sourceline: 'ppa:mhier/libboost-latest'
+      # - sourceline: 'ppa:mhier/libboost-latest'
     packages:
       - neovim
       - clang
       - cmake
-      - libboost1.70-dev
+      - libboost-all-dev
+      # - libboost1.70-dev
   homebrew:
     update: false
     packages:
@@ -36,8 +37,7 @@ before_install: |
   fi
 script: |
   nvim --version
-  mkdir build
-  cd build
+  mkdir build && cd build
   cmake -DUSE_SYSTEM_MSGPACK=OFF -DBoost_USE_STATIC_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=./INSTALL ..
   make install
   if [ "$TRAVIS_OS_NAME" = "osx" ]; then

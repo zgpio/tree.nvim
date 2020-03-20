@@ -2,10 +2,9 @@ cmake_minimum_required(VERSION 2.8.3)
 
 project(neovim_client_cpp)
 
-set(Boost_USE_STATIC_LIBS  ON)  # only find static libs
 find_package(Boost 1.55.0 REQUIRED COMPONENTS system coroutine context thread filesystem)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -pthread")
 
 set(CMAKE_CXX_FLAGS "-DMSGPACK_USE_BOOST ${CMAKE_CXX_FLAGS}") #TODO: import every flags directly from msgpack-c
 # to generate a compile_commands.json usable by ycm and other tooling
@@ -39,7 +38,8 @@ add_executable(tree
 
 target_link_libraries(tree ${Boost_LIBRARIES})
 install(DIRECTORY src/app/viml/ DESTINATION ${CMAKE_INSTALL_PREFIX})
-install(TARGETS tree DESTINATION ${CMAKE_INSTALL_BINDIR})
+# install(TARGETS tree DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS tree DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
 find_package(PythonInterp)
 if (PYTHONINTERP_FOUND)

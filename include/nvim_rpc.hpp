@@ -54,7 +54,7 @@ public:
     void call(const std::string &method, Object& res, const U&...u);
 
     template<typename...U>
-    void call(const std::string &method, nullptr_t res, const U&...u);
+    void call(const std::string &method, std::nullptr_t res, const U&...u);
     inline bool send_response(uint64_t msgid, const Object &err, const Object &res);
 
     template<typename...U>

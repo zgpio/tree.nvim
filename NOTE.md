@@ -15,6 +15,7 @@
     ```
 
 * CMake
+- https://gitee.com/mirrors/boost
 - [FindBoost](https://cmake.org/cmake/help/v3.15/module/FindBoost.html)
 https://github.com/cquery-project/cquery/wiki/Compilation-database
     ```sh

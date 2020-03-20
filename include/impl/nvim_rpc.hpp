@@ -55,7 +55,7 @@ void NvimRPC::call(const std::string &method, Object& res, const U& ...u) {
 }
 
 template<typename...U>
-void NvimRPC::call(const std::string &method, nullptr_t res, const U&...u) {
+void NvimRPC::call(const std::string &method, std::nullptr_t res, const U&...u) {
     do_call(method, u...);
     // std::cout << "void NvimRPC::call" << std::endl;
 }
