@@ -12,7 +12,6 @@ addons:
       - sourceline: 'ppa:neovim-ppa/unstable'
       # - sourceline: 'ppa:mhier/libboost-latest'
     packages:
-      - neovim
       - clang
       - cmake
       - libboost-all-dev
@@ -20,23 +19,14 @@ addons:
   homebrew:
     update: false
     packages:
-      - neovim
       - cmake
       - boost
       - msgpack
 compiler:
   - gcc
   - clang
-before_install: |
-  if [ "$TRAVIS_OS_NAME" = "osx" ]; then
-    brew update
-    brew install neovim
-    brew ls | grep -wq cmake || brew install cmake
-    brew ls | grep -wq boost || brew install boost
-    brew ls | grep -wq msgpack || brew install msgpack
-  fi
+
 script: |
-  nvim --version
   mkdir build && cd build
   cmake -DUSE_SYSTEM_MSGPACK=OFF -DBoost_USE_STATIC_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=./INSTALL ..
   make install
