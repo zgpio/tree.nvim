@@ -442,6 +442,7 @@ void Tree::entryInfoListRecursively(const FileItem& item,
     sort(v.begin(), v.end(), [](path x, path y){return is_directory(x)>is_directory(y);});
 
     for (auto &x : v) {
+      try {
         FileItem *fileitem = new FileItem;
         fileitem->level = level;
         fileitem->parent = &item;
@@ -459,6 +460,9 @@ void Tree::entryInfoListRecursively(const FileItem& item,
         }
         else
             fileitem_lst.push_back(fileitem);
+      } catch(std::exception& e) {
+          continue;
+      }
     }
 }
 
@@ -502,6 +506,7 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
     sort(v.begin(), v.end(), [](path x, path y){return is_directory(x)>is_directory(y);});
 
     for (directory_entry &x : v) {
+      try {
         FileItem *fileitem = new FileItem;
         fileitem->level = level;
         fileitem->parent = &item;
@@ -520,6 +525,9 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
         }
         else
             fileitems.push_back(fileitem);
+      } catch(std::exception& e) {
+          continue;
+      }
     }
 }
 
