@@ -80,6 +80,8 @@ nvim -u config.vim --listen /tmp/xxxxxxxxx
     auto it = std::next(col_map[col].begin(), pos);
     ```
 # NOTE
+* Boost::Asio based client library for talking with NeoVim process via it's msgpack-rpc API.
+Depends on: [msgpack-c](https://github.com/msgpack/msgpack-c), Jinja2, and Boost Libraries.
 * 对于Nvim类, 其method没有必要使用前缀`nvim_`
 * 理解UTF-8与Unicode
     ```cpp
