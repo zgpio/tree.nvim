@@ -4,22 +4,7 @@ Version: 0.1.0
 Author: zgp <zgpio@qq.com>
 License: MIT license
 
-CONTENTS						*tree-contents*
-
-Introduction		|tree-introduction|
-Install			|tree-install|
-Interface		|tree-interface|
-  Commands		  |tree-commands|
-  Functions		  |tree-functions|
-  Key mappings		  |tree-key-mappings|
-  Actions		  |tree-actions|
-  Options		  |tree-options|
-  Columns		  |tree-columns|
-    External columns	    |tree-external-columns|
-  Sources		  |tree-sources|
-Examples		|tree-examples|
-FAQ			|tree-faq|
-Compatibility		|tree-compatibility|
+                                      Type |gO| to see the table of contents.
 
 ==============================================================================
 INTRODUCTION						*tree-introduction*
@@ -29,7 +14,7 @@ INTRODUCTION						*tree-introduction*
 ==============================================================================
 INSTALL							*tree-install*
 
-Note: tree requires Neovim 0.4.2+.
+Note: tree requires Neovim 0.5+.
 
 1. Extract the files and put them in your Neovim config directory
    (usually `$XDG_CONFIG_HOME/nvim/`).
@@ -54,45 +39,45 @@ tree#action({action}[, {args}])				*tree#action()*
 		Note: You cannot fire the next action until the previous
 		action is finished.
 
-							*tree#call_action()*
-tree#call_action({action}[, {args}])
+							*tree.call_action()*
+tree.call_action({action}[, {args}])
 		Fire {action} action with {args}.  See |tree-actions|.
 		{args} behavior depends on {action}.
 
-						*tree#call_async_action()*
-tree#call_async_action({action}[, {args}])
+						*tree.call_async_action()*
+tree.call_async_action({action}[, {args}])
 		Fire {action} action with {args} asynchronously.
 		See |tree-actions|.
 		{args} behavior depends on {action}.
 		Note: You cannot fire the next action until the previous
 		action is finished.
 
-						*tree#custom#column()*
-tree#custom#column({column-name}, {option-name}, {value})
-tree#custom#column({column-name}, {dict})
+						*tree.custom_column()*
+tree.custom_column({column-name}, {option-name}, {value})
+tree.custom_column({column-name}, {dict})
 		Set {column-name} column specialized variable {variable-name}
 		to {value}.  You may specify multiple sources with the
 		separator "," in {column-name}. >
 
-	call tree#custom#column('icon', {
-	      \ 'directory_icon': '▸',
-	      \ 'opened_icon': '▾',
-	      \ 'root_icon': ' ',
-	      \ })
+	tree.custom_column('icon', {
+	    directory_icon='▸',
+	    opened_icon='▾',
+	    root_icon=' ',
+	})
 
-	call tree#custom#column('filename', {
-	      \ 'min_width': 40,
-	      \ 'max_width': 40,
-	      \ })
+	tree.custom_column('filename', {
+	    min_width=40,
+	    max_width=40,
+	})
 
-	call tree#custom#column('mark', {
-	      \ 'readonly_icon': '✗',
-	      \ 'selected_icon': '✓',
-	      \ })
+	tree.custom_column('mark', {
+	    readonly_icon='✗',
+	    selected_icon='✓',
+	})
 <
-						*tree#custom#option()*
-tree#custom#option({buffer-name}, {option-name}, {value})
-tree#custom#option({buffer-name}, {dict})
+						*tree.custom_option()*
+tree.custom_option({buffer-name}, {option-name}, {value})
+tree.custom_option({buffer-name}, {dict})
 		Set {option-name} option to {value} in {buffer-name}
 		buffer.
 		If {buffer-name} is "_", the options are used for all buffers.
@@ -101,40 +86,41 @@ tree#custom#option({buffer-name}, {dict})
 		Note: The all options are in |tree-options|.  However, "-" is
 		substituted to "_", and "-" prefix is removed. >
 
-	call tree#custom#option('_', {
-	      \ 'columns': 'mark:indent:icon:filename:type:size:time',
-	      \ })
+	tree.custom_option('_', {
+	    columns='mark:indent:icon:filename:type:size:time',
+	})
 <
-							*tree#custom#source()*
-tree#custom#source({source-name}, {var-name}, {value})
-tree#custom#source({source-name}, {dict})
+							*tree.custom_source()*
+tree.custom_source({source-name}, {var-name}, {value})
+tree.custom_source({source-name}, {dict})
 		Set {source-name} source specialized variable {variable-name}
 		to {value}.  You may specify multiple sources with the
 		separator "," in {source-name}.
+		Note: Not yet implemented.
 >
 	function! Root(path) abort
 	  return fnamemodify(a:path, ':t')
 	endfunction
 
-	call tree#custom#source('file', {
+	call v:lua.tree.custom_source('file', {
 	     \ 'root': 'Root',
 	     \})
 <
-tree#get_candidate()					*tree#get_candidate()*
+tree.get_candidate()					*tree.get_candidate()*
 		Returns the current cursor candidate as |Dictionary|.
 
-tree#is_directory()					*tree#is_directory()*
-		Returns |v:true| if the current cursor candidate is directory.
+tree.is_directory()					*tree.is_directory()*
+		Returns true if the current cursor candidate is directory.
 
 		Example: >
 
 		nnoremap <silent><buffer><expr> <CR>
-		\ tree#is_directory() ?
+		\ v:lua.tree.is_directory() ?
 		\ tree#action('open') : tree#action('multi', ['drop', 'quit'])
 
 
-tree#is_opened_tree()					*tree#is_opened_tree()*
-		Returns |v:true| if the current cursor candidate is opened
+tree.is_opened_tree()					*tree.is_opened_tree()*
+		Returns true if the current cursor candidate is opened
 		directory tree.
 
 ------------------------------------------------------------------------------
@@ -151,6 +137,7 @@ add_session 					*tree-action-add_session*
 		|tree-option-session-file|.
 		Note: You must set to |tree-option-session-file| save current
 		sessions.
+		Note: Not yet implemented.
 
 		Current session feature saves below states.
 
@@ -597,16 +584,6 @@ Q: How to open file use drop?
 
 A: >
 	nnoremap <silent><buffer><expr> <CR> tree#action('drop')
-
-Q: How to disable root marker?
-
-A: >
-	call tree#custom#option('_', {
-	      \ 'root_marker': ':',
-	      \ })
-	call tree#custom#column('filename', {
-	      \ 'root_marker_highlight': 'Ignore',
-	      \ })
 
 ==============================================================================
 COMPATIBILITY						*tree-compatibility*
