@@ -56,7 +56,6 @@ public:
     void copy_(const nvim::Array &args);
     void _copy_or_move(const nvim::Array &args);
     void rename(const nvim::Array &args);
-    void vim_input(string prompt, string text, string completion, string handle);
     void expandRecursively(const FileItem &item, vector<FileItem*> &fileitem_lst);
     void cd(const nvim::Array &args);
     void goto_(const nvim::Array &args);

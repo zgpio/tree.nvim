@@ -820,7 +820,7 @@ void Tree::drop(const nvim::Array &args)
     if (is_directory(cur.p))
         changeRoot(p.string());
     else {
-        api->execute_lua("tree.drop(...)", {args, p.string()});
+        api->async_execute_lua("tree.drop(...)", {args, p.string()});
     }
 }
 void Tree::cd(const nvim::Array &args)
@@ -829,7 +829,6 @@ void Tree::cd(const nvim::Array &args)
     if (args.size()>0) {
         string dir = args.at(0).as_string();
 
-        // FIXME 第一次cd无效
         if (dir=="..") {
             path & curdir = m_fileitem[0]->p;
             cout << __FUNCTION__ << curdir.parent_path().string() << endl;
@@ -837,9 +836,7 @@ void Tree::cd(const nvim::Array &args)
         }
         else if (dir == ".") {
             FileItem &cur = *m_fileitem[ctx.cursor - 1];
-            string dir(cur.p.string());
-            // if (cur.opened_tree)
-            //     dir = cur.fi.absoluteFilePath();
+            string dir = is_directory(cur.p) ? cur.p.string() : cur.p.parent_path().string();
             string cmd = "cd " + dir;
             api->async_execute_lua("tree.print_message(...)", {cmd});
             api->async_command(cmd);
@@ -937,10 +934,10 @@ void Tree::yank_path(const nvim::Array &args)
         reg += i;
         reg += '\n';
     }
-    api->call_function("setreg", {"\"", reg});
+    api->async_call_function("setreg", {"\"", reg});
 
     reg.insert(0, "yank_path\n");
-    api->execute_lua("tree.print_message(...)", {reg});
+    api->async_execute_lua("tree.print_message(...)", {reg});
 }
 void Tree::pre_remove(const nvim::Array &args)
 {
@@ -1052,7 +1049,7 @@ void Tree::move(const nvim::Array &args)
 void Tree::open_or_close_tree_recursively(const nvim::Array &args)
 {
     const int l = ctx.cursor - 1;
-    cout << __PRETTY_FUNCTION__;
+    cout << __PRETTY_FUNCTION__ << endl;
     assert(0 <= l && l < m_fileitem.size());
     if (l == 0) return;
     vector<string> ret;

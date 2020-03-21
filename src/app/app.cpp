@@ -6,7 +6,6 @@ using std::cout;
 using std::endl;
 using std::string;
 
-// Checked
 App::App(nvim::Nvim *nvim, int chan_id) : m_nvim(nvim), chan_id(chan_id)
 {
     char format[] = "%s: %" PRIu64 "\n";
@@ -14,7 +13,7 @@ App::App(nvim::Nvim *nvim, int chan_id) : m_nvim(nvim), chan_id(chan_id)
 
     // call rpcnotify(g:tree#_channel_id, "_tree_start", "/Users/zgp/")
     auto &a = *m_nvim;
-    a.set_var("tree#_channel_id", chan_id);
+    a.async_set_var("tree#_channel_id", chan_id);
     Tree::api = m_nvim;
 
     // init highlight
@@ -63,7 +62,7 @@ void App::createTree(string &path)
     char name[64];
     sprintf(name, "Tree-%d", count);
     string bufname(name);
-    b->buf_set_name(bufnr, bufname);
+    b->async_buf_set_name(bufnr, bufname);
     count++;
 
     int ns_id = b->create_namespace("tree_icon");
@@ -194,6 +193,11 @@ void App::handleRequest(nvim::NvimRPC & rpc, uint64_t msgid, const string& metho
             if (it != treebufs.end()) {
                 treebufs.erase(it);
                 treebufs.insert(treebufs.begin(), m_ctx.prev_bufnr);
+            }
+            // NOTE: 暂时不支持通过_tree_start动态更新columns
+            auto got = m_cfgmap.find("columns");
+            if(got != m_cfgmap.end()) {
+                m_cfgmap.erase(got);
             }
             tree.cfg.update(m_cfgmap);
 

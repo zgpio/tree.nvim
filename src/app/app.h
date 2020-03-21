@@ -22,7 +22,6 @@ private:
     Context m_ctx;
     Map m_cfgmap;
 
-    // FIXME: cant work when string as key
     // unordered_map<string, QVariant> resource;
     unordered_map<int, Tree*> trees;
     list<int> treebufs;  // Recently used order
