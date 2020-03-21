@@ -267,10 +267,10 @@ local function init_channel()
   local N = 15
   local i = 0
   while i < N and fn.exists('g:tree#_channel_id') == 0 do
-    C('sleep 10m')
+    C('sleep 4m')
     i = i + 1
   end
-  -- print(string.format('Wait for server %dms', i*10))
+  -- print(string.format('Wait for server %dms', i*4))
   return true
 end
 
