@@ -158,7 +158,6 @@ Cell::Cell(const Config &cfg, const FileItem& fileitem, const int type)
         update_size(fileitem);
     }
     else if (type == TIME) {
-        // TODO: custom column time format
         try {
             std::time_t t = boost::filesystem::last_write_time(fileitem.p);;
             char mbstr[64];
@@ -192,7 +191,6 @@ void Cell::update_git(const FileItem &fi)
     }
 }
 
-// Checked
 void Cell::update_size(const FileItem &fi)
 {
     // https://stackoverflow.com/questions/45169587/boostfilesystem-recursively-getting-size-of-each-file
@@ -226,9 +224,9 @@ void Cell::update_size(const FileItem &fi)
         this->text = text;
     }
     else this->text = string(7, ' ');
+    // The size of the directory has no meaning.
 }
 
-// Checked
 void Cell::update_icon(const FileItem & fn)
 {
     string suffix = boost::filesystem::extension(fn.filename);
@@ -261,7 +259,6 @@ void Cell::update_icon(const FileItem & fn)
 }
 
 /// Ref to https://git-scm.com/docs/git-status
-// Checked
 git_status get_indicator_name(const char X, const char Y)
 {
     if (X == '?' and Y == '?')
@@ -331,7 +328,6 @@ void FileItem::update_gmap(string p)
             FileItem::git_map[key] = status;
         }
     }
-    cout << "-----------------------------------" << endl;
 }
 
 Context::Context(const Map &ctx)
