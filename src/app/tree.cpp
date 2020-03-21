@@ -319,7 +319,7 @@ void Tree::hline(int sl, int el)
                 // auto req_hl = api->buf_add_highlight(bufnr, 0, "String", 0, 0, 3);
                 // call buf_add_highlight(0, -1, "Identifier", 0, 5, -1)
                 api->async_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
-            } else if (col==SIZE || col==TIME ){//|| col==INDENT
+            } else if (col==SIZE || col==TIME || col==INDENT){
                 sprintf(name, "tree_%u", col);
                 api->async_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
             }

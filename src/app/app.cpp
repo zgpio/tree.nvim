@@ -32,6 +32,10 @@ App::App(nvim::Nvim *nvim, int chan_id) : m_nvim(nvim), chan_id(chan_id)
     sprintf(cmd, "hi %s guifg=%s", name, gui_colors[GREEN].data());
     a.command(cmd);
 
+    sprintf(name, "tree_%d", INDENT);
+    sprintf(cmd, "hi %s guifg=%s", name, "#41535b");
+    a.command(cmd);
+
     sprintf(name, "tree_%d", TIME);
     sprintf(cmd, "hi %s guifg=%s", name, gui_colors[BLUE].data());
     a.command(cmd);
