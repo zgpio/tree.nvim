@@ -112,7 +112,10 @@ void Tree::changeRoot(const string &root)
     const string & rootPath = dir.string();
     expandStore.insert({rootPath, true});
 
-    FileItem::update_gmap(root);
+    auto i = find(cfg.columns.begin(), cfg.columns.end(), GIT);
+    if (i != cfg.columns.end()) {
+        FileItem::update_gmap(root);
+    }
     targets.clear();
     erase_entrylist(0, m_fileitem.size());
 
