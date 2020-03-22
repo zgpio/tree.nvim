@@ -254,7 +254,7 @@ local function init_channel()
   local cmd
   -- NOTE: ~ cant expand in {cmd} arg of jobstart
   if M.linux() then
-    cmd = {project_root .. '/bin/tree-nvim', '--nofork', '--server', servername}
+    cmd = {project_root .. '/bin/tree', servername}
   elseif M.windows() then
     cmd = {project_root .. '\\bin\\tree-nvim.exe', '--server', servername}
   elseif M.macos() then
