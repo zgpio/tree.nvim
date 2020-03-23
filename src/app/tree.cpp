@@ -11,7 +11,7 @@ using namespace boost::filesystem;
 using std::string;
 using std::cout;
 using std::endl;
-
+namespace tree {
 Tree::ClipboardMode Tree::paste_mode;
 list<string> Tree::clipboard;
 nvim::Nvim *Tree::api;
@@ -334,7 +334,7 @@ void Tree::hline(int sl, int el)
 void Tree::redraw_line(int sl, int el)
 {
     char format[] = "%s (1-based): [%d, %d]\n";
-    printf(format, __PRETTY_FUNCTION__, sl+1, el);
+    printf(format, __FUNCTION__, sl+1, el);
 
     vector<string> ret;
     const int kStop = cfg.filename_colstop;
@@ -395,7 +395,7 @@ void Tree::redraw_recursively(int l)
     std::tuple<int, int> se = find_range(l);
     int s = std::get<0>(se) + 1;
     int e = std::get<1>(se) + 1;
-    printf("%s redraw range(1-based): [%d, %d]\n", __PRETTY_FUNCTION__, s+1, e);
+    printf("%s redraw range(1-based): [%d, %d]\n", __FUNCTION__, s+1, e);
 
     erase_entrylist(s, e);
 
@@ -542,7 +542,7 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
 
 void Tree::handleRename(string &input)
 {
-    cout << __PRETTY_FUNCTION__ << endl;
+    cout << __FUNCTION__ << endl;
 
     Cell & cur = col_map[FILENAME][ctx.cursor-1];
     FileItem & item = *m_fileitem[ctx.cursor-1];
@@ -572,14 +572,14 @@ void Tree::handleNewFile(const string &input)
         api->async_execute_lua("tree.print_message(...)", {"Canceled"});
         return;
     }
-    cout << __PRETTY_FUNCTION__ << input;
+    cout << __FUNCTION__ << input;
 
     // Cell & cur = col_map["filename"][ctx.cursor-1];
     FileItem & item = *m_fileitem[ctx.cursor-1];
 
     path dest = item.opened_tree ? item.p : item.p.parent_path();
 
-    dest += path::preferred_separator + input;
+    dest /= input;
     cout << dest << endl;
     // QFileInfo fi(dest.filePath(input));
     // NOTE: failed when same name file exists
@@ -882,7 +882,7 @@ void Tree::pre_paste(const nvim::Array &args)
         string fname = path(f).filename().string();
         path curdir = cur.p.parent_path();
         if (cur.opened_tree) curdir = cur.p.string();
-        string destfile = curdir.string() + path::preferred_separator + fname;
+        string destfile = (curdir/=fname).string();
         cout << "destfile:" << destfile << endl;
         cout << "fname:" << fname << endl;
         if (exists(destfile)) {
@@ -1052,7 +1052,7 @@ void Tree::move(const nvim::Array &args)
 void Tree::open_or_close_tree_recursively(const nvim::Array &args)
 {
     const int l = ctx.cursor - 1;
-    cout << __PRETTY_FUNCTION__ << endl;
+    cout << __FUNCTION__ << endl;
     assert(0 <= l && l < m_fileitem.size());
     if (l == 0) return;
     vector<string> ret;
@@ -1148,4 +1148,5 @@ void Tree::toggle_ignored_files(const nvim::Array &args)
     cfg.show_ignored_files = !cfg.show_ignored_files;
     FileItem &root = *m_fileitem[0];
     changeRoot(root.p.string());
+}
 }

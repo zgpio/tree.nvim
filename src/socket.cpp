@@ -48,8 +48,10 @@ void Socket::connect_tcp(const std::string& host,
 
 void Socket::connect_pipe(const std::string& name, double timeout_sec)
 {
+#ifdef BOOST_ASIO_HAS_LOCAL_SOCKETS
     boost::asio::local::stream_protocol::endpoint ep(name);
     socket_.connect(ep);
+#endif
 }
 size_t Socket::read(char *rbuf, size_t capacity, double timeout_sec) {
     deadline_.expires_from_now(boost::posix_time::seconds(long(timeout_sec)));

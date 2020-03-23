@@ -5,7 +5,7 @@
 using std::cout;
 using std::endl;
 using std::string;
-
+namespace tree {
 App::App(nvim::Nvim *nvim, int chan_id) : m_nvim(nvim), chan_id(chan_id)
 {
     char format[] = "%s: %" PRIu64 "\n";
@@ -237,4 +237,5 @@ void App::handleRequest(nvim::NvimRPC & rpc, uint64_t msgid, const string& metho
         // be sure to return early or this message will be sent
         rpc.send_response(msgid, {"Unknown method"}, {});
     }
+}
 }

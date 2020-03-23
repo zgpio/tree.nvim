@@ -11,6 +11,7 @@ using std::array;
 using std::list;
 using std::unordered_map;
 using boost::filesystem::file_status;
+namespace tree {
 extern unordered_map<string, string> mark_indicators;
 extern array<string, 2> git_indicators[];
 extern array<string, 2> icons[];
@@ -117,5 +118,5 @@ public:
     // targets: typing.List[typing.Dict[str, typing.Any]] = []
 };
 
-
+}
 #endif

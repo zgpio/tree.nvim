@@ -4,6 +4,7 @@
 #include <iostream>
 
 using namespace std;
+namespace tree {
 enum Icon {
   folderClosed,
   folderOpened,
@@ -261,18 +262,18 @@ void Cell::update_icon(const FileItem & fn)
 /// Ref to https://git-scm.com/docs/git-status
 git_status get_indicator_name(const char X, const char Y)
 {
-    if (X == '?' and Y == '?')
+    if (X == '?' && Y == '?')
         return Untracked;
-    else if (X == ' ' and Y == 'M')
+    else if (X == ' ' && Y == 'M')
         return Modified;
-    else if (X == 'M' or X == 'A' or X == 'C')
+    else if (X == 'M' || X == 'A' || X == 'C')
         return Staged;
     else if (X == 'R') // todo
         return Renamed;
     else if (X == '!')
         return Ignored;
-    else if (X == 'U' or Y == 'U' or (X == 'A' and Y == 'A') or
-             (X == 'D' and Y == 'D'))
+    else if (X == 'U' || Y == 'U' || (X == 'A' && Y == 'A') ||
+             (X == 'D' && Y == 'D'))
         return Unmerged; // all included
     else if (Y == 'D')
         return Deleted;
@@ -283,6 +284,7 @@ git_status get_indicator_name(const char X, const char Y)
 void FileItem::update_gmap(string p)
 {
     using namespace boost::process;
+    using namespace boost::filesystem;
     FileItem::git_map.clear();
 
     ipstream pipe_stream;
@@ -295,7 +297,7 @@ void FileItem::update_gmap(string p)
         cerr << line << endl;
     if (line=="")
         return;
-    string topdir(line+boost::filesystem::path::preferred_separator);
+    string topdir((path(line)+=path::preferred_separator).string());
     cout << __FUNCTION__ << " top dir: " << topdir << endl;
 
     ipstream pipe_stream2;
@@ -783,4 +785,4 @@ unordered_map<string, Icon> patternMatches = {
 };
 
 // clang-format on
-
+}

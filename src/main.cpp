@@ -19,7 +19,7 @@ void eventloop(nvim::Nvim &nvim) {
     cout << "type(api-metadata): " << type_name(info[1]) << endl;
     cout << "Channel Id: " << chan_id << endl;
 
-    App app(&nvim, chan_id);
+    tree::App app(&nvim, chan_id);
 
     string line = nvim.get_current_line();
     cout << "get_current_line = " << line << endl;

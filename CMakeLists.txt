@@ -50,4 +50,7 @@ if (PYTHONINTERP_FOUND)
     )
 endif()
 
+if(WIN32 AND NOT CMAKE_CROSSCOMPILING)
+    add_definitions(-D Q_OS_WIN)
+endif()
 # add_dependencies(tree auto_gen_api)
