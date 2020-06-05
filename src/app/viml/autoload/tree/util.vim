@@ -159,49 +159,6 @@ function! tree#util#complete(arglead, cmdline, cursorpos) abort
   return uniq(sort(filter(_, 'stridx(v:val, a:arglead) == 0')))
 endfunction
 
-" Open a file.
-function! tree#util#open(filename) abort
-  let filename = fnamemodify(a:filename, ':p')
-
-  " Detect desktop environment.
-  if v:lua.tree.windows()
-    " For URI only.
-    " Note:
-    "   # and % required to be escaped (:help cmdline-special)
-    silent execute printf(
-          \ '!start rundll32 url.dll,FileProtocolHandler %s',
-          \ escape(filename, '#%'),
-          \)
-  elseif has('win32unix')
-    " Cygwin.
-    call system(printf('%s %s', 'cygstart',
-          \ shellescape(filename)))
-  elseif executable('xdg-open')
-    " Linux.
-    call system(printf('%s %s &', 'xdg-open',
-          \ shellescape(filename)))
-  elseif exists('$KDE_FULL_SESSION') && $KDE_FULL_SESSION ==# 'true'
-    " KDE.
-    call system(printf('%s %s &', 'kioclient exec',
-          \ shellescape(filename)))
-  elseif exists('$GNOME_DESKTOP_SESSION_ID')
-    " GNOME.
-    call system(printf('%s %s &', 'gnome-open',
-          \ shellescape(filename)))
-  elseif executable('exo-open')
-    " Xfce.
-    call system(printf('%s %s &', 'exo-open',
-          \ shellescape(filename)))
-  elseif v:lua.tree.macos() && executable('open')
-    " Mac OS.
-    call system(printf('%s %s &', 'open',
-          \ shellescape(filename)))
-  else
-    " Give up.
-    call tree#util#print_error('Not supported.')
-  endif
-endfunction
-
 function! tree#util#cd(path) abort
   if exists('*chdir')
     call chdir(a:path)

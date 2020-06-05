@@ -1141,7 +1141,7 @@ void Tree::execute_system(const nvim::Array &args)
 {
     FileItem &cur = *m_fileitem[ctx.cursor - 1];
     string info = cur.p.string();
-    api->call_function("tree#util#open", {info});
+    api->async_execute_lua("tree.open(...)", {info});
 }
 void Tree::toggle_ignored_files(const nvim::Array &args)
 {

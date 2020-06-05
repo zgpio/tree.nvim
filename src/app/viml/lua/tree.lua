@@ -1,4 +1,4 @@
--- vim: set sw=2 sts=4 et tw=78 foldlevel=0 foldmethod=indent:
+-- vim: set sw=2 sts=4 et tw=78 foldmethod=indent:
 -- :luafile %
 local api = vim.api
 local inspect = vim.inspect
@@ -237,6 +237,45 @@ function M.windows()
 end
 function M.macos()
   return is_macos
+end
+-- Open a file.
+function M.open(filename)
+  local filename = vim.fn.fnamemodify(filename, ':p')
+  local system = vim.fn.system
+  local shellescape = vim.fn.shellescape
+  local executable = vim.fn.executable
+  local exists = vim.fn.exists
+  local printf = string.format
+
+  -- Detect desktop environment.
+  if tree.windows() then
+    -- For URI only.
+    -- Note:
+    --   # and % required to be escaped (:help cmdline-special)
+    vim.api.nvim_command(
+      printf("silent execute '!start rundll32 url.dll,FileProtocolHandler %s'", vim.fn.escape(filename, '#%')))
+  elseif vim.fn.has('win32unix')==1 then
+    -- Cygwin.
+    system(printf('cygstart %s', shellescape(filename)))
+  elseif executable('xdg-open')==1 then
+    -- Linux.
+    system(printf('%s %s &', 'xdg-open', shellescape(filename)))
+  elseif exists('$KDE_FULL_SESSION')==1 and vim.env['KDE_FULL_SESSION'] == 'true' then
+    -- KDE.
+    system(printf('%s %s &', 'kioclient exec', shellescape(filename)))
+  elseif exists('$GNOME_DESKTOP_SESSION_ID')==1 then
+    -- GNOME.
+    system(printf('gnome-open %s &', shellescape(filename)))
+  elseif executable('exo-open')==1 then
+    -- Xfce.
+    system(printf('exo-open %s &', shellescape(filename)))
+  elseif tree.macos() and executable('open')==1 then
+    -- Mac OS.
+    system(printf('open %s &', shellescape(filename)))
+  else
+    -- Give up.
+    vim.fn['tree#util#print_error']('Not supported.')
+  end
 end
 -------------------- end of util.vim --------------------
 
