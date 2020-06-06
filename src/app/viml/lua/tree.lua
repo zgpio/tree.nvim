@@ -466,13 +466,14 @@ function start(paths, user_context)
   --   call tree#call_action('search', [context['search']])
   -- endif
 end
-function action(action, ...)
+function M.action(action, ...)
   if vim.bo.filetype ~= 'tree' then
     return ''
   end
-  local args = ...
-  if type(args) ~= type({}) then
-    args = {...}
+  local args = {...}
+  args = args[1] or {}
+  if not vim.tbl_islist(args) then
+    args = {args}
   end
   return api.nvim_eval(string.format([[":\<C-u>call v:lua.call_async_action(%s, %s)\<CR>"]],
          fn.string(action), fn.string(args)))

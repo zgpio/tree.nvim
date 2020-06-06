@@ -59,6 +59,11 @@ nvim -u config.vim --listen /tmp/xxxxxxxxx
     // unpacker.reserve_buffer(32*1024ul);
     ```
 * initial_buffer_size=25 时unpack得到的消息可能出现错误, 设置为17不会, 设置得这么小是为了验证reserve buffer正确工作.
+* benchmark/performance 测试
+* 设计用户接口:
+    * 1) 需要变量参数的映射使用:map-<expr>, 其他不用, 因为对于常量调用没有必要每次通过tree#action转换命令,
+         类似于tree#action('cd', getcwd())才需要每次求值;
+    * 2)
 * [msgpack controls a buffer](https://github.com/msgpack/msgpack-c/wiki/v2_0_cpp_unpacker)
 * 验证消息传递
     ```vim
@@ -80,6 +85,7 @@ nvim -u config.vim --listen /tmp/xxxxxxxxx
     auto it = std::next(col_map[col].begin(), pos);
     ```
 # NOTE
+* 返回值优化(RVO)
 * Boost::Asio based client library for talking with NeoVim process via it's msgpack-rpc API.
 Depends on: [msgpack-c](https://github.com/msgpack/msgpack-c), Jinja2, and Boost Libraries.
 * 对于Nvim类, 其method没有必要使用前缀`nvim_`

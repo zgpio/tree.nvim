@@ -87,7 +87,7 @@ private:
     void collect_targets();
     void insert_rootcell(const int pos);
     void erase_entrylist(const int s, const int e);
-    void makeline(const int pos, string &line);
+    string makeline(const int pos);
     void entryInfoListRecursively(const FileItem &, vector<FileItem*>& fileitem_lst);
 
     void save_cursor();

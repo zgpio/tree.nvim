@@ -2,6 +2,7 @@
 #include <cinttypes>
 #include <cwchar>
 #include <codecvt>
+#include <chrono>
 #include "tree.h"
 
 #if defined(Q_OS_WIN)
@@ -82,9 +83,11 @@ void truncate(const int l, Cell &cell)
     cell.col_end -= total - 1;
 }
 
-void Tree::makeline(const int pos, string &line)
+// NOTE: depend on RVO
+string Tree::makeline(const int pos)
 {
     assert(0<=pos&&pos<col_map[FILENAME].size());
+    string line;
     int start = 0;
     for (int col : cfg.columns) {
         const Cell & cell = col_map[col][pos];
@@ -101,9 +104,15 @@ void Tree::makeline(const int pos, string &line)
         start = cell.col_end;
     }
     // cout<<"mkline"<<pos<<":"<<line;
+    return line;
 }
+#define TEST
+using namespace std::chrono;
 void Tree::changeRoot(const string &root)
 {
+#ifdef TEST
+    auto start_change_root=system_clock::now();
+#endif
     // TODO: cursor history
     path dir(root);
     if (!exists(dir)) {
@@ -131,8 +140,7 @@ void Tree::changeRoot(const string &root)
     // col_map["icon"][0].text = "";
 
     vector<string> ret;
-    string line;
-    makeline(0, line);
+    string line = makeline(0);
     ret.push_back(line);
 
     vector<FileItem*> child_fileitem;
@@ -151,6 +159,10 @@ void Tree::changeRoot(const string &root)
     }
 
     hline(0, m_fileitem.size());
+#ifdef TEST
+    duration<double> time_change_root = system_clock::now()-start_change_root;
+    printf("change_root Elapsed time:%.9f secs.\n", time_change_root.count());
+#endif
 }
 
 /// Insert columns
@@ -263,8 +275,7 @@ void Tree::insert_entrylist(const vector<FileItem*>& fil, const int pos, vector<
     for (int i = 0; i < file_count; ++i) {
         insert_item(pos+i);
 
-        string line;
-        makeline(pos+i, line);
+        string line = makeline(pos+i);
         ret.push_back(std::move(line));
     }
 }
@@ -378,8 +389,7 @@ void Tree::redraw_line(int sl, int el)
             byte_start = cell.byte_end + sep;
         }
 
-        string line;
-        makeline(i, line);
+        string line = makeline(i);
         ret.push_back(std::move(line));
     }
     buf_set_lines(sl, el, true, std::move(ret));
