@@ -182,6 +182,16 @@ function M.buf_attach(buf)
 end
 
 -------------------- start of util.vim --------------------
+function __remove_quote_pairs(s)
+  -- remove leading/ending quote pairs
+  local t = s
+  if (t[1] == '"' and t[#t] == '"') or (t[1] == "'" and t[#t] == "'") then
+    t = t:sub(2, #t-1)
+  else
+    t = vim.fn.substitute(s, [[\\\(.\)]], "\\1", 'g')
+  end
+  return t
+end
 function __substitute_path_separator(path)
   if is_windows then
     return vim.fn.substitute(path, '\\', '/', 'g')

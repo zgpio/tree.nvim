@@ -55,18 +55,6 @@ function! s:re_unquoted_match(match) abort
         \ . "'" . '([^' . "'" . '\\]*\\.)*[^' . "'" . '\\]*' . "'" . '))*[^"'
         \ . "'" . ']*$'
 endfunction
-function! s:remove_quote_pairs(s) abort
-  " remove leading/ending quote pairs
-  let s = a:s
-  if s[0] ==# '"' && s[len(s) - 1] ==# '"'
-    let s = s[1: len(s) - 2]
-  elseif s[0] ==# "'" && s[len(s) - 1] ==# "'"
-    let s = s[1: len(s) - 2]
-  else
-    let s = substitute(a:s, '\\\(.\)', "\\1", 'g')
-  endif
-  return s
-endfunction
 function! s:parse_options(cmdline) abort
   let args = []
   let options = {}
@@ -85,7 +73,7 @@ function! s:parse_options(cmdline) abort
       let value = v:false
     else
       let value = (arg_key =~# '=$') ?
-            \ s:remove_quote_pairs(arg[len(arg_key) :]) : v:true
+            \ v:lua.__remove_quote_pairs(arg[len(arg_key) :]) : v:true
     endif
 
     let template_opts = v:lua.user_options()
