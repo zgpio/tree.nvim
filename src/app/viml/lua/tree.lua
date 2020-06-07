@@ -182,6 +182,28 @@ function M.buf_attach(buf)
 end
 
 -------------------- start of util.vim --------------------
+-- Test case
+-- -columns=mark:git:indent:icon:filename:size:time -winwidth=40 -listed `expand('%:p:h')`
+-- -buffer-name=\`foo\` -split=vertical -direction=topleft -winwidth=40 -listed `expand('%:p:h')`
+function __eval_cmdline(cmdline)
+  local cl = ''
+  local prev_match = 0
+  local eval_pos = vim.fn.match(cmdline, [[\\\@<!`.\{-}\\\@<!`]])
+  while eval_pos >= 0 do
+    if eval_pos - prev_match > 0 then
+      cl = cl .. cmdline:sub(prev_match+1, eval_pos)
+    end
+    prev_match = vim.fn.matchend(cmdline, [[\\\@<!`.\{-}\\\@<!`]], eval_pos)
+    cl = cl .. vim.fn.escape(vim.fn.eval(cmdline:sub(eval_pos+2, prev_match-1)), [[\ ]])
+
+    eval_pos = vim.fn.match(cmdline, [[\\\@<!`.\{-}\\\@<!`]], prev_match)
+  end
+  if prev_match >= 0 then
+    cl = cl .. cmdline:sub(prev_match+1)
+  end
+
+  return cl
+end
 function M.new_file(args)
   print(inspect(args))
   ret = fn.input(args.prompt, args.text, args.completion)

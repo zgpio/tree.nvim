@@ -76,7 +76,7 @@ function! s:parse_options(cmdline) abort
 
   " Eval
   let cmdline = (a:cmdline =~# '\\\@<!`.*\\\@<!`') ?
-        \ s:eval_cmdline(a:cmdline) : a:cmdline
+        \ v:lua.__eval_cmdline(a:cmdline) : a:cmdline
 
   for s in split(cmdline, s:re_unquoted_match('\%(\\\@<!\s\)\+'))
     let arg = substitute(s, '\\\( \)', '\1', 'g')
@@ -104,26 +104,6 @@ function! s:parse_options(cmdline) abort
   endfor
 
   return [args, options]
-endfunction
-function! s:eval_cmdline(cmdline) abort
-  let cmdline = ''
-  let prev_match = 0
-  let eval_pos = match(a:cmdline, '\\\@<!`.\{-}\\\@<!`')
-  while eval_pos >= 0
-    if eval_pos - prev_match > 0
-      let cmdline .= a:cmdline[prev_match : eval_pos - 1]
-    endif
-    let prev_match = matchend(a:cmdline,
-          \ '\\\@<!`.\{-}\\\@<!`', eval_pos)
-    let cmdline .= escape(eval(a:cmdline[eval_pos+1 : prev_match - 2]), '\ ')
-
-    let eval_pos = match(a:cmdline, '\\\@<!`.\{-}\\\@<!`', prev_match)
-  endwhile
-  if prev_match >= 0
-    let cmdline .= a:cmdline[prev_match :]
-  endif
-
-  return cmdline
 endfunction
 
 function! tree#util#complete(arglead, cmdline, cursorpos) abort
