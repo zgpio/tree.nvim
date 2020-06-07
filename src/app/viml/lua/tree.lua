@@ -182,6 +182,60 @@ function M.buf_attach(buf)
 end
 
 -------------------- start of util.vim --------------------
+function __substitute_path_separator(path)
+  if is_windows then
+    return vim.fn.substitute(path, '\\', '/', 'g')
+  else
+    return path
+  end
+end
+function map_filter(func, t)
+  vim.validate{func={func,'c'},t={t,'t'}}
+
+  local rettab = {}
+  for k, v in pairs(t) do
+    if func(k, v) then
+      rettab[k] = v
+    end
+  end
+  return rettab
+end
+function complete(arglead, cmdline, cursorpos)
+  local copy = vim.fn.copy
+  local _ = {}
+
+  if arglead:find('^-') then
+    -- Option names completion.
+    local bool_options = vim.tbl_keys(map_filter(
+      function(k, v) return type(v) == 'boolean' end, copy(user_options())))
+    local bt = vim.tbl_map(function(v) return '-' .. vim.fn.tr(v, '_', '-') end, copy(bool_options))
+    vim.list_extend(_, bt)
+    local string_options = vim.tbl_keys(map_filter(
+      function(k, v) return type(v) ~= type(true) end, copy(user_options())))
+    local st = vim.tbl_map(function(v) return '-' .. vim.fn.tr(v, '_', '-') .. '=' end, copy(string_options))
+    vim.list_extend(_, st)
+
+    -- Add "-no-" option names completion.
+    local nt = vim.tbl_map(function(v) return '-no-' .. vim.fn.tr(v, '_', '-') end, copy(bool_options))
+    vim.list_extend(_, nt)
+  else
+    local al = vim.fn['tree#util#__expand_complete'](arglead)
+    -- Path names completion.
+    local files = vim.tbl_filter(function(v) return vim.fn.stridx(v:lower(), al:lower()) == 0 end,
+      vim.tbl_map(function(v) return __substitute_path_separator(v) end, vim.fn.glob(arglead .. '*', true, true)))
+    files = vim.tbl_map(
+      function(v) return vim.fn['tree#util#__expand_complete'](v) end,
+      vim.tbl_filter(function(v) return vim.fn.isdirectory(v)==1 end, files))
+    if arglead:find('^~') then
+      local home_pattern = '^'.. vim.fn['tree#util#__expand_complete']('~')
+      files = vim.tbl_map(function(v) return vim.fn.substitute(v, home_pattern, '~/', '') end, files)
+    end
+    files = vim.tbl_map(function(v) return vim.fn.escape(v..'/', ' \\') end, files)
+    vim.list_extend(_, files)
+  end
+
+  return vim.fn.uniq(vim.fn.sort(vim.tbl_filter(function(v) return vim.fn.stridx(v, arglead) == 0 end, _)))
+end
 -- Test case
 -- -columns=mark:git:indent:icon:filename:size:time -winwidth=40 -listed `expand('%:p:h')`
 -- -buffer-name=\`foo\` -split=vertical -direction=topleft -winwidth=40 -listed `expand('%:p:h')`

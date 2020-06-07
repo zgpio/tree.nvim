@@ -28,19 +28,16 @@ function! tree#util#execute_path(command, path) abort
   endtry
 endfunction
 function! s:expand(path) abort
-  return s:substitute_path_separator(
+  return v:lua.__substitute_path_separator(
         \ (a:path =~# '^\~') ? fnamemodify(a:path, ':p') :
         \ a:path)
 endfunction
-function! s:expand_complete(path) abort
-  return s:substitute_path_separator(
+function! tree#util#__expand_complete(path) abort
+  return v:lua.__substitute_path_separator(
         \ (a:path =~# '^\~') ? fnamemodify(a:path, ':p') :
         \ (a:path =~# '^\$\h\w*') ? substitute(a:path,
         \             '^\$\h\w*', '\=eval(submatch(0))', '') :
         \ a:path)
-endfunction
-function! s:substitute_path_separator(path) abort
-  return v:lua.tree.windows() ? substitute(a:path, '\\', '/', 'g') : a:path
 endfunction
 
 function! tree#util#call_tree(command, args) abort
@@ -104,39 +101,6 @@ function! s:parse_options(cmdline) abort
   endfor
 
   return [args, options]
-endfunction
-
-function! tree#util#complete(arglead, cmdline, cursorpos) abort
-  let _ = []
-
-  if a:arglead =~# '^-'
-    " Option names completion.
-    let bool_options = keys(filter(copy(v:lua.user_options()),
-          \ 'type(v:val) == type(v:true) || type(v:val) == type(v:false)'))
-    let _ += map(copy(bool_options), "'-' . tr(v:val, '_', '-')")
-    let string_options = keys(filter(copy(v:lua.user_options()),
-          \ 'type(v:val) != type(v:true) && type(v:val) != type(v:false)'))
-    let _ += map(copy(string_options), "'-' . tr(v:val, '_', '-') . '='")
-
-    " Add "-no-" option names completion.
-    let _ += map(copy(bool_options), "'-no-' . tr(v:val, '_', '-')")
-  else
-    let arglead = s:expand_complete(a:arglead)
-    " Path names completion.
-    let files = filter(map(glob(a:arglead . '*', v:true, v:true),
-          \                's:substitute_path_separator(v:val)'),
-          \            'stridx(tolower(v:val), tolower(arglead)) == 0')
-    let files = map(filter(files, 'isdirectory(v:val)'),
-          \ 's:expand_complete(v:val)')
-    if a:arglead =~# '^\~'
-      let home_pattern = '^'. s:expand_complete('~')
-      call map(files, "substitute(v:val, home_pattern, '~/', '')")
-    endif
-    call map(files, "escape(v:val.'/', ' \\')")
-    let _ += files
-  endif
-
-  return uniq(sort(filter(_, 'stridx(v:val, a:arglead) == 0')))
 endfunction
 
 function! tree#util#cd(path) abort
