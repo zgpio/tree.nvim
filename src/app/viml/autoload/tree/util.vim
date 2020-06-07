@@ -19,18 +19,13 @@ endfunction
 
 function! tree#util#execute_path(command, path) abort
   try
-    execute a:command fnameescape(s:expand(a:path))
+    execute a:command fnameescape(v:lua.__expand(a:path))
   catch /^Vim\%((\a\+)\)\=:E325/
     " Ignore swap file error
   catch
     call tree#util#print_error(v:throwpoint)
     call tree#util#print_error(v:exception)
   endtry
-endfunction
-function! s:expand(path) abort
-  return v:lua.__substitute_path_separator(
-        \ (a:path =~# '^\~') ? fnamemodify(a:path, ':p') :
-        \ a:path)
 endfunction
 function! tree#util#__expand_complete(path) abort
   return v:lua.__substitute_path_separator(

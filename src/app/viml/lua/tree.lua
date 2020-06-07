@@ -182,6 +182,12 @@ function M.buf_attach(buf)
 end
 
 -------------------- start of util.vim --------------------
+function __expand(path)
+  if path:find('^~') then
+    path = vim.fn.fnamemodify(path, ':p')
+  end
+  return __substitute_path_separator(path)
+end
 function __remove_quote_pairs(s)
   -- remove leading/ending quote pairs
   local t = s
