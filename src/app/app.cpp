@@ -73,7 +73,7 @@ void App::createTree(string &path)
     int ns_id = b->create_namespace("tree_icon");
     if (path.back()=='/')  // path("/foo/bar/").parent_path();    // "/foo/bar"
         path.pop_back();
-    cout << __FUNCTION__ << " bufnr:" << bufnr << " ns_id:" << ns_id << " path:" << path << endl;
+    INFO("bufnr:%d ns_id:%d path:%s\n", bufnr, ns_id, path.c_str());
 
     Tree &tree = *(new Tree(bufnr, ns_id));
     trees.insert({bufnr, &tree});
@@ -99,7 +99,7 @@ void App::createTree(string &path)
 
 void App::handleNvimNotification(const string &method, const vector<nvim::Object> &args)
 {
-    cout << __FUNCTION__ << ":" << method << endl;
+    INFO("method: %s\n", method.c_str());
 
     if(method=="_tree_async_action" && args.size() > 0) {
         // _tree_async_action [action: string, args: vector, context: multimap]
@@ -111,10 +111,9 @@ void App::handleNvimNotification(const string &method, const vector<nvim::Object
         }
         cout << endl;
 
-        // cout << "\t" << "action:" << action << "args:" << act_args;
-        // cout << "context:" << context;
+        // INFO("\taction: %s\n", action.c_str());
         m_ctx = context;
-        // cout << "\t" <<trees<< m_ctx.prev_bufnr;
+        // INFO("\tprev_bufnr: %d\n", m_ctx.prev_bufnr);
 
         auto search = trees.find(m_ctx.prev_bufnr);
         if (search != trees.end()) {
@@ -131,7 +130,6 @@ void App::handleNvimNotification(const string &method, const vector<nvim::Object
             string dest = fargs[2].as_string();
             int buf = pos[0].as_uint64_t();
             int line = pos[1].as_uint64_t();
-            // cout<<fargs;
             trees[buf]->paste(line, src, dest);
         }
         else if (fn == "new_file") {
@@ -150,7 +148,6 @@ void App::handleNvimNotification(const string &method, const vector<nvim::Object
             vector<nvim::Object> fargs = args.at(1).as_vector();
             int buf = fargs[0].as_uint64_t();
             int choice = fargs[1].as_uint64_t();
-            // cout << fargs;
             trees[buf]->remove();
         }
         else if (fn == "on_detach") {
@@ -173,7 +170,7 @@ void App::handleNvimNotification(const string &method, const vector<nvim::Object
 void App::handleRequest(nvim::NvimRPC & rpc, uint64_t msgid, const string& method,
         const vector<nvim::Object> &args)
 {
-    cout << __FUNCTION__ << ":" << method << " args.size:" << args.size() << endl;
+    INFO("method: %s args.size: %lu\n", method.c_str(), args.size());
 
     if(method=="_tree_start" && args.size() > 0)
     {

@@ -103,7 +103,7 @@ string Tree::makeline(const int pos)
         line.append(std::move(spc_after));
         start = cell.col_end;
     }
-    // cout<<"mkline"<<pos<<":"<<line;
+    // INFO("pos:%d line:%s\n", pos, line.c_str());
     return line;
 }
 #define TEST
@@ -328,8 +328,6 @@ void Tree::hline(int sl, int el)
                 // :hi tree_<tab>
                 sprintf(name, "tree_%u_%u", col, cell.color);
                 // sprintf(name, "tree_%s", cell.text.data());
-                // cout << icon.col_start<< "->"<<icon.col_end;
-                // cout << icon.text;
                 // auto req_hl = api->buf_add_highlight(bufnr, 0, "String", 0, 0, 3);
                 // call buf_add_highlight(0, -1, "Identifier", 0, 5, -1)
                 api->async_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
@@ -344,8 +342,7 @@ void Tree::hline(int sl, int el)
 /// 0-based [sl, el).
 void Tree::redraw_line(int sl, int el)
 {
-    char format[] = "%s (1-based): [%d, %d]\n";
-    printf(format, __PRETTY_FUNCTION__, sl+1, el);
+    INFO("(1-based): [%d, %d]\n", sl+1, el);
 
     vector<string> ret;
     const int kStop = cfg.filename_colstop;
@@ -374,7 +371,6 @@ void Tree::redraw_line(int sl, int el)
             cell.byte_start = byte_start;
             cell.byte_end = byte_start+cell.text.size();
 
-            // cout << col;
             if (col==FILENAME)
             {
                 int tmp = kStop - cell.col_end;
@@ -405,7 +401,7 @@ void Tree::redraw_recursively(int l)
     std::tuple<int, int> se = find_range(l);
     int s = std::get<0>(se) + 1;
     int e = std::get<1>(se) + 1;
-    printf("%s redraw range(1-based): [%d, %d]\n", __PRETTY_FUNCTION__, s+1, e);
+    INFO("redraw range(1-based): [%d, %d]\n", s+1, e);
 
     erase_entrylist(s, e);
 
@@ -455,7 +451,7 @@ void Tree::entryInfoListRecursively(const FileItem& item,
             copy_if(directory_iterator(item.p), directory_iterator(), back_inserter(v),
                 [](auto x){return (x.path().filename().string().front() != '.');});
     } catch(std::exception& e) {
-        cout << "------->" << e.what() << endl;
+        INFO("-------> %s\n", e.what());
         return;
     }
     sort(v.begin(), v.end(), [](path x, path y){return is_directory(x)>is_directory(y);});
@@ -495,7 +491,7 @@ void Tree::shrinkRecursively(const string &p)
     try {
         copy(directory_iterator(p), directory_iterator(), back_inserter(v));
     } catch(std::exception& e) {
-        cout << "------->" << e.what() << endl;
+        INFO("-------> %s\n", e.what());
         return;
     }
 
@@ -519,7 +515,7 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
     try {
         copy(directory_iterator(item.p), directory_iterator(), back_inserter(v));
     } catch(std::exception& e) {
-        cout << "------->" << e.what() << endl;
+        INFO("-------> %s\n", e.what());
         return;
     }
     sort(v.begin(), v.end(), [](path x, path y){return is_directory(x)>is_directory(y);});
@@ -552,7 +548,7 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
 
 void Tree::handleRename(string &input)
 {
-    cout << __PRETTY_FUNCTION__ << endl;
+    INFO("\n");
 
     Cell & cur = col_map[FILENAME][ctx.cursor-1];
     FileItem & item = *m_fileitem[ctx.cursor-1];
@@ -582,7 +578,7 @@ void Tree::handleNewFile(const string &input)
         api->async_execute_lua("tree.print_message(...)", {"Canceled"});
         return;
     }
-    cout << __PRETTY_FUNCTION__ << input;
+    INFO("input: %s\n", input.c_str());
 
     // Cell & cur = col_map["filename"][ctx.cursor-1];
     FileItem & item = *m_fileitem[ctx.cursor-1];
@@ -590,7 +586,7 @@ void Tree::handleNewFile(const string &input)
     path dest = item.opened_tree ? item.p : item.p.parent_path();
 
     dest += path::preferred_separator + input;
-    cout << dest << endl;
+    INFO("dest: %s\n", dest.string().c_str());
     // QFileInfo fi(dest.filePath(input));
     // NOTE: failed when same name file exists
     if (boost::filesystem::exists(dest)) {
@@ -631,7 +627,7 @@ void Tree::save_cursor()
 {
     FileItem &item = *m_fileitem[0];
     cursorHistory[item.p.string()] = ctx.cursor;
-    cout << "cursorHistory:" << item.p.string() << ":"<< ctx.cursor;
+    INFO("cursorHistory: %s -> %d\n", item.p.string().c_str(), ctx.cursor);
 }
 void Tree::paste(const int ln, const string &src, const string &dest)
 {
@@ -639,13 +635,13 @@ void Tree::paste(const int ln, const string &src, const string &dest)
         if (paste_mode == COPY) {
             copy(src, dest);
             api->async_execute_lua("tree.print_message(...)", {"Copyed"});
-            cout<<"Copy Paste dir"<<endl;
+            INFO("Copy Paste dir\n");
             int pidx = find_parent(ln);
             redraw_recursively(pidx);
         }
         else if (paste_mode == MOVE){
             boost::filesystem::rename(src, dest);
-            cout<<"Move Paste dir"<<endl;
+            INFO("Move Paste dir\n");
             FileItem &root = *m_fileitem[0];
             changeRoot(root.p.string());
         }
@@ -654,13 +650,13 @@ void Tree::paste(const int ln, const string &src, const string &dest)
         if (paste_mode == COPY) {
             copy(src, dest);
             api->async_execute_lua("tree.print_message(...)", {"Copyed"});
-            cout<<"Copy Paste"<<endl;
+            INFO("Copy Paste\n");
             int pidx = find_parent(ln);
             redraw_recursively(pidx);
         }
         else if (paste_mode == MOVE){
             boost::filesystem::rename(src, dest);
-            cout<<"Move Paste"<<endl;
+            INFO("Move Paste\n");
             FileItem &root = *m_fileitem[0];
             changeRoot(root.p.string());
         }
@@ -694,10 +690,10 @@ std::unordered_map<string, Action> action_map {
 void Tree::action(const string &action, const nvim::Array &args,
                   const Map &context)
 {
-    cout << __FUNCTION__ << ":" << action << endl;
+    INFO("action: %s\n", action.c_str());
 
     this->ctx = context;
-    cout << "cursor position(1-based): " << ctx.cursor << endl;
+    INFO("cursor position(1-based): %d\n", ctx.cursor);
 
     auto search = action_map.find(action);
     if (search != action_map.end()) {
@@ -712,7 +708,7 @@ void Tree::action(const string &action, const nvim::Array &args,
 void Tree::open_tree(const nvim::Array &args)
 {
     const int l = ctx.cursor - 1;
-    cout << __FUNCTION__ << endl;
+    INFO("\n");
     assert(0 <= l && l < m_fileitem.size());
     // if (l == 0) return;
     vector<string> ret;
@@ -802,7 +798,7 @@ void Tree::open(const nvim::Array &args)
         changeRoot(p.string());
     }
     else if (args.size()>0 && args[0].as_string()=="vsplit") {
-        cout << "vsplit " << p;
+        INFO("vsplit: %s\n", p.string().c_str());
         api->async_call_function("tree#util#execute_path", {"rightbelow vsplit", p.string()});
     }
     else {
@@ -812,7 +808,6 @@ void Tree::open(const nvim::Array &args)
 
 void Tree::rename(const nvim::Array &args)
 {
-    // cout << action << args;
     FileItem &cur = *m_fileitem[ctx.cursor - 1];
     string info = cur.p.string();
     nvim::Dictionary cfg{
@@ -829,7 +824,6 @@ void Tree::drop(const nvim::Array &args)
 {
     FileItem &cur = *m_fileitem[ctx.cursor - 1];
     const auto p = cur.p;
-    // cout<<args;
     if (is_directory(cur.p))
         changeRoot(p.string());
     else {
@@ -844,7 +838,7 @@ void Tree::cd(const nvim::Array &args)
 
         if (dir=="..") {
             path & curdir = m_fileitem[0]->p;
-            cout << __FUNCTION__ << curdir.parent_path().string() << endl;
+            INFO("cd %s\n", curdir.parent_path().string().c_str());
             changeRoot(curdir.parent_path().string());
         }
         else if (dir == ".") {
@@ -893,8 +887,8 @@ void Tree::pre_paste(const nvim::Array &args)
         path curdir = cur.p.parent_path();
         if (cur.opened_tree) curdir = cur.p.string();
         string destfile = curdir.string() + path::preferred_separator + fname;
-        cout << "destfile:" << destfile << endl;
-        cout << "fname:" << fname << endl;
+        INFO("destfile: %s\n", destfile.c_str());
+        INFO("fname: %s\n", fname.c_str());
         if (exists(destfile)) {
             // api->async_execute_lua("tree.print_message(...)", {"Destination file exists"});
 
@@ -1062,7 +1056,7 @@ void Tree::move(const nvim::Array &args)
 void Tree::open_or_close_tree_recursively(const nvim::Array &args)
 {
     const int l = ctx.cursor - 1;
-    cout << __PRETTY_FUNCTION__ << endl;
+    INFO("\n");
     assert(0 <= l && l < m_fileitem.size());
     if (l == 0) return;
     vector<string> ret;
