@@ -15,3 +15,13 @@
 
 ### Config
 Ref to `src/app/dev.vim`.
+
+## Build
+```sh
+git clone https://github.com/zgpio/tree.nvim
+brew install boost
+brew info boost
+
+cmake -DCMAKE_INSTALL_PREFIX=../INSTALL -DBoost_USE_STATIC_LIBS=ON -DCMAKE_BUILD_TYPE=Release -S ~/project/tree.nvim/ -B ~/project/tree.nvim/build
+make -C ~/project/tree.nvim/build/
+```
