@@ -1,4 +1,6 @@
 # Tree.nvim - File explorer powered by C++.
+[![Build Status](https://travis-ci.org/zgpio/tree.nvim.svg?branch=master)](https://travis-ci.org/zgpio/tree.nvim)
+[![Build status](https://ci.appveyor.com/api/projects/status/v0tb04id681b49xx/branch/master?svg=true)](https://ci.appveyor.com/project/zgpio/tree-nvim/branch/master)
 
 🎉: `QT` dependencies removed (2020-03-21)
 
