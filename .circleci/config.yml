@@ -1,0 +1,33 @@
+version: 2
+jobs:
+  build:
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/project
+    steps:
+      - checkout
+      - run:
+          name: Setup nvim ppa
+          command: sudo add-apt-repository --yes ppa:neovim-ppa/unstable
+      - run:
+          name: Setup boost ppa
+          command: sudo add-apt-repository --yes ppa:mhier/libboost-latest
+      - run:
+          name: APT update
+          command: sudo apt-get update
+      - run:
+          name: Install dependencies
+          command: sudo apt-get install -y neovim python-pip python-dev cmake libboost1.70-dev
+      - run:
+          name: build
+          command: |
+            mkdir build
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Debug ..
+            cmake --build . -- VERBOSE=1
+      - run:
+          name: test
+          command: |
+            cd build
+            ctest -VV
+
