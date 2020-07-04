@@ -93,14 +93,3 @@ function! tree#util#cd(path) abort
     silent execute (haslocaldir() ? 'lcd' : 'cd') fnameescape(a:path)
   endif
 endfunction
-
-function! s:strwidthpart(str, width) abort
-  let str = tr(a:str, "\t", ' ')
-  let vcol = a:width + 2
-  return matchstr(str, '.*\%<' . (vcol < 0 ? 0 : vcol) . 'v')
-endfunction
-function! s:strwidthpart_reverse(str, width) abort
-  let str = tr(a:str, "\t", ' ')
-  let vcol = strwidth(str) - a:width
-  return matchstr(str, '\%>' . (vcol < 0 ? 0 : vcol) . 'v.*')
-endfunction
