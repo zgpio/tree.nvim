@@ -1,36 +1,48 @@
+-- vim:sw=2:et:
 local api = vim.api
 local inspect = vim.inspect
 local fn = vim.fn
 local eval = vim.api.nvim_eval
-require 'tree'
+local tree = require 'tree'
+-- 用户接口tree.custom_column测试
 function t_custom_column()
-  custom = nil
-  custom_column('icon , filename', {
-    directory_icon='▸',
-    opened_icon='▾',
-    root_icon=' ',
-  })
-  print(inspect(custom))
+  tree.custom = nil
+  tree.custom_column('icon , filename', { directory_icon='▸', opened_icon='▾', root_icon=' ', })
+  local rv = {
+    column = {
+      filename = { directory_icon = "▸", opened_icon = "▾", root_icon = " " },
+      icon = { directory_icon = "▸", opened_icon = "▾", root_icon = " " }
+    },
+    option = {},
+    source = {}
+  }
+  assert(vim.deep_equal(rv, tree.custom))
 end
+-- 用户接口tree.custom_option测试
 function t_custom_option()
-  custom = nil
-  custom_option('_', {
-    columns='mark:indent:icon:filename:type:size:time',
-  })
-  print(inspect(custom))
+  tree.custom = nil
+  tree.custom_option('_', { columns='mark:indent:icon:filename:type:size:time', })
+  local rv = {
+    column = {},
+    option = {
+      _ = { columns = "mark:indent:icon:filename:type:size:time" }
+    },
+    source = {}
+  }
+  assert(vim.deep_equal(rv, tree.custom))
 end
+-- 用户接口tree.custom_source测试
 function t_custom_source()
-  custom = nil
-  custom_source('file', {
-    root='Root',
-  })
-  print(inspect(custom))
+  tree.custom = nil
+  tree.custom_source('file', { root='Root', })
+  local rv = { column = {}, option = {}, source = { file = { root = "Root" } } }
+  assert(vim.deep_equal(rv, tree.custom))
 end
 function t_set_custom()
   local dest = {}
-  dest = set_custom(dest, 'icon', true)
+  dest = tree._set_custom(dest, 'icon', true)
   assert(dest, {icon=true})
-  dest = set_custom(dest, {opened_icon='-', root_icon='[R]'})
+  dest = tree._set_custom(dest, {opened_icon='-', root_icon='[R]'})
   assert(dest, {icon=true, opened_icon='-', root_icon='[R]'})
 end
 function t_init_context()
@@ -42,7 +54,7 @@ function t_init_context()
     listed=true,
     winwidth='40'
   }
-  local ctx = init_context(user_context)
+  local ctx = tree._init_context(user_context)
   local rv = {
     columns              = 'mark:indent:git:icons:filename:type',
     auto_cd              = false,
@@ -73,13 +85,24 @@ function t_init_context()
     drives               = {},
     toggle               = false
   }
-  print(inspect(ctx))
+  local check = {
+    columns = "mark:indent:git:icons:filename:type",
+    custom = { column = {}, option = {}, source = { file = { root = "Root" } } },
+    direction = "topleft",
+    listed = true,
+    resume = true,
+    split = "vertical",
+    wincol = 42,
+    winrow = 15,
+    winwidth = "40"
+  }
+  assert(vim.deep_equal(check, ctx))
 end
--- t_custom_column()
--- t_custom_option()
--- t_custom_source()
+t_custom_column()
+t_custom_option()
+t_custom_source()
 t_set_custom()
 t_init_context()
-initialize()
-error('test error function')
-warning('test error function')
+tree._initialize()
+tree.error('test error function')
+tree.warning('test error function')

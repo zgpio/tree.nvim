@@ -633,4 +633,13 @@ function M.rrequire(module)
   return require(module)
 end
 
+if _TEST then
+  -- Note: we prefix it with an underscore, such that the test function and real function have
+  -- different names. Otherwise an accidental call in the code to `M.FirstToUpper` would
+  -- succeed in tests, but later fail unexpectedly in production
+  M._set_custom = set_custom
+  M._init_context = init_context
+  M._initialize = initialize
+end
+
 return M
