@@ -596,8 +596,6 @@ void Tree::handleNewFile(const string &input)
     else if(input.back() == '/'){
         if(!create_directory(dest))
             api->async_execute_lua("tree.print_message(...)", {"Failed to create dir!"});
-    } else {
-        boost::filesystem::ofstream(dest.string());
     }
 
     if (item.opened_tree) {
