@@ -81,6 +81,7 @@ Depends on: [msgpack-c](https://github.com/msgpack/msgpack-c), Jinja2, and Boost
 * 对于Nvim类, 其method没有必要使用前缀`nvim_`
 * 理解UTF-8与Unicode
     ```cpp
+    // linux下wchar占4个字节
     string s = "中国"; // (与源文件编码(UTF-8)一致?) byte array
     cout << s.at(0) << s.at(1) << s.at(2) << endl; // 中
 

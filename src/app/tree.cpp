@@ -17,6 +17,14 @@ Tree::ClipboardMode Tree::paste_mode;
 list<string> Tree::clipboard;
 nvim::Nvim *Tree::api;
 
+int wchar_width(wchar_t ucs)
+{
+#if defined(Q_OS_WIN)
+    return mk_wcwidth(ucs);
+#else
+    return wcwidth(ucs);
+#endif
+}
 Tree::~Tree()
 {
     erase_entrylist(0, m_fileitem.size());
@@ -47,40 +55,37 @@ int countgrid(const std::wstring &s)
         const wchar_t wc = s.at(i);
 
         // NOTE: wcwidth need unicode
-#if defined(Q_OS_WIN)
-        if (mk_wcwidth(wc)==2) {
+        if (wchar_width(wc)==2) {
             ans++;
         }
-#else
-        if (wcwidth(wc)==2) {
-            ans++;
-        }
-#endif
     }
     return n + ans;  // screen cells
 }
+// truncate to l screen cells
 void truncate(const int l, Cell &cell)
 {
     int old_bytesize = cell.text.size();
-    int n = cell.col_end - cell.col_start - l;
-    int total = 0; // total visual width
-    int pos = 1;
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
     std::wstring str = converter.from_bytes(cell.text.c_str());
-    while (total <= n) {
-#if defined(Q_OS_WIN)
-        total += mk_wcwidth(str.at(pos));
-#else
-        total += wcwidth(str.at(pos));
-#endif
-        str.erase(pos, 1);
+    int ls=0, rs=0;
+    int i=0, j=str.size()-1;
+    while (ls+rs < l-2) {
+        if (ls<rs) {
+            ls += wchar_width(str.at(i));
+            i++;
+        }
+        else {
+            rs += wchar_width(str.at(j));
+            j--;
+        }
     }
-    str.insert(pos, L"…");
+    str.erase(i, j-i+1);
+    str.insert(i, L"…");
     // https://stackoverflow.com/questions/4804298/how-to-convert-wstring-into-string
     // use converter (.to_bytes: wstr->str, .from_bytes: str->wstr)
     cell.text = converter.to_bytes(str);
     cell.byte_end -= old_bytesize - cell.text.size();
-    cell.col_end -= total - 1;
+    cell.col_end -= cell.col_end - cell.col_start - (ls+rs+1);
 }
 
 // NOTE: depend on RVO
@@ -596,6 +601,8 @@ void Tree::handleNewFile(const string &input)
     else if(input.back() == '/'){
         if(!create_directory(dest))
             api->async_execute_lua("tree.print_message(...)", {"Failed to create dir!"});
+    } else {
+        boost::filesystem::ofstream(dest.string());
     }
 
     if (item.opened_tree) {
