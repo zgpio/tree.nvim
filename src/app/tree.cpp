@@ -987,7 +987,13 @@ void Tree::redraw(const nvim::Array &args)
 void Tree::new_file(const nvim::Array &args)
 {
     FileItem &cur = *m_fileitem[ctx.cursor - 1];
-    string info = cur.p.string();
+    string info;
+    if (cur.opened_tree) {
+        info = cur.p.string();
+    } else {
+        int p = find_parent(ctx.cursor-1);
+        info = m_fileitem[p]->p.string();
+    }
     nvim::Dictionary cfg{
         {"prompt", "New File: " + info + "/"},
         {"text", ""},
