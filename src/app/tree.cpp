@@ -459,7 +459,12 @@ void Tree::entryInfoListRecursively(const FileItem& item,
         INFO("-------> %s\n", e.what());
         return;
     }
-    sort(v.begin(), v.end(), [](path x, path y){return is_directory(x)>is_directory(y);});
+    sort(v.begin(), v.end(), [](path x, path y) {
+        if (is_directory(x) == is_directory(y))
+            return x < y;
+        else
+            return is_directory(x) > is_directory(y);
+    });
 
     for (auto &x : v) {
       try {
@@ -523,7 +528,12 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
         INFO("-------> %s\n", e.what());
         return;
     }
-    sort(v.begin(), v.end(), [](path x, path y){return is_directory(x)>is_directory(y);});
+    sort(v.begin(), v.end(), [](path x, path y) {
+        if (is_directory(x) == is_directory(y))
+            return x < y;
+        else
+            return is_directory(x) > is_directory(y);
+    });
 
     for (directory_entry &x : v) {
       try {
