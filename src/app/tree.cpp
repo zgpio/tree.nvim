@@ -4,6 +4,7 @@
 #include <codecvt>
 #include <chrono>
 #include "tree.h"
+#include "strnatcmp.hpp"
 
 #if defined(Q_OS_WIN)
 extern int mk_wcwidth(wchar_t ucs);
@@ -461,7 +462,7 @@ void Tree::entryInfoListRecursively(const FileItem& item,
     }
     sort(v.begin(), v.end(), [](path x, path y) {
         if (is_directory(x) == is_directory(y))
-            return x < y;
+            return compareNat(x.string(), y.string());
         else
             return is_directory(x) > is_directory(y);
     });
@@ -530,7 +531,7 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
     }
     sort(v.begin(), v.end(), [](path x, path y) {
         if (is_directory(x) == is_directory(y))
-            return x < y;
+            return compareNat(x.string(), y.string());
         else
             return is_directory(x) > is_directory(y);
     });
