@@ -15,7 +15,7 @@
 - `Defx's` UI/API (minor revision).
 
 ## Usage
-![Demo](https://user-images.githubusercontent.com/19503791/68298747-1d6df180-00d5-11ea-8139-3c96ed492334.png)
+![Demo](https://user-images.githubusercontent.com/19503791/86912092-f3326f00-c14e-11ea-9d98-b65563c1bd6c.png)
 
 ### Config
 Ref to `src/app/dev.vim`.
