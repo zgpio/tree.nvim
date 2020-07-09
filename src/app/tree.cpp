@@ -114,6 +114,14 @@ string Tree::makeline(const int pos)
 }
 #define TEST
 using namespace std::chrono;
+void Tree::set_cursor()
+{
+    string k = (*m_fileitem[0]).p.string();
+    auto got = cursorHistory.find(k);
+    if (got != cursorHistory.end()) {
+        api->async_win_set_cursor(0, {cursorHistory[k], 0});
+    }
+}
 void Tree::changeRoot(const string &root)
 {
 #ifdef TEST
@@ -158,11 +166,6 @@ void Tree::changeRoot(const string &root)
     insert_entrylist(child_fileitem, 1, ret);
 
     buf_set_lines(0, -1, true, ret);
-    string k = (*m_fileitem[0]).p.string();
-    auto got = cursorHistory.find(k);
-    if (got != cursorHistory.end()) {
-        api->async_win_set_cursor(0, {cursorHistory[k], 0});
-    }
 
     hline(0, m_fileitem.size());
 #ifdef TEST
@@ -971,7 +974,8 @@ void Tree::pre_remove(const nvim::Array &args)
 }
 void Tree::remove()
 {
-    // TODO: remove 之后光标位置
+    // TODO: cursor position after remove
+    save_cursor();
     vector<string> rmfiles;
     for (const int &pos : targets) {
         rmfiles.push_back(m_fileitem[pos]->p.string());
@@ -989,6 +993,7 @@ void Tree::remove()
     }
     FileItem &root = *m_fileitem[0];
     changeRoot(root.p.string());
+    set_cursor();
 }
 void Tree::redraw(const nvim::Array &args)
 {

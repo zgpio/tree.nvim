@@ -91,6 +91,7 @@ private:
     void hline(int sl, int el);
     int find_parent(int l);
     std::tuple<int, int> find_range(int l);
+    void set_cursor();
     void insert_entrylist(const vector<FileItem*> &, const int pos, vector<string>& ret);
     void insert_item(const int pos);
     void _toggle_select(const int pos);
