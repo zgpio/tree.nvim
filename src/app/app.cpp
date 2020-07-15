@@ -43,7 +43,7 @@ App::App(nvim::Nvim *nvim, int chan_id) : m_nvim(nvim), chan_id(chan_id)
 
     for (int i = 0; i < 83; ++i) {
         sprintf(name, "tree_%d_%d", ICON, i);
-        sprintf(cmd, "hi %s guifg=%s", name, icons[i][1].data());
+        sprintf(cmd, "hi %s guifg=%s", name, icons[i].second.data());
         a.command(cmd);
     }
     for (int i = 0; i < 16; ++i) {
@@ -53,7 +53,7 @@ App::App(nvim::Nvim *nvim, int chan_id) : m_nvim(nvim), chan_id(chan_id)
     }
     for (int i = 0; i < 8; ++i) {
         sprintf(name, "tree_%d_%d", GIT, i);
-        sprintf(cmd, "hi %s guifg=%s", name, git_indicators[i][1].data());
+        sprintf(cmd, "hi %s guifg=%s", name, git_indicators[i].second.data());
         a.command(cmd);
     }
 }

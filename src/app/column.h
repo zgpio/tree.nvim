@@ -7,13 +7,12 @@
 #include <boost/filesystem.hpp>
 using Map = std::multimap<msgpack::type::variant, msgpack::type::variant>;
 using std::string;
-using std::array;
 using std::list;
 using std::unordered_map;
 using boost::filesystem::file_status;
 extern unordered_map<string, string> mark_indicators;
-extern array<string, 2> git_indicators[];
-extern array<string, 2> icons[];
+extern std::pair<string, string> git_indicators[];
+extern std::pair<string, string> icons[];
 extern string gui_colors[];
 
 enum GUI_COLOR { BROWN, AQUA, BLUE, DARKBLUE, PURPLE, LIGHTPURPLE, RED, BEIGE, YELLOW, ORANGE, DARKORANGE, PINK, SALMON, GREEN, LIGHTGREEN, WHITE };
