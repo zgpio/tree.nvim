@@ -201,20 +201,19 @@ void Cell::update_size(const FileItem &fi)
         if (0 <= sz && sz < 1024) {
             sprintf(text, "%4lu  B", sz);
         }
-        else if (1024 <= sz && sz < 1024 * 1024) {
+        else if (1024 <= sz && sz < (2<<20)) {
             sz >>= 10;
             sprintf(text, "%4lu KB", sz);
         }
-        else if (1024 * 1024 <= sz && sz < 1024 * 1024 * 1024) {
+        else if ((2<<20) <= sz && sz < (2<<30)) {
             sz >>= 20;
             sprintf(text, "%4lu MB", sz);
         }
-        else if (1024 * 1024 * 1024 <= sz && sz < 1024LL * 1024 * 1024 * 1024) {
+        else if ((2<<30) <= sz && sz < (2LL<<40)) {
             sz >>= 30;
             sprintf(text, "%4lu GB", sz);
         }
-        else if (1024LL * 1024 * 1024 * 1024 <= sz &&
-                sz < 1024LL * 1024 * 1024 * 1024 * 1024) {
+        else if ((2LL<<40) <= sz && sz < (2LL<<50)) {
             sz >>= 40;
             sprintf(text, "%4lu TB", sz);
         }
