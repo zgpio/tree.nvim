@@ -105,8 +105,7 @@ string Tree::makeline(const int pos)
         //     len = cell.col_end-countgrid(cell_str)-cell.col_start;
         // else
         //     len = cell.col_end-cell_str.size()-cell.col_start;
-        string spc_after(len, ' ');
-        line.append(std::move(spc_after));
+        line.append(string(len, ' '));
         start = cell.col_end;
     }
     // INFO("pos:%d line:%s\n", pos, line.c_str());
@@ -198,7 +197,6 @@ void Tree::insert_item(const int pos)
         // NOTE: alignment
         if (col==FILENAME) {
             int tmp = kStop - cell.col_end;
-            // TODO:此处都设置成统一列，在makeline时进行截断
             if (tmp > 0) {
                 cell.col_end+=tmp;
                 cell.byte_end+=tmp;
@@ -258,7 +256,6 @@ void Tree::insert_rootcell(const int pos)
         // NOTE: alignment
         if (col==FILENAME) {
             int tmp = kStop - cell.col_end;
-            // TODO:此处都设置成统一列，在makeline时进行截断
             if (tmp >0) {
                 cell.col_end+=tmp;
                 cell.byte_end+=tmp;
@@ -584,7 +581,7 @@ void Tree::handleRename(string &input)
     // NOTE: gmap may update
     // FileItem::update_gmap(item.fi.absolutePath());
     // redraw_line(ctx.cursor-1, ctx.cursor);
-    // TODO: 细粒度redraw
+    // TODO: Fine-grained redraw
     FileItem &root = *m_fileitem[0];
     changeRoot(root.p.string());
 
@@ -608,6 +605,7 @@ void Tree::handleNewFile(const string &input)
     INFO("dest: %s\n", dest.string().c_str());
     // QFileInfo fi(dest.filePath(input));
     // NOTE: failed when same name file exists
+    // TODO: No case sensitive on macos 10.14.5; Works on linux.
     if (boost::filesystem::exists(dest)) {
         api->async_execute_lua("tree.print_message(...)", {"File already exists!"});
         return;
@@ -870,6 +868,7 @@ void Tree::cd(const nvim::Array &args)
         else {
             changeRoot(dir);
         }
+        set_cursor();
     }
     else {
         // changeRoot(QDir::home().absolutePath());
@@ -895,12 +894,14 @@ void Tree::print(const nvim::Array &args)
 }
 void Tree::pre_paste(const nvim::Array &args)
 {
-    // TODO: 批量paste
     if (clipboard.size() <= 0) {
         api->async_execute_lua("tree.print_message(...)", {"Nothing in clipboard"});
         return;
     }
     for (const string &f : clipboard) {
+        // TODO Remove non-existent source directories from the clipboard
+        if (!exists(f))
+            continue;
         FileItem &cur = *m_fileitem[ctx.cursor - 1];
         string fname = path(f).filename().string();
         path curdir = cur.p.parent_path();
