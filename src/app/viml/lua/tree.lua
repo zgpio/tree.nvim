@@ -182,6 +182,17 @@ function M.buf_attach(buf)
 end
 
 -------------------- start of util.vim --------------------
+function M.string(expr)
+  if type(expr)=='string' then
+    return expr
+  else
+    return vim.fn.string(expr)
+  end
+end
+function M.print_error(s)
+  api.nvim_command(string.format("echohl Error | echomsg '[tree] %s' | echohl None", M.string(s)))
+end
+
 function __expand(path)
   if path:find('^~') then
     path = vim.fn.fnamemodify(path, ':p')
@@ -366,7 +377,7 @@ function M.open(filename)
     system(printf('open %s &', shellescape(filename)))
   else
     -- Give up.
-    vim.fn['tree#util#print_error']('Not supported.')
+    M.print_error('Not supported.')
   end
 end
 -------------------- end of util.vim --------------------

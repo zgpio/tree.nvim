@@ -5,16 +5,8 @@
 "=============================================================================
 lua require 'tree'
 
-function! tree#util#print_error(string) abort
-  echohl Error | echomsg '[tree] '
-        \ . tree#util#string(a:string) | echohl None
-endfunction
-
 function! tree#util#convert2list(expr) abort
   return type(a:expr) ==# type([]) ? a:expr : [a:expr]
-endfunction
-function! tree#util#string(expr) abort
-  return type(a:expr) ==# type('') ? a:expr : string(a:expr)
 endfunction
 
 function! tree#util#execute_path(command, path) abort
@@ -23,8 +15,8 @@ function! tree#util#execute_path(command, path) abort
   catch /^Vim\%((\a\+)\)\=:E325/
     " Ignore swap file error
   catch
-    call tree#util#print_error(v:throwpoint)
-    call tree#util#print_error(v:exception)
+    call v:lua.tree.print_error(v:throwpoint)
+    call v:lua.tree.print_error(v:exception)
   endtry
 endfunction
 function! tree#util#__expand_complete(path) abort
