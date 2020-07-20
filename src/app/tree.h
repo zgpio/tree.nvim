@@ -72,6 +72,7 @@ public:
     void toggle_ignored_files(const nvim::Array &args);
     void paste(const int ln, const string &src, const string &dest);
     void pre_paste(const nvim::Array &args);
+    void view(const nvim::Array &args);
 
     inline void buf_set_lines(int s, int e, bool strict, const vector<string> &replacement)
     {

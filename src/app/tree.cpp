@@ -702,6 +702,7 @@ std::unordered_map<string, Action> action_map {
     {"rename"               , &Tree::rename},
     {"drop"                 , &Tree::drop},
     {"call"                 , &Tree::call},
+    {"view"                 , &Tree::view},
     {"open_tree_recursive"  , &Tree::open_or_close_tree_recursively},
 };
 void Tree::action(const string &action, const nvim::Array &args,
@@ -847,6 +848,7 @@ void Tree::drop(const nvim::Array &args)
         api->async_execute_lua("tree.drop(...)", {args, p.string()});
     }
 }
+// TODO Handle calls without viewing permission
 void Tree::cd(const nvim::Array &args)
 {
     save_cursor();
@@ -1180,4 +1182,19 @@ void Tree::toggle_ignored_files(const nvim::Array &args)
     cfg.show_ignored_files = !cfg.show_ignored_files;
     FileItem &root = *m_fileitem[0];
     changeRoot(root.p.string());
+}
+void Tree::view(const nvim::Array &args)
+{
+    FileItem &cur = *m_fileitem[ctx.cursor - 1];
+    Cell time_cell(cfg, cur, TIME);
+    string size = Cell(cfg, cur, SIZE).text;
+    size.erase(0, size.find_first_not_of(" "));
+    size.erase(size.find_last_not_of(" ") + 1);
+    nvim::Dictionary info{
+        {"filename", cur.filename},
+        {"date", time_cell.text},
+        {"size", size},
+    };
+    api->command("lua require('tree/float')");
+    api->execute_lua("Tree_display(...)", {info});
 }

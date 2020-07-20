@@ -2,7 +2,7 @@
 local fn = vim.fn
 local api = vim.api
 local cmd = vim.api.nvim_command
-function buildContent(translations)
+local function buildContent(info)
   local marker = {
     ft='',
     date='',
@@ -11,14 +11,14 @@ function buildContent(translations)
 
   local content = {}
 
-  for k, v in pairs(translations) do
+  for k, v in pairs(info) do
     table.insert(content, string.format('%4s: %s', k, v))
   end
 
   return content
 end
 
-function winPos(width, height)
+local function winPos(width, height)
   local bottom_line = fn.line('w0') + fn.winheight(0) - 1
   local curr_pos = fn.getpos('.')
   local rownr = curr_pos[2]
@@ -50,11 +50,11 @@ function winPos(width, height)
   return row, col, vert, hor
 end
 
-function winSize(translation, max_width, max_height)
+local function winSize(info, max_width, max_height)
   local width = 0
   local height = 0
 
-  for i, line in ipairs(translation) do
+  for i, line in ipairs(info) do
     local line_width = fn.strdisplaywidth(line)
     if line_width > max_width then
       width = max_width
@@ -82,8 +82,8 @@ function closePopup()
   end
 end
 
-function Tree_display(translations)
-  local content = buildContent(translations)
+function Tree_display(info)
+  local content = buildContent(info)
   local tree_popup_max_height
   local tree_popup_max_width
   local max_height = tree_popup_max_height or 0.6*vim.o.lines
@@ -140,7 +140,7 @@ function Tree_display(translations)
   ]], false)
 
 end
-print(vim.inspect(buildContent({date='2020-03-08', ft='txt'} )))
+-- print(vim.inspect(buildContent({date='2020-03-08', ft='txt'})))
 -- call v:lua.Tree_display({ 'date': '2020-03-08', 'ft': 'txt' })
 -- lua Tree_display({ date='2020-03-08', ft='txt', size='1024KB' })
 -- autocmd CursorHold <buffer> lua Tree_display({ date='2020-03-08', ft='txt', size='1024KB' })

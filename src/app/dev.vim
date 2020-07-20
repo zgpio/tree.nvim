@@ -63,6 +63,7 @@ func! s:set_tree() abort
   nnoremap <silent><buffer><expr> cp tree#action('copy')
   nnoremap <silent><buffer><expr> m tree#action('move')
   nnoremap <silent><buffer><expr> p tree#action('paste')
+  nnoremap <silent><buffer><expr> a tree#action('view')
   nnoremap <silent><buffer><expr> d tree#action('remove')
   nnoremap <silent><buffer><expr> cD tree#action('call', 'CdNode')
   nnoremap <silent><buffer><expr> > tree#action('toggle_ignored_files')
