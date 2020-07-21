@@ -14,6 +14,7 @@ using std::string;
 using std::cout;
 using std::endl;
 
+namespace tree {
 Tree::ClipboardMode Tree::paste_mode;
 list<string> Tree::clipboard;
 nvim::Nvim *Tree::api;
@@ -595,7 +596,7 @@ void Tree::handleNewFile(const string &input)
 
     path dest = item.opened_tree ? item.p : item.p.parent_path();
 
-    dest += path::preferred_separator + input;
+    dest /= input;
     INFO("dest: %s\n", dest.string().c_str());
     // QFileInfo fi(dest.filePath(input));
     // NOTE: failed when same name file exists
@@ -622,7 +623,10 @@ void Tree::handleNewFile(const string &input)
     }
     // TODO: Find in subdirectories is faster
     for (int i = 0; i < m_fileitem.size(); i++) {
-        if (m_fileitem[i]->p == dest) api->async_win_set_cursor(0, {i + 1, 0});
+        if (m_fileitem[i]->p == dest) {
+            api->async_win_set_cursor(0, {i + 1, 0});
+            break;
+        }
     }
 }
 
@@ -906,7 +910,7 @@ void Tree::pre_paste(const nvim::Array &args)
         string fname = path(f).filename().string();
         path curdir = cur.p.parent_path();
         if (cur.opened_tree) curdir = cur.p.string();
-        string destfile = curdir.string() + path::preferred_separator + fname;
+        string destfile = (curdir/=fname).string();
         INFO("destfile: %s\n", destfile.c_str());
         INFO("fname: %s\n", fname.c_str());
         if (exists(destfile)) {
@@ -1197,3 +1201,4 @@ void Tree::view(const nvim::Array &args)
     api->command("lua require('tree/float')");
     api->execute_lua("Tree_display(...)", {info});
 }
+} // namespace tree

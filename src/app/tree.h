@@ -22,6 +22,7 @@ using std::list;
 using std::string;
 using std::vector;
 using std::unordered_map;
+namespace tree {
 // TODO using Hash = std::unordered_map<class _Key, class _Tp>;
 class Tree
 {
@@ -107,5 +108,5 @@ private:
     void expandRecursively(const FileItem&, list<FileItem*> &fileitem_lst);
 };
 
-
+} // namespace tree
 #endif
