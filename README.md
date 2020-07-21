@@ -22,11 +22,21 @@
 Ref to [config.vim](src/app/dev.vim).
 
 ## Build
+### macos
 ```sh
-git clone https://github.com/zgpio/tree.nvim
 brew install boost
-brew info boost
+git clone https://github.com/zgpio/tree.nvim
 
-cmake -DCMAKE_INSTALL_PREFIX=../INSTALL -DBoost_USE_STATIC_LIBS=ON -DCMAKE_BUILD_TYPE=Release -S ~/project/tree.nvim/ -B ~/project/tree.nvim/build
-make -C ~/project/tree.nvim/build/
+cmake -DCMAKE_INSTALL_PREFIX=./INSTALL -DBoost_USE_STATIC_LIBS=ON -DCMAKE_BUILD_TYPE=Release -S tree.nvim/ -B tree.nvim/build
+make -C tree.nvim/build/ install
+```
+### ubuntu1804
+```sh
+# cmake 3.10  boost 1.65
+sudo apt install cmake libboost-all-dev
+git clone https://github.com/zgpio/tree.nvim.git
+cd tree.nvim
+mkdir build && cd build
+cmake -DCMAKE_INSTALL_PREFIX=./INSTALL -DBoost_USE_STATIC_LIBS=ON -DCMAKE_BUILD_TYPE=Release  ..
+make install
 ```
