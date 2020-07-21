@@ -5,6 +5,7 @@
 #include "tree.h"
 #include "nvim.hpp"
 
+namespace tree {
 
 class App
 {
@@ -27,5 +28,5 @@ private:
     list<int> treebufs;  // Recently used order
 };
 
-
+} // namespace tree
 #endif
