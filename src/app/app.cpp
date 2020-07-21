@@ -123,6 +123,7 @@ void App::handleNvimNotification(const string &method, const vector<nvim::Object
     }
     else if (method=="function") {
         string fn = args.at(0).as_string();
+        // TODO The logic of tree.nvim calling lua code and then calling back cpp code should be placed in tree.cpp
         if (fn == "paste") {
             vector<nvim::Object> fargs = args.at(1).as_vector();
             vector<nvim::Object> pos = fargs[0].as_vector();

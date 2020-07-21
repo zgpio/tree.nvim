@@ -23,17 +23,20 @@ class Cell;
 class Config;
 class FileItem
 {
-public:
-    FileItem();
-    virtual ~FileItem(){};
+private:
+    using Path = boost::filesystem::path;
 
-    boost::filesystem::path p;
+public:
+    FileItem() = delete;
+    FileItem(Path p);
+    ~FileItem(){};
+
+    Path p;
     string filename;
     int level = 0;
     bool opened_tree = false;
-    // TODO: parent被选中 与 部分child被选中，两者是冲突的 <04-10-19, zgp>
+    // TODO: Conflict situation: parent is selected and part of child is selected
     bool selected = false;
-    // TODO: 更快地查找父FileItem
     const FileItem* parent=nullptr;
     bool last = false;
     static unordered_map<string, git_status> git_map;

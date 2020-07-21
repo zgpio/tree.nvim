@@ -141,11 +141,9 @@ void Tree::changeRoot(const string &root)
     targets.clear();
     erase_entrylist(0, m_fileitem.size());
 
-    FileItem *fileitem = new FileItem;
+    FileItem *fileitem = new FileItem(dir);
     fileitem->level = -1;
     fileitem->opened_tree = true;
-    fileitem->p = dir;
-    fileitem->filename = dir.filename().string();
     m_fileitem.push_back(fileitem);
 
     insert_rootcell(0);
@@ -285,7 +283,7 @@ void Tree::insert_entrylist(const vector<FileItem*>& fil, const int pos, vector<
         ret.push_back(std::move(line));
     }
 }
-// TODO: 通过FileItem的parent查询
+// TODO: Find the parent through FileItem.parent
 /// l is 0-based row number.
 /// NOTE: root.level=-1
 int Tree::find_parent(int l)
@@ -469,11 +467,9 @@ void Tree::entryInfoListRecursively(const FileItem& item,
 
     for (auto &x : v) {
       try {
-        FileItem *fileitem = new FileItem;
+        FileItem *fileitem = new FileItem(x);
         fileitem->level = level;
         fileitem->parent = &item;
-        fileitem->p = x;
-        fileitem->filename = x.filename().string();
         if (&x == &(*(v.end()-1))) {
             fileitem->last = true;
         }
@@ -538,11 +534,9 @@ void Tree::expandRecursively(const FileItem &item, vector<FileItem*> &fileitems)
 
     for (directory_entry &x : v) {
       try {
-        FileItem *fileitem = new FileItem;
+        FileItem *fileitem = new FileItem(x);
         fileitem->level = level;
         fileitem->parent = &item;
-        fileitem->p = x.path();
-        fileitem->filename = x.path().filename().string();
         if (&x == &(*(v.end()-1))) {
             fileitem->last = true;
         }
@@ -625,6 +619,10 @@ void Tree::handleNewFile(const string &input)
         // NOTE: root.level=-1
         // TODO: consider named redraw_family
         redraw_recursively(pidx);
+    }
+    // TODO: Find in subdirectories is faster
+    for (int i = 0; i < m_fileitem.size(); i++) {
+        if (m_fileitem[i]->p == dest) api->async_win_set_cursor(0, {i + 1, 0});
     }
 }
 
@@ -1183,6 +1181,7 @@ void Tree::toggle_ignored_files(const nvim::Array &args)
     FileItem &root = *m_fileitem[0];
     changeRoot(root.p.string());
 }
+// TODO Custom display content
 void Tree::view(const nvim::Array &args)
 {
     FileItem &cur = *m_fileitem[ctx.cursor - 1];

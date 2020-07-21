@@ -92,8 +92,9 @@ enum Icon {
 
 extern unordered_map<string, Icon> extensions;
 extern unordered_map<string, Icon> filenames;
-FileItem::FileItem()
+FileItem::FileItem(Path p) : p(p)
 {
+    filename = p.filename().string();
 }
 Cell::Cell()
 {
@@ -352,7 +353,7 @@ Context::Context(const Map &ctx)
 }
 
 // https://www.zhihu.com/question/36642771
-void ssplit(const string &s, vector<string> &tokens, const string &delimiters=" ")
+static void ssplit(const string &s, vector<string> &tokens, const string &delimiters=" ")
 {
     string::size_type lastPos = s.find_first_not_of(delimiters, 0);
     string::size_type pos = s.find_first_of(delimiters, lastPos);
