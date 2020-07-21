@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 
 project(neovim_client_cpp)
 
-find_package(Boost 1.55.0 REQUIRED COMPONENTS system coroutine context thread filesystem)
+find_package(Boost 1.55.0 REQUIRED COMPONENTS system coroutine context thread filesystem date_time)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -pthread")
 
@@ -24,7 +24,8 @@ include_directories(
     ${Boost_INCLUDE_DIR}
     ${MSGPACK_INCLUDE_DIRS}
 )
-
+add_definitions( -DBOOST_ALL_NO_LIB )
+# include(GNUInstallDirs)
 add_executable(tree
     src/main.cpp
     src/app/tree.cpp
