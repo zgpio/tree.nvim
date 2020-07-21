@@ -33,7 +33,7 @@ make -C tree.nvim/build/ install
 ### ubuntu1804
 ```sh
 # cmake 3.10  boost 1.65
-sudo apt install cmake libboost-all-dev
+sudo apt install cmake libboost-filesystem-dev
 git clone https://github.com/zgpio/tree.nvim.git
 cd tree.nvim
 mkdir build && cd build

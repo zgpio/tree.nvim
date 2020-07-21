@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 
 project(neovim_client_cpp)
 
-find_package(Boost 1.55.0 REQUIRED COMPONENTS system coroutine context thread filesystem)
+find_package(Boost 1.55.0 REQUIRED COMPONENTS filesystem)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -pthread")
 
