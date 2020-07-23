@@ -6,7 +6,7 @@
 #include "tree.h"
 #include "strnatcmp.hpp"
 
-#if defined(Q_OS_WIN)
+#if defined(OS_WIN)
 extern int mk_wcwidth(wchar_t ucs);
 #endif
 using namespace boost::filesystem;
@@ -21,7 +21,7 @@ nvim::Nvim *Tree::api;
 
 int wchar_width(wchar_t ucs)
 {
-#if defined(Q_OS_WIN)
+#if defined(OS_WIN)
     return mk_wcwidth(ucs);
 #else
     return wcwidth(ucs);
@@ -188,13 +188,7 @@ void Tree::insert_item(const int pos)
         cell.col_start = start;
         if (col==FILENAME) {
             cell.col_end = start + countgrid(ws);
-        }
-        else {
-            cell.col_end = start + ws.size();
-        }
-
-        // NOTE: alignment
-        if (col==FILENAME) {
+            // NOTE: alignment
             int tmp = kStop - cell.col_end;
             if (tmp > 0) {
                 cell.col_end+=tmp;
@@ -208,6 +202,9 @@ void Tree::insert_item(const int pos)
                     cell.byte_end+=tmp;
                 }
             }
+        }
+        else {
+            cell.col_end = start + ws.size();
         }
 
         int sep = (col==INDENT?0:1);
@@ -242,18 +239,15 @@ void Tree::insert_rootcell(const int pos)
 
         if (col==FILENAME) {
             cell.col_end = start + countgrid(ws);
-        }
-        else {
-            cell.col_end = start + ws.size();
-        }
-
-        // NOTE: alignment
-        if (col==FILENAME) {
+            // NOTE: alignment
             int tmp = kStop - cell.col_end;
             if (tmp >0) {
                 cell.col_end+=tmp;
                 cell.byte_end+=tmp;
             }
+        }
+        else {
+            cell.col_end = start + ws.size();
         }
 
         int sep = (col==INDENT?0:1);
