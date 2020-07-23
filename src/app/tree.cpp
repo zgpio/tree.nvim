@@ -149,7 +149,7 @@ void Tree::changeRoot(const string &root)
 
     insert_rootcell(0);
     // FIXME: when icon not available
-    // col_map["icon"][0].text = "";
+    // col_map[ICON][0].text = "";
 
     vector<string> ret;
     string line = makeline(0);
@@ -214,12 +214,7 @@ void Tree::insert_item(const int pos)
         start = cell.col_end + sep;
         byte_start = cell.byte_end + sep;
 
-        auto search = col_map.find(col);
-        if (search != col_map.end()) {
-            col_map[col].emplace(search->second.begin()+pos, std::move(cell));
-        } else {
-            col_map.insert({col, vector<Cell>()});
-        }
+        col_map[col].emplace(col_map[col].begin()+pos, std::move(cell));
     }
 }
 
@@ -265,12 +260,7 @@ void Tree::insert_rootcell(const int pos)
         start = cell.col_end + sep;
         byte_start = cell.byte_end + sep;
 
-        auto search = col_map.find(col);
-        if (search != col_map.end()) {
-            col_map[col].insert(search->second.begin()+pos, std::move(cell));
-        } else {
-            col_map.insert({col, vector<Cell>()});
-        }
+        col_map[col].emplace(col_map[col].begin()+pos, std::move(cell));
     }
 }
 /// pos is 0-based row number.

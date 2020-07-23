@@ -3,8 +3,8 @@ local api = vim.api
 local inspect = vim.inspect
 local fn = vim.fn
 local eval = vim.api.nvim_eval
-local tree = require 'tree'
--- 用户接口tree.custom_column测试
+tree = require 'tree'
+-- tree.custom_column
 function t_custom_column()
   tree.custom = nil
   tree.custom_column('icon , filename', { directory_icon='▸', opened_icon='▾', root_icon=' ', })
@@ -18,7 +18,7 @@ function t_custom_column()
   }
   assert(vim.deep_equal(rv, tree.custom))
 end
--- 用户接口tree.custom_option测试
+-- tree.custom_option
 function t_custom_option()
   tree.custom = nil
   tree.custom_option('_', { columns='mark:indent:icon:filename:type:size:time', })
@@ -31,7 +31,7 @@ function t_custom_option()
   }
   assert(vim.deep_equal(rv, tree.custom))
 end
--- 用户接口tree.custom_source测试
+-- tree.custom_source
 function t_custom_source()
   tree.custom = nil
   tree.custom_source('file', { root='Root', })

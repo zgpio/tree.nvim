@@ -18,6 +18,7 @@ extern string gui_colors[];
 
 enum GUI_COLOR { BROWN, AQUA, BLUE, DARKBLUE, PURPLE, LIGHTPURPLE, RED, BEIGE, YELLOW, ORANGE, DARKORANGE, PINK, SALMON, GREEN, LIGHTGREEN, WHITE };
 enum column {MARK, INDENT, GIT, ICON, FILENAME, SIZE, TIME};
+const int COLUMN_NR = 7;
 enum git_status {Untracked, Modified, Staged, Renamed, Ignored, Unmerged, Deleted, Unknown};
 
 class Cell;

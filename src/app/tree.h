@@ -86,7 +86,7 @@ public:
 
 private:
     vector<FileItem *> m_fileitem;
-    unordered_map<int, vector<Cell>> col_map;
+    vector<Cell> col_map[COLUMN_NR];
     unordered_map<string, bool> expandStore;
     unordered_map<string, int> cursorHistory;
     list<int> targets;
