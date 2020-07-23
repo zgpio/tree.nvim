@@ -5,7 +5,7 @@ function! tree#action(action, ...) abort
     return ''
   endif
 
-  let args = tree#util#convert2list(get(a:000, 0, []))
+  let args = v:lua.tree.convert2list(get(a:000, 0, []))
   return printf(":\<C-u>call v:lua.call_async_action(%s, %s)\<CR>",
         \ string(a:action), string(args))
 endfunction

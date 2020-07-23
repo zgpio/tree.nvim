@@ -5,10 +5,6 @@
 "=============================================================================
 lua require 'tree'
 
-function! tree#util#convert2list(expr) abort
-  return type(a:expr) ==# type([]) ? a:expr : [a:expr]
-endfunction
-
 function! tree#util#execute_path(command, path) abort
   try
     execute a:command fnameescape(v:lua.__expand(a:path))

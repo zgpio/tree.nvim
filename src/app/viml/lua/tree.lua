@@ -197,6 +197,13 @@ local function __re_unquoted_match(match)
   -- Don't match a:match if it is located in-between unescaped single or double quotes
   return match .. [[\v\ze([^"'\\]*(\\.|"([^"\\]*\\.)*[^"\\]*"|'([^'\\]*\\.)*[^'\\]*'))*[^"']*$]]
 end
+function M.convert2list(expr)
+  if vim.tbl_islist(expr) then
+    return expr
+  else
+    return {expr}
+  end
+end
 function __parse_options(cmdline)
   local args = {}
   local options = {}

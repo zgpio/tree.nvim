@@ -27,7 +27,7 @@ add_executable(tree-nvim WIN32 MACOSX_BUNDLE main.cpp
 	${NEOVIM_RCC_SOURCES}
 	${RES_FILE})
 
-target_link_libraries(tree-nvim ${QTLIBS} ${MSGPACK_LIBRARIES} tree-server)
+target_link_libraries(tree-nvim ${MSGPACK_LIBRARIES} tree-server)
 
 install(DIRECTORY viml/ DESTINATION ${CMAKE_INSTALL_PREFIX})
 install(TARGETS tree-nvim DESTINATION ${CMAKE_INSTALL_BINDIR})
