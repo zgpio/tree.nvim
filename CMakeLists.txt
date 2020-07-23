@@ -38,7 +38,7 @@ add_executable(tree
 )
 
 target_link_libraries(tree ${Boost_LIBRARIES})
-install(DIRECTORY src/app/viml/ DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(DIRECTORY runtime/ DESTINATION ${CMAKE_INSTALL_PREFIX})
 # install(TARGETS tree DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(TARGETS tree DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 

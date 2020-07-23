@@ -26,8 +26,8 @@ sudo apt install libboost1.70-dev
 # Test
 ```vim
 " config.vim
-set rtp+=~/project/nvim.cpp/src/app/viml
-so ~/project/nvim.cpp/src/app/dev.vim
+set rtp+=~/project/tree.nvim/runtime
+so ~/project/tree.nvim/src/app/dev.vim
 ```
 ```sh
 nvim -u config.vim --listen 127.0.0.1:6666
