@@ -50,7 +50,7 @@ class Cell
 public:
     Cell();
     Cell(const Config&, const FileItem&, const int);
-    virtual ~Cell();
+    ~Cell();
 
     int col_start, col_end;
     // TODO: use text.size() when byte highlight, consider remove byte_end
@@ -86,7 +86,7 @@ class Config
 public:
     Config(){};
     Config(const Map &ctx);
-    virtual ~Config(){};
+    ~Config(){};
     void update(const Map &ctx);
 
     bool auto_cd = false;

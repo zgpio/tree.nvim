@@ -19,13 +19,6 @@ function! tree#util#execute_path(command, path) abort
     call v:lua.tree.print_error(v:exception)
   endtry
 endfunction
-function! tree#util#__expand_complete(path) abort
-  return v:lua.__substitute_path_separator(
-        \ (a:path =~# '^\~') ? fnamemodify(a:path, ':p') :
-        \ (a:path =~# '^\$\h\w*') ? substitute(a:path,
-        \             '^\$\h\w*', '\=eval(submatch(0))', '') :
-        \ a:path)
-endfunction
 
 function! tree#util#call_tree(command, args) abort
   let [paths, context] = tree#util#_parse_options_args(a:args)

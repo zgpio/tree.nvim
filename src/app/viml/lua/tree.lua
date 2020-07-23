@@ -227,6 +227,14 @@ function map_filter(func, t)
   end
   return rettab
 end
+function __expand_complete(path)
+  if path:find('^~') then
+    path = vim.fn.fnamemodify(path, ':p')
+  elseif vim.fn.match(path, [[^\$\h\w*]]) ~= -1 then
+    path = vim.fn.substitute(path, [[^\$\h\w*]], [[\=eval(submatch(0))]], '')
+  end
+  return __substitute_path_separator(path)
+end
 function complete(arglead, cmdline, cursorpos)
   local copy = vim.fn.copy
   local _ = {}
@@ -246,15 +254,15 @@ function complete(arglead, cmdline, cursorpos)
     local nt = vim.tbl_map(function(v) return '-no-' .. vim.fn.tr(v, '_', '-') end, copy(bool_options))
     vim.list_extend(_, nt)
   else
-    local al = vim.fn['tree#util#__expand_complete'](arglead)
+    local al = __expand_complete(arglead)
     -- Path names completion.
     local files = vim.tbl_filter(function(v) return vim.fn.stridx(v:lower(), al:lower()) == 0 end,
       vim.tbl_map(function(v) return __substitute_path_separator(v) end, vim.fn.glob(arglead .. '*', true, true)))
     files = vim.tbl_map(
-      function(v) return vim.fn['tree#util#__expand_complete'](v) end,
+      function(v) return __expand_complete(v) end,
       vim.tbl_filter(function(v) return vim.fn.isdirectory(v)==1 end, files))
     if arglead:find('^~') then
-      local home_pattern = '^'.. vim.fn['tree#util#__expand_complete']('~')
+      local home_pattern = '^'.. __expand_complete('~')
       files = vim.tbl_map(function(v) return vim.fn.substitute(v, home_pattern, '~/', '') end, files)
     end
     files = vim.tbl_map(function(v) return vim.fn.escape(v..'/', ' \\') end, files)
