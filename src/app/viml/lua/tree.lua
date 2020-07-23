@@ -193,6 +193,52 @@ function M.print_error(s)
   api.nvim_command(string.format("echohl Error | echomsg '[tree] %s' | echohl None", M.string(s)))
 end
 
+function __re_unquoted_match(match)
+  -- Don't match a:match if it is located in-between unescaped single or double quotes
+  return match .. [[\v\ze([^"'\\]*(\\.|"([^"\\]*\\.)*[^"\\]*"|'([^'\\]*\\.)*[^'\\]*'))*[^"']*$]]
+end
+function __parse_options(cmdline)
+  local args = {}
+  local options = {}
+  local match = vim.fn.match
+
+  -- Eval
+  if match(cmdline, [[\\\@<!`.*\\\@<!`]]) ~= -1 then
+    cmdline = __eval_cmdline(cmdline)
+  end
+
+  for _, s in ipairs(vim.fn.split(cmdline, __re_unquoted_match([[\%(\\\@<!\s\)\+]]))) do
+    local arg = vim.fn.substitute(s, [[\\\( \)]], [[\1]], 'g')
+    local arg_key = vim.fn.substitute(arg, [[=\zs.*$]], '', '')
+
+    local name = vim.fn.substitute(vim.fn.tr(arg_key, '-', '_'), [[=$]], '', ''):sub(2)
+    local value
+
+    if match(name, '^no_') ~= -1 then
+      name = name:sub(4)
+      value = false
+    else
+      if match(arg_key, [[=$]]) ~= -1 then
+        value = __remove_quote_pairs(arg:sub(vim.fn.len(arg_key)+1))
+      else
+        value = true
+      end
+    end
+
+    local template_opts = user_options()
+    if vim.fn.index(vim.fn.keys(template_opts), name) >= 0 then
+      if type(template_opts[name]) == type(42) then
+        options[name] = vim.fn.str2nr(value)
+      else
+        options[name] = value
+      end
+    else
+      table.insert(args, arg)
+    end
+  end
+
+  return {args, options}
+end
 function __expand(path)
   if path:find('^~') then
     path = vim.fn.fnamemodify(path, ':p')
