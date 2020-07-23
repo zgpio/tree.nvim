@@ -193,7 +193,7 @@ function M.print_error(s)
   api.nvim_command(string.format("echohl Error | echomsg '[tree] %s' | echohl None", M.string(s)))
 end
 
-function __re_unquoted_match(match)
+local function __re_unquoted_match(match)
   -- Don't match a:match if it is located in-between unescaped single or double quotes
   return match .. [[\v\ze([^"'\\]*(\\.|"([^"\\]*\\.)*[^"\\]*"|'([^'\\]*\\.)*[^'\\]*'))*[^"']*$]]
 end
@@ -684,14 +684,6 @@ function M.get_context()
   return rpcrequest('_tree_get_context', {}, false)
 end
 -------------------- end of tree.vim --------------------
-function M.refactor(old)
-  local C = vim.api.nvim_command
-  local msg = 'Rename to: '
-  local new = fn.input(msg, '', 'file')
-  local cmd = string.format(':%%s/\\<%s\\>/%s/gIc', old, new)
-  print(cmd)
-  C(cmd)
-end
 
 function M.rrequire(module)
   package.loaded[module] = nil
