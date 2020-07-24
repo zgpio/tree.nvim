@@ -27,6 +27,7 @@ namespace tree {
 class Tree
 {
 public:
+    typedef nvim::Array ArgType;
     Tree() = delete; // delete default constructor
     ~Tree();
     Tree(int bufnr, int icon_ns_id);
@@ -42,38 +43,38 @@ public:
 
     void handleNewFile(const string &input);
     void handleRename(string &input);
-    void toggle_select(const nvim::Array &args);
-    void toggle_select_all(const nvim::Array &args);
-    void execute_system(const nvim::Array &args);
+    void toggle_select(const ArgType &args);
+    void toggle_select_all(const ArgType &args);
+    void execute_system(const ArgType &args);
     void redraw_line(int sl, int el);
     void changeRoot(const string &path);
-    void action(const string &action, const nvim::Array &args, const Map &context);
+    void action(const string &action, const ArgType &args, const Map &context);
 
     void remove();
-    void move(const nvim::Array &args);
+    void move(const ArgType &args);
     Map get_candidate(const int pos);
-    void new_file(const nvim::Array &args);
-    void redraw(const nvim::Array &args);
+    void new_file(const ArgType &args);
+    void redraw(const ArgType &args);
     void redraw_recursively(int l);
-    void yank_path(const nvim::Array &args);
-    void pre_remove(const nvim::Array &args);
-    void print(const nvim::Array &args);
-    void debug(const nvim::Array &args);
-    void open_tree(const nvim::Array &args);
-    void open_or_close_tree_recursively(const nvim::Array &args);
-    void open(const nvim::Array &args);
-    void drop(const nvim::Array &args);
-    void call(const nvim::Array &args);
-    void copy_(const nvim::Array &args);
-    void _copy_or_move(const nvim::Array &args);
-    void rename(const nvim::Array &args);
+    void yank_path(const ArgType &args);
+    void pre_remove(const ArgType &args);
+    void print(const ArgType &args);
+    void debug(const ArgType &args);
+    void open_tree(const ArgType &args);
+    void open_or_close_tree_recursively(const ArgType &args);
+    void open(const ArgType &args);
+    void drop(const ArgType &args);
+    void call(const ArgType &args);
+    void copy_(const ArgType &args);
+    void _copy_or_move(const ArgType &args);
+    void rename(const ArgType &args);
     void expandRecursively(const FileItem &item, vector<FileItem*> &fileitem_lst);
-    void cd(const nvim::Array &args);
-    void goto_(const nvim::Array &args);
-    void toggle_ignored_files(const nvim::Array &args);
+    void cd(const ArgType &args);
+    void goto_(const ArgType &args);
+    void toggle_ignored_files(const ArgType &args);
     void paste(const int ln, const string &src, const string &dest);
-    void pre_paste(const nvim::Array &args);
-    void view(const nvim::Array &args);
+    void pre_paste(const ArgType &args);
+    void view(const ArgType &args);
 
     inline void buf_set_lines(int s, int e, bool strict, const vector<string> &replacement)
     {
