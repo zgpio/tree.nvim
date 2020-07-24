@@ -355,7 +355,10 @@ end
 function M.rename(args)
   print(inspect(args))
   ret = fn.input(args.prompt, args.text, args.completion)
-  print(ret)
+  if ret == "" then
+    M.print_message("Cancel")
+    return
+  end
   rpcrequest('function', {"rename", {ret, args.bufnr}}, true)
 end
 function M.error(str)
