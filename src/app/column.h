@@ -1,34 +1,52 @@
 #ifndef NVIM_COLUMN_H
 #define NVIM_COLUMN_H
-#include "msgpack.hpp" // msgpack::type::variant
-#include <unordered_map>
-#include <string>
 #include <array>
 #include <boost/filesystem.hpp>
+#include <string>
+#include <unordered_map>
+#include "msgpack.hpp"  // msgpack::type::variant
 using Map = std::multimap<msgpack::type::variant, msgpack::type::variant>;
-using std::string;
-using std::list;
-using std::unordered_map;
 using boost::filesystem::file_status;
-namespace tree {
+using std::list;
+using std::string;
+using std::unordered_map;
+namespace tree
+{
 extern unordered_map<string, string> mark_indicators;
 extern std::pair<string, string> git_indicators[];
 extern std::pair<string, string> icons[];
 extern string gui_colors[];
 
-enum GUI_COLOR { BROWN, AQUA, BLUE, DARKBLUE, PURPLE, LIGHTPURPLE, RED, BEIGE, YELLOW, ORANGE, DARKORANGE, PINK, SALMON, GREEN, LIGHTGREEN, WHITE };
-enum column {MARK, INDENT, GIT, ICON, FILENAME, SIZE, TIME};
+enum GUI_COLOR {
+    BROWN,
+    AQUA,
+    BLUE,
+    DARKBLUE,
+    PURPLE,
+    LIGHTPURPLE,
+    RED,
+    BEIGE,
+    YELLOW,
+    ORANGE,
+    DARKORANGE,
+    PINK,
+    SALMON,
+    GREEN,
+    LIGHTGREEN,
+    WHITE
+};
+enum column { MARK, INDENT, GIT, ICON, FILENAME, SIZE, TIME };
 const int COLUMN_NR = 7;
-enum git_status {Untracked, Modified, Staged, Renamed, Ignored, Unmerged, Deleted, Unknown};
+enum git_status { Untracked, Modified, Staged, Renamed, Ignored, Unmerged, Deleted, Unknown };
 
 class Cell;
 class Config;
 class FileItem
 {
-private:
+   private:
     using Path = boost::filesystem::path;
 
-public:
+   public:
     FileItem() = delete;
     FileItem(Path p);
     ~FileItem(){};
@@ -39,7 +57,7 @@ public:
     bool opened_tree = false;
     // TODO: Conflict situation: parent is selected and part of child is selected
     bool selected = false;
-    const FileItem* parent=nullptr;
+    const FileItem *parent = nullptr;
     bool last = false;
     static unordered_map<string, git_status> git_map;
     static void update_gmap(string p);
@@ -48,9 +66,9 @@ public:
 /// 多个column类意义不大，管理困难
 class Cell
 {
-public:
+   public:
     Cell();
-    Cell(const Config&, const FileItem&, const int);
+    Cell(const Config &, const FileItem &, const int);
     ~Cell();
 
     int col_start, col_end;
@@ -61,15 +79,14 @@ public:
     // TODO: 考虑添加highlight_id, 并在highlight时加上列作用域防止冲突,
     //  icon/git/mark可以由text作为id,
     //  而filename以文件种类作为id, size以大小种类作为id, ...
-    int color = 666; // color id, 不同的列用不同的表存储; 也可以是公共的表, 如gui_color
+    int color = 666;  // color id, 不同的列用不同的表存储; 也可以是公共的表, 如gui_color
     string tcolor;
     void update_git(const FileItem &fi);
     void update_icon(const FileItem &fn);
     void update_size(const FileItem &fi);
 };
 
-struct Context
-{
+struct Context {
     // FIXME: 默认构造的成员初始值没有意义
     Context(){};
     Context(const Map &ctx);
@@ -84,7 +101,7 @@ struct Context
 // NOTE: tree状态参数
 class Config
 {
-public:
+   public:
     Config(){};
     Config(const Map &ctx);
     ~Config(){};
@@ -121,5 +138,5 @@ public:
     // targets: typing.List[typing.Dict[str, typing.Any]] = []
 };
 
-} // namespace tree
+}  // namespace tree
 #endif

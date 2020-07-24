@@ -1,40 +1,41 @@
 #ifndef NVIM_CPP_TREE
 #define NVIM_CPP_TREE
 
+#include <boost/filesystem.hpp>
 #include <list>
 #include <tuple>
 #include <unordered_map>
-#include <boost/filesystem.hpp>
 #include "column.h"
 #include "nvim.hpp"
 
 #ifdef NDEBUG
 #define INFO(...)
 #else
-#define INFO(...) \
-do{ \
-    fprintf(stdout, "[INFO]%s %s(Line %d): ",__FILE__,__FUNCTION__,__LINE__); \
-    fprintf(stdout, __VA_ARGS__); \
-}while(0)
+#define INFO(...)                                                                                                      \
+    do {                                                                                                               \
+        fprintf(stdout, "[INFO]%s %s(Line %d): ", __FILE__, __FUNCTION__, __LINE__);                                   \
+        fprintf(stdout, __VA_ARGS__);                                                                                  \
+    } while (0)
 #endif
 
 using std::list;
 using std::string;
-using std::vector;
 using std::unordered_map;
-namespace tree {
+using std::vector;
+namespace tree
+{
 // TODO using Hash = std::unordered_map<class _Key, class _Tp>;
 class Tree
 {
-public:
+   public:
     typedef nvim::Array ArgType;
-    Tree() = delete; // delete default constructor
+    Tree() = delete;  // delete default constructor
     ~Tree();
     Tree(int bufnr, int ns_id);
-    enum ClipboardMode {COPY, MOVE};
+    enum ClipboardMode { COPY, MOVE };
     static ClipboardMode paste_mode;
     static list<string> clipboard;
-	static nvim::Nvim *api;
+    static nvim::Nvim *api;
     int bufnr = -1;
     int ns_id = -1;
     Config cfg;
@@ -68,7 +69,7 @@ public:
     void copy_(const ArgType &args);
     void _copy_or_move(const ArgType &args);
     void rename(const ArgType &args);
-    void expandRecursively(const FileItem &item, vector<FileItem*> &fileitem_lst);
+    void expandRecursively(const FileItem &item, vector<FileItem *> &fileitem_lst);
     void cd(const ArgType &args);
     void goto_(const ArgType &args);
     void toggle_ignored_files(const ArgType &args);
@@ -85,7 +86,7 @@ public:
         collect_targets();
     };
 
-private:
+   private:
     vector<FileItem *> m_fileitem;
     vector<Cell> col_map[COLUMN_NR];
     unordered_map<string, bool> expandStore;
@@ -95,19 +96,19 @@ private:
     int find_parent(int l);
     std::tuple<int, int> find_range(int l);
     void set_cursor();
-    void insert_entrylist(const vector<FileItem*> &, const int pos, vector<string>& ret);
+    void insert_entrylist(const vector<FileItem *> &, const int pos, vector<string> &ret);
     void insert_item(const int pos);
     void _toggle_select(const int pos);
     void collect_targets();
     void insert_rootcell(const int pos);
     void erase_entrylist(const int s, const int e);
     string makeline(const int pos);
-    void entryInfoListRecursively(const FileItem &, vector<FileItem*>& fileitem_lst);
+    void entryInfoListRecursively(const FileItem &, vector<FileItem *> &fileitem_lst);
 
     void save_cursor();
     void shrinkRecursively(const string &path);
-    void expandRecursively(const FileItem&, list<FileItem*> &fileitem_lst);
+    void expandRecursively(const FileItem &, list<FileItem *> &fileitem_lst);
 };
 
-} // namespace tree
+}  // namespace tree
 #endif
