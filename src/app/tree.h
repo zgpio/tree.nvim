@@ -30,13 +30,13 @@ public:
     typedef nvim::Array ArgType;
     Tree() = delete; // delete default constructor
     ~Tree();
-    Tree(int bufnr, int icon_ns_id);
+    Tree(int bufnr, int ns_id);
     enum ClipboardMode {COPY, MOVE};
     static ClipboardMode paste_mode;
     static list<string> clipboard;
 	static nvim::Nvim *api;
     int bufnr = -1;
-    int icon_ns_id = -1;
+    int ns_id = -1;
     Config cfg;
     Context ctx;
     string input;

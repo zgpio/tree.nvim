@@ -32,7 +32,7 @@ Tree::~Tree()
     erase_entrylist(0, m_fileitem.size());
 }
 Tree::Tree(int bufnr, int ns_id)
-    : bufnr(bufnr), icon_ns_id(ns_id)
+    : bufnr(bufnr), ns_id(ns_id)
 {
 
     api->buf_set_option(bufnr, "ft", "tree");
@@ -301,7 +301,7 @@ std::tuple<int, int> Tree::find_range(int l)
 void Tree::hline(int sl, int el)
 {
     int bufnr = this->bufnr;
-    api->async_buf_clear_namespace(bufnr, icon_ns_id, sl, el);
+    api->async_buf_clear_namespace(bufnr, ns_id, sl, el);
     for (int i = sl;i<el;++i)
     {
         const FileItem &fileitem = *m_fileitem[i];
@@ -312,17 +312,17 @@ void Tree::hline(int sl, int el)
 
             if(col==FILENAME) {
                 sprintf(name, "tree_%u_%u", col, is_directory(fileitem.p));
-                api->async_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
+                api->async_buf_add_highlight(bufnr, ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
             } else if(col==ICON || col==GIT || col==MARK) {
                 // :hi tree_<tab>
                 sprintf(name, "tree_%u_%u", col, cell.color);
                 // sprintf(name, "tree_%s", cell.text.data());
                 // auto req_hl = api->buf_add_highlight(bufnr, 0, "String", 0, 0, 3);
                 // call buf_add_highlight(0, -1, "Identifier", 0, 5, -1)
-                api->async_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
+                api->async_buf_add_highlight(bufnr, ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
             } else if (col==SIZE || col==TIME || col==INDENT){
                 sprintf(name, "tree_%u", col);
-                api->async_buf_add_highlight(bufnr, icon_ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
+                api->async_buf_add_highlight(bufnr, ns_id, name, i, cell.byte_start, cell.byte_start+cell.text.size());
             }
         }
     }
