@@ -130,8 +130,6 @@ void Tree::changeRoot(const string &root)
     if (!exists(dir)) {
         return;
     }
-    const string &rootPath = dir.string();
-    expandStore.insert({rootPath, true});
 
     auto i = find(cfg.columns.begin(), cfg.columns.end(), GIT);
     if (i != cfg.columns.end()) {
