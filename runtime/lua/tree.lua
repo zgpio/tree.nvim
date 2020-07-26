@@ -126,7 +126,7 @@ function M.drop(args, file)
   end
 end
 
--- 仅仅用于处理同名文件
+--- Used to process files with the same name
 -- def check_overwrite(view: View, dest: Path, src: Path) -> Path:
 -- dest/src: {mtime=, path=, size=}
 function M.pre_paste(pos, dest, src)
@@ -147,7 +147,9 @@ function M.pre_paste(pos, dest, src)
   local msg = msg..string.format('%s already exists.  Overwrite?', dest.path)
   local choice = call('confirm', {msg, '&Force\n&No\n&Rename\n&Time\n&Underbar', 0})
   local ret = ''
-  if choice == 1 then
+  if choice == 0 then
+    return
+  elseif choice == 1 then
     ret = dest.path
   elseif choice == 2 then
     ret = ''
