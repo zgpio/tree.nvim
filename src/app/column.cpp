@@ -313,8 +313,12 @@ void FileItem::update_gmap(string p)
             FileItem::git_map[key] = status;
         } else {
             string key = topdir + line.substr(3);
-            cout << key << endl;
-            FileItem::git_map[key] = status;
+            boost::filesystem::path p(key);
+            int N = 5;
+            while (p.string() != topdir && N--) {
+                FileItem::git_map[p.string()] = status;
+                p = p.parent_path();
+            }
         }
     }
 }
