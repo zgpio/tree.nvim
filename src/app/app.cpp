@@ -159,6 +159,26 @@ void App::handleNvimNotification(const string &method, const vector<nvim::Object
         }
     }
 }
+/// Parse nested variant map 'custom'
+void App::ParseCustom(Map &custom)
+{
+    auto got1 = custom.find("column");
+    if (got1 != custom.end()) {
+        auto column = got1->second.as_multimap();
+        auto got2 = column.find("mark");
+        if (got2 != column.end()) {
+            auto mark = got2->second.as_multimap();
+            auto got3 = mark.find("readonly_icon");
+            if (got3 != mark.end()) {
+                mark_indicators["readonly_icon"] = got3->second.as_string();
+            }
+            got3 = mark.find("selected_icon");
+            if (got3 != mark.end()) {
+                mark_indicators["selected_icon"] = got3->second.as_string();
+            }
+        }
+    }
+}
 
 void App::handleRequest(nvim::NvimRPC &rpc, uint64_t msgid, const string &method, const vector<nvim::Object> &args)
 {
@@ -171,6 +191,12 @@ void App::handleRequest(nvim::NvimRPC &rpc, uint64_t msgid, const string &method
         string path = paths[0].as_string();
         m_cfgmap = args[1].as_multimap();
         auto *b = m_nvim;
+
+        auto got = m_cfgmap.find("custom");
+        if (got != m_cfgmap.end()) {
+            auto custom = got->second.as_multimap();
+            ParseCustom(custom);
+        }
 
         auto search = m_cfgmap.find("new");
         if (trees.size() < 1 || (search != m_cfgmap.end() && search->second.as_bool())) {

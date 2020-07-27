@@ -21,10 +21,10 @@ tree.custom_column('filename', {
 tree.custom_column('time', {
   format="%d-%M-%Y",
 })
--- tree.custom_column('mark', {
---   readonly_icon="X",
---   selected_icon="*",
--- })
+tree.custom_column('mark', {
+  readonly_icon="X",
+  selected_icon="*",
+})
 EOF
 
 autocmd FileType tree call s:set_tree()
