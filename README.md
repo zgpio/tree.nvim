@@ -19,7 +19,19 @@
 ![Demo](https://user-images.githubusercontent.com/19503791/86912092-f3326f00-c14e-11ea-9d98-b65563c1bd6c.png)
 
 ### Config
-Ref to [config.vim](src/app/dev.vim).
+#### Step 1
+```sh
+mkdir tree.nvim && cd tree.nvim
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/zgpio/tree.nvim/master/install.sh)"
+```
+#### Step 2
+```vim
+" Add tree.nvim to runtime path
+set rtp+=/path/to/tree.nvim/
+" Start user configuration
+" ...
+```
+User configuration ref to [config.vim](src/app/dev.vim).
 
 ## Build
 ### macos
