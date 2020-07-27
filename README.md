@@ -22,6 +22,8 @@
 #### Step 1
 ```sh
 mkdir tree.nvim && cd tree.nvim
+# via wget or curl
+sh -c "$(wget -O- https://raw.githubusercontent.com/zgpio/tree.nvim/master/install.sh)"
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/zgpio/tree.nvim/master/install.sh)"
 ```
 #### Step 2
