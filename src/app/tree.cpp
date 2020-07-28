@@ -110,7 +110,6 @@ string Tree::makeline(const int pos)
     // INFO("pos:%d line:%s\n", pos, line.c_str());
     return line;
 }
-#define TEST
 using namespace std::chrono;
 void Tree::set_cursor()
 {
@@ -122,7 +121,7 @@ void Tree::set_cursor()
 }
 void Tree::changeRoot(const string &root)
 {
-#ifdef TEST
+#ifndef NDEBUG
     auto start_change_root = system_clock::now();
 #endif
     // TODO: cursor history
@@ -162,7 +161,7 @@ void Tree::changeRoot(const string &root)
     buf_set_lines(0, -1, true, ret);
 
     hline(0, m_fileitem.size());
-#ifdef TEST
+#ifndef NDEBUG
     duration<double> time_change_root = system_clock::now() - start_change_root;
     printf("change_root Elapsed time:%.9f secs.\n", time_change_root.count());
 #endif
