@@ -644,8 +644,8 @@ function M.action(action, ...)
   if not vim.tbl_islist(args) then
     args = {args}
   end
-  return api.nvim_eval(string.format([[":\<C-u>call v:lua.call_async_action(%s, %s)\<CR>"]],
-         fn.string(action), fn.string(args)))
+  local rv = string.format([[:\<C-u>call v:lua.call_async_action(%s, %s)\<CR>]], fn.string(action), fn.string(args))
+  return vim.api.nvim_replace_termcodes(rv, true, true, true)
 end
 
 function M.call_action(action, ...)

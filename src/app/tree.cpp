@@ -562,14 +562,14 @@ void Tree::handleNewFile(const string &input)
     }
     INFO("input: %s\n", input.c_str());
 
-    // Cell & cur = col_map["filename"][ctx.cursor-1];
+    // Cell & cur = col_map[FILENAME][ctx.cursor-1];
     FileItem &item = *m_fileitem[ctx.cursor - 1];
 
     path dest = item.opened_tree ? item.p : item.p.parent_path();
 
     dest /= input;
     INFO("dest: %s\n", dest.string().c_str());
-    // QFileInfo fi(dest.filePath(input));
+
     // NOTE: failed when same name file exists
     // TODO: No case sensitive on macos 10.14.5; Works on linux.
     if (boost::filesystem::exists(dest)) {
@@ -600,7 +600,7 @@ void Tree::handleNewFile(const string &input)
     }
 }
 
-/// 收集无序targets
+/// Collect unorder targets
 /// 视图变化之后 targets 要更新
 void Tree::collect_targets()
 {
@@ -776,6 +776,7 @@ void Tree::open(const nvim::Array &args)
     const path &p = m_fileitem[l]->p;
     if (is_directory(p)) {
         changeRoot(p.string());
+        set_cursor();
     } else if (args.size() > 0 && args[0].as_string() == "vsplit") {
         INFO("vsplit: %s\n", p.string().c_str());
         api->async_call_function("tree#util#execute_path", {"rightbelow vsplit", p.string()});
