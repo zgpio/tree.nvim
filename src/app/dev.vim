@@ -29,20 +29,8 @@ EOF
 
 autocmd FileType tree call s:set_tree()
 
-function! CdNode(context) abort
+function! CallDemo(context) abort
   echom string(a:context)
-  let [curdir] = a:context.targets
-:py3 << EOF
-import vim
-from pathlib import Path
-str = vim.eval('curdir')
-path = Path(str)
-if not path.is_dir():
-  path = Path(str).parent
-print(path)
-vim.command(f"let dir='{path}'")
-EOF
-    exe 'cd ' . dir
 endfunction
 
 func! s:set_tree() abort
@@ -65,7 +53,7 @@ func! s:set_tree() abort
   nnoremap <silent><buffer><expr> p tree#action('paste')
   nnoremap <silent><buffer><expr> a tree#action('view')
   nnoremap <silent><buffer><expr> d tree#action('remove')
-  nnoremap <silent><buffer><expr> cD tree#action('call', 'CdNode')
+  nnoremap <silent><buffer><expr> cD tree#action('call', 'CallDemo')
   nnoremap <silent><buffer><expr> > tree#action('toggle_ignored_files')
   nnoremap <silent><buffer><expr> * tree#action('toggle_select_all')
   nnoremap <silent><buffer><expr> s tree#action('drop', 'split')
