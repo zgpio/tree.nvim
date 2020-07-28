@@ -815,9 +815,17 @@ void Tree::cd(const nvim::Array &args)
         string dir = args.at(0).as_string();
 
         if (dir == "..") {
-            path &curdir = m_fileitem[0]->p;
+            // NOTE: reference become invalid after changeRoot
+            path curdir = m_fileitem[0]->p;
             INFO("cd %s\n", curdir.parent_path().string().c_str());
             changeRoot(curdir.parent_path().string());
+            // NOTE: goto root_path line pos
+            for (int i = 0; i < m_fileitem.size(); i++) {
+                if (m_fileitem[i]->p == curdir.string()) {
+                    api->async_win_set_cursor(0, {i + 1, 0});
+                    break;
+                }
+            }
         } else if (dir == ".") {
             FileItem &cur = *m_fileitem[ctx.cursor - 1];
             string dir = is_directory(cur.p) ? cur.p.string() : cur.p.parent_path().string();
