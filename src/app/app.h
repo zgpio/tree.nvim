@@ -22,7 +22,6 @@ class App
 
     Context m_ctx;
     Map m_cfgmap;
-    void ParseCustom(Map &custom);
 
     // unordered_map<string, QVariant> resource;
     unordered_map<int, Tree *> trees;

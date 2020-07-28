@@ -436,6 +436,7 @@ void Config::update(const Map &ctx)
             }
             margin = e - s - 1;
         } else if (k == "custom") {
+            // Parse nested variant map 'custom'
             auto custom = v.as_multimap();
             auto got = custom.find("column");
             if (got != custom.end()) {
@@ -452,6 +453,16 @@ void Config::update(const Map &ctx)
                         auto got = opts.find("format");
                         if (got != opts.end()) {
                             time_format = got->second.as_string();
+                        }
+                    } else if (name == "mark") {
+                        auto mark = c.second.as_multimap();
+                        auto got = mark.find("readonly_icon");
+                        if (got != mark.end()) {
+                            mark_indicators["readonly_icon"] = got->second.as_string();
+                        }
+                        got = mark.find("selected_icon");
+                        if (got != mark.end()) {
+                            mark_indicators["selected_icon"] = got->second.as_string();
                         }
                     }
                 }
