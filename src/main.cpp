@@ -63,9 +63,9 @@ void eventloop(nvim::Nvim &nvim) {
                 obj.convert(msg);
                 int msgid = msg.get<1>();
                 string method = msg.get<2>().as_string();
-                cout << "msgid: " << msgid << endl;
-                cout << "method: " << method << endl;
-                cout << "type(msg.get<3>()): " << type_name(msg.get<3>()) << endl;
+                INFO("msgid: %d\n", msgid);
+                INFO("method: %s\n", method.c_str());
+                INFO("type(msg.get<3>()): %s\n", type_name(msg.get<3>()).c_str());
                 auto argv = msg.get<3>().as_vector();
 
                 // 涉及 tree.nvim 通信协议

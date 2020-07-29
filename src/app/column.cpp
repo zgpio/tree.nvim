@@ -157,7 +157,6 @@ Cell::Cell(const Config &cfg, const FileItem &fileitem, const int type)
     } else if (type == TIME) {
         try {
             std::time_t t = boost::filesystem::last_write_time(fileitem.p);
-            ;
             char mbstr[64];
             if (std::strftime(mbstr, sizeof(mbstr), cfg.time_format.c_str(), std::localtime(&t))) {
                 text = mbstr;

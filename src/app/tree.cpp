@@ -130,6 +130,7 @@ void Tree::changeRoot(const string &root)
         return;
     }
 
+    // TODO broken when hold on redraw 10s
     auto i = find(cfg.columns.begin(), cfg.columns.end(), GIT);
     if (i != cfg.columns.end()) {
         FileItem::update_gmap(root);
@@ -306,9 +307,6 @@ void Tree::hline(int sl, int el)
             } else if (col == ICON || col == GIT || col == MARK) {
                 // :hi tree_<tab>
                 sprintf(name, "tree_%u_%u", col, cell.color);
-                // sprintf(name, "tree_%s", cell.text.data());
-                // auto req_hl = api->buf_add_highlight(bufnr, 0, "String", 0, 0, 3);
-                // call buf_add_highlight(0, -1, "Identifier", 0, 5, -1)
                 api->async_buf_add_highlight(bufnr, ns_id, name, i, cell.byte_start,
                                              cell.byte_start + cell.text.size());
             } else if (col == SIZE || col == TIME || col == INDENT) {
@@ -1149,8 +1147,12 @@ void Tree::view(const nvim::Array &args)
     nvim::Dictionary info{
         {"filename", cur.filename},
         {"date", time_cell.text},
-        {"size", size},
     };
+    if (size.size() != 0)
+        info.insert({"size", size});
+    if (boost::filesystem::is_symlink(cur.p)) {
+        info.insert({"symlink", boost::filesystem::canonical(cur.p).string()});
+    }
     api->command("lua require('tree/float')");
     api->execute_lua("Tree_display(...)", {info});
 }
