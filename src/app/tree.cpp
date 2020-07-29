@@ -725,7 +725,7 @@ void Tree::open_tree(const nvim::Array &args)
         std::tuple<int, int> se = find_range(l);
         int s = std::get<0>(se) + 1;
         int e = std::get<1>(se) + 1;
-        printf("\tclose range(1-based): [%d, %d]\n", s + 1, e);
+        INFO("\tclose range(1-based): [%d, %d]\n", s + 1, e);
         buf_set_lines(s, e, true, {});
 
         erase_entrylist(s, e);
@@ -737,7 +737,7 @@ void Tree::open_tree(const nvim::Array &args)
         int s = std::get<0>(se) + 1;
         int e = std::get<1>(se) + 1;
 
-        printf("\tclose range(1-based): [%d, %d]\n", s + 1, e);
+        INFO("\tclose range(1-based): [%d, %d]\n", s + 1, e);
 
         buf_set_lines(s, e, true, {});
         // ref to https://github.com/equalsraf/neovim-qt/issues/596
@@ -1076,7 +1076,7 @@ void Tree::open_or_close_tree_recursively(const nvim::Array &args)
         std::tuple<int, int> se = find_range(l);
         int s = std::get<0>(se) + 1;
         int e = std::get<1>(se) + 1;
-        printf("\tclose range(1-based): [%d, %d]\n", s + 1, e);
+        INFO("\tclose range(1-based): [%d, %d]\n", s + 1, e);
         buf_set_lines(s, e, true, {});
         shrinkRecursively(p);
         erase_entrylist(s, e);
@@ -1089,7 +1089,7 @@ void Tree::open_or_close_tree_recursively(const nvim::Array &args)
         int s = std::get<0>(se) + 1;
         int e = std::get<1>(se) + 1;
 
-        printf("\tclose range(1-based): [%d, %d]\n", s + 1, e);
+        INFO("\tclose range(1-based): [%d, %d]\n", s + 1, e);
 
         buf_set_lines(s, e, true, {});
         // ref to https://github.com/equalsraf/neovim-qt/issues/596

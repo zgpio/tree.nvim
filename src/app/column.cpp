@@ -284,7 +284,7 @@ void FileItem::update_gmap(string p)
     if (line == "")
         return;
     string topdir((path(line) += path::preferred_separator).string());
-    cout << __FUNCTION__ << " top dir: " << topdir << endl;
+    INFO("top dir: %s\n", topdir.c_str());
 
     ipstream pipe_stream2;
     string cmd2 = "git -C " + p + " status --porcelain -u";
@@ -338,7 +338,7 @@ Context::Context(const Map &ctx)
         } else if (k == "visual_end") {
             visual_end = v.as_uint64_t();
         } else {
-            cout << "Unsupported member: " << k << endl;
+            INFO("Unsupported member: %s\n", k.c_str());
         }
     }
 }
@@ -467,7 +467,7 @@ void Config::update(const Map &ctx)
                 }
             }
         } else {
-            cout << "Unsupported member: " << k << endl;
+            INFO("Unsupported member: %s\n", k.c_str());
         }
     }
 }

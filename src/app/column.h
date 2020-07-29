@@ -5,6 +5,17 @@
 #include <string>
 #include <unordered_map>
 #include "msgpack.hpp"  // msgpack::type::variant
+
+#ifdef NDEBUG
+#define INFO(...)
+#else
+#define INFO(...)                                                                                                      \
+    do {                                                                                                               \
+        fprintf(stdout, "[INFO]%s %s(Line %d): ", __FILE__, __FUNCTION__, __LINE__);                                   \
+        fprintf(stdout, __VA_ARGS__);                                                                                  \
+    } while (0)
+#endif
+
 using Map = std::multimap<msgpack::type::variant, msgpack::type::variant>;
 using boost::filesystem::file_status;
 using std::list;

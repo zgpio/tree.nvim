@@ -10,8 +10,7 @@ namespace tree
 {
 App::App(nvim::Nvim *nvim, int chan_id) : m_nvim(nvim), chan_id(chan_id)
 {
-    char format[] = "%s: %" PRIu64 "\n";
-    printf(format, __FUNCTION__, chan_id);
+    INFO("chan_id: %d\n", chan_id);
 
     // call rpcnotify(g:tree#_channel_id, "_tree_start", "/Users/zgp/")
     auto &a = *m_nvim;
@@ -103,10 +102,6 @@ void App::handleNvimNotification(const string &method, const vector<nvim::Object
         string action = args.at(0).as_string();
         vector<nvim::Object> act_args = args.at(1).as_vector();
         auto context = args.at(2).as_multimap();
-        for (auto i : args[2].as_multimap()) {
-            cout << i.first.as_string() << ':';
-        }
-        cout << endl;
 
         // INFO("\taction: %s\n", action.c_str());
         m_ctx = context;

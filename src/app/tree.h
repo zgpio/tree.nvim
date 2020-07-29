@@ -8,16 +8,6 @@
 #include "column.h"
 #include "nvim.hpp"
 
-#ifdef NDEBUG
-#define INFO(...)
-#else
-#define INFO(...)                                                                                                      \
-    do {                                                                                                               \
-        fprintf(stdout, "[INFO]%s %s(Line %d): ", __FILE__, __FUNCTION__, __LINE__);                                   \
-        fprintf(stdout, __VA_ARGS__);                                                                                  \
-    } while (0)
-#endif
-
 using std::list;
 using std::string;
 using std::unordered_map;

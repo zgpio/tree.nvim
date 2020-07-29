@@ -11,20 +11,20 @@ using std::endl;
 using std::string;
 #define BOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT
 
-// TODO: 临时
+// TODO: Better message dispatch mechanism
 void eventloop(nvim::Nvim &nvim) {
     using nvim::Object;
     nvim::Array info = nvim.get_api_info();
     int chan_id = info[0].as_uint64_t();
-    cout << "type(api-metadata): " << type_name(info[1]) << endl;
-    cout << "Channel Id: " << chan_id << endl;
+    INFO("type(api-metadata): %s\n", type_name(info[1]).c_str());
+    INFO("Channel Id: %d\n", chan_id);
 
     tree::App app(&nvim, chan_id);
 
     string line = nvim.get_current_line();
-    cout << "get_current_line = " << line << endl;
+    INFO("get_current_line = %s\n", line.c_str());
 
-    cout << "eventloop started" << endl;
+    INFO("eventloop started\n");
     while(true) {
         msgpack::unpacked result;
         try {
@@ -87,8 +87,8 @@ void eventloop(nvim::Nvim &nvim) {
                 msgpack::type::tuple<int64_t, Object, Object> msg;
                 obj.convert(msg);
                 string method = msg.get<1>().as_string();
-                cout << "method: " << method << endl;
-                cout << "type(msg.get<2>()): " << type_name(msg.get<2>()) << endl;
+                INFO("method: %s\n", method.c_str());
+                INFO("type(msg.get<2>()): %s\n", type_name(msg.get<2>()).c_str());
                 auto argv = msg.get<2>().as_vector();
 
                 // 涉及 tree.nvim 通信协议
@@ -106,7 +106,7 @@ void eventloop(nvim::Nvim &nvim) {
 
 int main(int argc, char *argv[])
 {
-    cout << "argc:" << argc << " argv[1]:"<< argv[1] << endl;
+    INFO("argc: %d, argv[1]: %s\n", argc, argv[1]);
     std::locale::global(std::locale(""));
     nvim::Nvim nvim;
     // nvim.connect_tcp("localhost", "6666");
@@ -114,9 +114,9 @@ int main(int argc, char *argv[])
 
     string expr = "( 3 + 2 ) * 4";
     nvim::Object rv = nvim.eval(expr);
-    cout << type_name(rv) << endl;
+    INFO("%s\n", type_name(rv).c_str());
     uint64_t res = rv.as_uint64_t();
-    printf("nvim_eval('%s') = %llu\n", expr.c_str(), res);
+    INFO("nvim_eval('%s') = %llu\n", expr.c_str(), res);
 
     eventloop(nvim);
 
