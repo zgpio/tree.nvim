@@ -15,6 +15,7 @@ local is_linux = fn.has('unix') == 1 and fn.has('macunix') == 0 and fn.has('win3
 local info = debug.getinfo(1, "S")
 local sfile = info.source:sub(2) -- remove @
 local project_root = fn.fnamemodify(sfile, ':h:h')
+local custom = require('tree/custom')
 
 -- https://gist.github.com/cwarden/1207556
 function catch(what)
@@ -556,17 +557,6 @@ function user_options()
   }, user_var_options())
 end
 
-local function custom_get()
-  if not M.custom then
-    M.custom = {
-      column = {},
-      option = {},
-      source = {},
-    }
-  end
-  return M.custom
-end
-
 local function internal_options()
   return {
     cursor=fn.line('.'),
@@ -581,7 +571,11 @@ end
 local function init_context(user_context)
   local buffer_name = user_context.buffer_name or 'default'
   local context = user_var_options()
-  local custom = custom_get()
+  local custom = vim.deepcopy(custom.get())
+  -- NOTE: Avoid empty custom.column being converted to vector
+  if vim.tbl_isempty(custom.column) then
+    custom.column = nil
+  end
   if custom.option._ then
     context = vim.tbl_extend('force', context, custom.option._)
     custom.option._ = nil
@@ -601,51 +595,6 @@ local function action_context()
 end
 
 -------------------- end of init.vim --------------------
-
--------------------- start of custom.vim --------------------
--- 用name:value或dict扩展dest table
-local function set_custom(dest, name_or_dict, value)
-  if type(name_or_dict) == 'table' then
-    dest = vim.tbl_extend('force', dest, name_or_dict)
-  else
-    dest[name_or_dict] = value
-  end
-  return dest
-end
-
-function M.custom_column(column_name, name_or_dict, ...)
-  local custom = custom_get().column
-
-  for i, key in ipairs(vim.split(column_name, '%s*,%s*')) do
-    if not custom[key] then
-      custom[key] = {}
-    end
-    custom[key] = set_custom(custom[key], name_or_dict, ...)
-  end
-end
-
-function M.custom_option(buffer_name, name_or_dict, ...)
-  local custom = custom_get().option
-
-  for i, key in ipairs(vim.split(buffer_name, '%s*,%s*')) do
-    if not custom[key] then
-      custom[key] = {}
-    end
-    custom[key] = set_custom(custom[key], name_or_dict, ...)
-  end
-end
-
-function M.custom_source(source_name, name_or_dict, ...)
-  local custom = custom_get().source
-
-  for i, key in ipairs(fn.split(source_name, [[\s*,\s*]])) do
-    if not custom[key] then
-      custom[key] = {}
-    end
-    custom[key] = set_custom(custom[key], name_or_dict, ...)
-  end
-end
--------------------- end of custom.vim --------------------
 
 -------------------- start of tree.vim --------------------
 function start(paths, user_context)

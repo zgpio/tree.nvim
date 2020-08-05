@@ -12,16 +12,16 @@ nnoremap <silent> <Space>xdf :Tree -new -split=vertical -winwidth=20
             \ -direction=topleft `expand('%:p:h')` -search=`expand('%:p')`<CR>
 
 lua << EOF
-local tree = require 'tree'
-tree.custom_option('_', {root_marker='[in]:', })
-tree.custom_column('filename', {
+local custom = require 'tree/custom'
+custom.option('_', {root_marker='[in]:', })
+custom.column('filename', {
   root_marker_highlight='Ignore',
   max_width=60,
 })
-tree.custom_column('time', {
+custom.column('time', {
   format="%d-%M-%Y",
 })
-tree.custom_column('mark', {
+custom.column('mark', {
   readonly_icon="X",
   selected_icon="*",
 })
