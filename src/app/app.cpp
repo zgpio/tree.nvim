@@ -12,10 +12,9 @@ App::App(nvim::Nvim *nvim, int chan_id) : m_nvim(nvim), chan_id(chan_id)
 {
     INFO("chan_id: %d\n", chan_id);
 
-    // call rpcnotify(g:tree#_channel_id, "_tree_start", "/Users/zgp/")
     auto &a = *m_nvim;
     // NOTE: 必须同步调用
-    a.set_var("tree#_channel_id", chan_id);
+    a.execute_lua("tree.channel_id = ...", {chan_id});
     Tree::api = m_nvim;
 
     // init highlight

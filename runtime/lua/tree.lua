@@ -16,6 +16,19 @@ local info = debug.getinfo(1, "S")
 local sfile = info.source:sub(2) -- remove @
 local project_root = fn.fnamemodify(sfile, ':h:h')
 
+-- https://gist.github.com/cwarden/1207556
+function catch(what)
+  return what[1]
+end
+
+function try(what)
+  status, result = pcall(what[1])
+  if not status then
+    what[2](result)
+  end
+  return result
+end
+
 local M = {}
 
 --- Resume tree window.
@@ -193,7 +206,19 @@ function M.string(expr)
 end
 function M.call_tree(command, args)
   local paths, context = __parse_options(args)
-  start(paths, context)
+  try {
+    function()
+      call_async_action('redraw', {})  -- trigger exception when server dead
+      start(paths, context)
+    end,
+    catch {
+      function(error)
+        print('restart tree.nvim server')
+        M.channel_id = nil
+        start(paths, context)
+      end
+    }
+  }
 end
 function M.print_error(s)
   api.nvim_command(string.format("echohl Error | echomsg '[tree] %s' | echohl None", M.string(s)))
@@ -384,17 +409,14 @@ function M.print_message(str)
   vim.api.nvim_command(cmd)
 end
 
-local function check_channel()
-  return fn.exists('g:tree#_channel_id')
-end
 function rpcrequest(method, args, is_async)
-  if check_channel() == 0 then
+  if not M.channel_id then
     -- TODO: temporary
-    M.error("g:tree#_channel_id doesn't exists")
+    M.error("tree.channel_id doesn't exists")
     return -1
   end
 
-  local channel_id = vim.g['tree#_channel_id']
+  local channel_id = M.channel_id
   if is_async then
     return vim.rpcnotify(channel_id, method, args)
   else
@@ -478,7 +500,7 @@ local function init_channel()
   fn.jobstart(cmd)
   local N = 15
   local i = 0
-  while i < N and fn.exists('g:tree#_channel_id') == 0 do
+  while i < N and M.channel_id == nil do
     C('sleep 4m')
     i = i + 1
   end
@@ -487,7 +509,7 @@ local function init_channel()
 end
 
 local function initialize()
-  if fn.exists('g:tree#_channel_id') == 1 then
+  if M.channel_id then
     return
   end
 
@@ -715,4 +737,5 @@ if _TEST then
   M._initialize = initialize
 end
 
+tree = M
 return M
