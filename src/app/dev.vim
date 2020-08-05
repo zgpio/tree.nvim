@@ -16,7 +16,7 @@ local tree = require 'tree'
 tree.custom_option('_', {root_marker='[in]:', })
 tree.custom_column('filename', {
   root_marker_highlight='Ignore',
-  max_width=40,
+  max_width=60,
 })
 tree.custom_column('time', {
   format="%d-%M-%Y",

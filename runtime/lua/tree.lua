@@ -191,6 +191,10 @@ function M.string(expr)
     return vim.fn.string(expr)
   end
 end
+function M.call_tree(command, args)
+  local paths, context = __parse_options(args)
+  start(paths, context)
+end
 function M.print_error(s)
   api.nvim_command(string.format("echohl Error | echomsg '[tree] %s' | echohl None", M.string(s)))
 end
@@ -246,7 +250,7 @@ function __parse_options(cmdline)
     end
   end
 
-  return {args, options}
+  return args, options
 end
 function __expand(path)
   if path:find('^~') then

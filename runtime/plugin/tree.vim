@@ -11,4 +11,4 @@ let g:loaded_tree = 1
 
 command! -nargs=* -range -bar -complete=customlist,v:lua.complete
       \ Tree
-      \ call tree#util#call_tree('Tree', <q-args>)
+      \ call luaeval('require("tree").call_tree("Tree", _A)', <q-args>)

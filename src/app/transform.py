@@ -18,12 +18,12 @@ with open(f"{self_dir}/transform.cpp", "w") as f:
                 f.write(line)
             f.write('};\n')
 
-            f.write('array<QByteArray, 2> icons[] = {\n')
+            f.write('pair<string, string> icons[] = {\n')
             for k, v in val.items():
                 code = v['code']
                 color = v['color']
                 print(k, code, color)
-                line = f'    {{ {{"{code}", "{color}"}} }},\n'
+                line = f'    {{"{code}", "{color}"}},\n'
                 f.write(line)
             f.write('};\n')
         else:

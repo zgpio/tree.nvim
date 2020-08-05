@@ -16,11 +16,6 @@ function! tree#util#execute_path(command, path) abort
   endtry
 endfunction
 
-function! tree#util#call_tree(command, args) abort
-  let [paths, context] = v:lua.__parse_options(a:args)
-  call v:lua.start(paths, context)
-endfunction
-
 function! tree#util#cd(path) abort
   if exists('*chdir')
     call chdir(a:path)

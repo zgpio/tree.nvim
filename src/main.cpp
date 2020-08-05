@@ -82,7 +82,6 @@ void eventloop(nvim::Nvim &nvim) {
             break;
         case 2:
             {
-                Object methodName;
                 // [type(2), method, params]
                 msgpack::type::tuple<int64_t, Object, Object> msg;
                 obj.convert(msg);
