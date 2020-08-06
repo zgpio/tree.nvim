@@ -558,13 +558,17 @@ function user_options()
 end
 
 local function internal_options()
+  local s = fn.getpos("'<")[2]
+  local e = fn.getpos("'>")[2]
+  cmd('delmarks <')
+  cmd('delmarks >')
   return {
     cursor=fn.line('.'),
     drives={},
     prev_bufnr=fn.bufnr('%'),
     prev_winid=fn.win_getid(),
-    visual_start=fn.getpos("'<")[2],
-    visual_end=fn.getpos("'>")[2],
+    visual_start=s,
+    visual_end=e,
   }
 end
 -- 一些设置没有必要传输, action_ctx/setting_ctx
