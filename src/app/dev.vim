@@ -58,7 +58,7 @@ func! s:set_tree() abort
   nnoremap <silent><buffer><expr> * tree#action('toggle_select_all')
   nnoremap <silent><buffer><expr> s tree#action('drop', 'split')
   nnoremap <silent><buffer><expr> <CR> tree#action('drop')
-  nnoremap <silent><buffer><expr> <Tab> tree#action('toggle_select') . 'j'
+  noremap <silent><buffer><expr> <Tab> tree#action('toggle_select') . 'j'
   nnoremap <silent><buffer><expr> <C-l> tree#action('redraw')
   nnoremap <silent><buffer><expr> <C-g> tree#action('print')
   nnoremap <silent><buffer><expr> E tree#action('open', 'vsplit')

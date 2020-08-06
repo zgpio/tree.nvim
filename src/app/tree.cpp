@@ -999,8 +999,14 @@ void Tree::_toggle_select(const int pos)
 }
 void Tree::toggle_select(const nvim::Array &args)
 {
-    const int pos = ctx.cursor - 1;
-    _toggle_select(pos);
+    if (ctx.visual_start < ctx.visual_end) {
+        for (int i = ctx.visual_start - 1; i < ctx.visual_end; ++i) {
+            _toggle_select(i);
+        }
+    } else {
+        const int pos = ctx.cursor - 1;
+        _toggle_select(pos);
+    }
 }
 void Tree::toggle_select_all(const nvim::Array &args)
 {
