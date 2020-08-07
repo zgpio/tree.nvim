@@ -682,7 +682,7 @@ void Tree::action(const string &action, const nvim::Array &args, const Map &cont
     if (search != action_map.end()) {
         (this->*action_map[action])(args);
     } else {
-        api->call_function("tree#util#print_message", {"Unknown Action: " + action});
+        api->async_execute_lua("tree.print_message(...)", {"Unknown Action: " + action});
     }
 }
 
@@ -692,6 +692,7 @@ void Tree::open_tree(const nvim::Array &args)
     const int l = ctx.cursor - 1;
     INFO("\n");
     assert(0 <= l && l < m_fileitem.size());
+    // TODO: It does not make sense to collapse the current root directory
     // if (l == 0) return;
     vector<string> ret;
     FileItem &cur = *m_fileitem[l];
@@ -1159,7 +1160,8 @@ void Tree::view(const nvim::Array &args)
     if (boost::filesystem::is_symlink(cur.p)) {
         info.insert({"symlink", boost::filesystem::canonical(cur.p).string()});
     }
-    api->command("lua require('tree/float')");
-    api->execute_lua("Tree_display(...)", {info});
+    // TODO: broken when hold on view if use sync rpc
+    api->async_command("lua require('tree/float')");
+    api->async_execute_lua("Tree_display(...)", {info});
 }
 }  // namespace tree
