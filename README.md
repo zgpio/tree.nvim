@@ -17,6 +17,7 @@
 
 ## Usage
 ![Demo](https://user-images.githubusercontent.com/19503791/86912092-f3326f00-c14e-11ea-9d98-b65563c1bd6c.png)
+![Demo](https://github.com/zgpio/demo/blob/master/tree_demo.gif)
 
 ### Config
 #### Step 1
