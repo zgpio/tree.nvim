@@ -179,7 +179,7 @@ void Cell::update_git(const FileItem &fi)
     string path = fi.p.string();
     // cout << "query:" << path;
     auto search = FileItem::git_map.find(path);
-    if (search != FileItem::git_map.end()) {
+    if (!fi.opened_tree && search != FileItem::git_map.end()) {
         auto key = search->second;
         text = git_indicators[key].first;
         color = key;
