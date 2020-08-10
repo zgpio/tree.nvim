@@ -617,32 +617,25 @@ void Tree::save_cursor()
 }
 void Tree::paste(const int ln, const string &src, const string &dest)
 {
-    if (is_directory(src)) {
-        if (paste_mode == COPY) {
-            copy(src, dest);
-            api->async_execute_lua("tree.print_message(...)", {"Copyed"});
+    if (paste_mode == COPY) {
+        copy(src, dest);
+        api->async_execute_lua("tree.print_message(...)", {"Copyed"});
+        if (is_directory(src)) {
             INFO("Copy Paste dir\n");
-            int pidx = find_parent(ln);
-            redraw_recursively(pidx);
-        } else if (paste_mode == MOVE) {
-            boost::filesystem::rename(src, dest);
-            INFO("Move Paste dir\n");
-            FileItem &root = *m_fileitem[0];
-            changeRoot(root.p.string());
-        }
-    } else {
-        if (paste_mode == COPY) {
-            copy(src, dest);
-            api->async_execute_lua("tree.print_message(...)", {"Copyed"});
+        } else {
             INFO("Copy Paste\n");
-            int pidx = find_parent(ln);
-            redraw_recursively(pidx);
-        } else if (paste_mode == MOVE) {
-            boost::filesystem::rename(src, dest);
-            INFO("Move Paste\n");
-            FileItem &root = *m_fileitem[0];
-            changeRoot(root.p.string());
         }
+        int pidx = find_parent(ln);
+        redraw_recursively(pidx);
+    } else if (paste_mode == MOVE) {
+        boost::filesystem::rename(src, dest);
+        if (is_directory(src)) {
+            INFO("Move Paste dir\n");
+        } else {
+            INFO("Move Paste\n");
+        }
+        FileItem &root = *m_fileitem[0];
+        changeRoot(root.p.string());
     }
     return;
 }
