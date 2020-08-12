@@ -617,6 +617,8 @@ void Tree::save_cursor()
 }
 void Tree::paste(const int ln, const string &src, const string &dest)
 {
+    // TODO: copy dir do not work
+    // https://stackoverflow.com/questions/8593608/how-can-i-copy-a-directory-using-boost-filesystem
     if (paste_mode == COPY) {
         copy(src, dest);
         api->async_execute_lua("tree.print_message(...)", {"Copyed"});
@@ -922,10 +924,16 @@ void Tree::yank_path(const nvim::Array &args)
 }
 void Tree::pre_remove(const nvim::Array &args)
 {
-    int cnt = targets.size();
-    Map farg;
-    farg.insert({"cnt", cnt == 0 ? 1 : cnt});
-    api->async_execute_lua("tree.pre_remove(...)", {bufnr, farg});
+    nvim::Array rmfiles;
+    for (const int pos : targets) {
+        rmfiles.push_back(m_fileitem[pos]->p.string());
+    }
+    // if there is no selection
+    if (rmfiles.size() == 0) {
+        FileItem &cur = *m_fileitem[ctx.cursor - 1];
+        rmfiles.push_back(cur.p.string());
+    }
+    api->async_execute_lua("tree.pre_remove(...)", {bufnr, rmfiles});
 }
 void Tree::remove()
 {

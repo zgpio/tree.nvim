@@ -120,10 +120,10 @@ function M.resume(bufnrs, cfg)
 end
 
 --- Drop file.
--- If the window corresponding to file is available, goto it;
--- otherwise, goto prev window and edit file.
--- @param file  string: file absolute path.
--- @return nil.
+--- If the window corresponding to file is available, goto it;
+--- otherwise, goto prev window and edit file.
+--@param file  string: file absolute path
+--@return nil
 function M.drop(args, file)
   local arg = args[1] or 'edit'
   local bufnr = call('bufnr', {file})
@@ -181,9 +181,17 @@ function M.pre_paste(pos, dest, src)
   rpcrequest('function', {"paste", {pos, src.path, ret}}, true)
 end
 
-function M.pre_remove(bufnr, info)
+--- Confirm remove files.
+--@param bufnr Number of tree buffer
+--@param rmfiles List of remove files
+--@return nil
+function M.pre_remove(bufnr, rmfiles)
   -- print(vim.inspect(info))
-  local msg = string.format('Are you sure to remove %d files?', info.cnt)
+  local cnt = #rmfiles
+  local msg = string.format('Are you sure to remove %d files?\n', cnt)
+  for _, f in ipairs(rmfiles) do
+    msg = msg .. f .. '\n'
+  end
   local choice = call('confirm', {msg, '&Yes\n&No\n&Cancel', 0})
 
   if choice == 1 then
