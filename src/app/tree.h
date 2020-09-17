@@ -81,7 +81,7 @@ class Tree
     vector<Cell> col_map[COLUMN_NR];
     unordered_map<string, bool> expandStore;
     unordered_map<string, int> cursorHistory;
-    list<int> targets;
+    list<int> m_targets;
     void hline(int sl, int el);
     int find_parent(int l);
     std::tuple<int, int> find_range(int l);

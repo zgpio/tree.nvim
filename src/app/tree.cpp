@@ -135,7 +135,7 @@ void Tree::changeRoot(const string &root)
     if (i != cfg.columns.end()) {
         FileItem::update_gmap(root);
     }
-    targets.clear();
+    m_targets.clear();
     erase_entrylist(0, m_fileitem.size());
 
     FileItem *fileitem = new FileItem(dir);
@@ -601,11 +601,11 @@ void Tree::handleNewFile(const string &input)
 /// 视图变化之后 targets 要更新
 void Tree::collect_targets()
 {
-    targets.clear();
+    m_targets.clear();
     for (int i = 0; i < m_fileitem.size(); ++i) {
         const FileItem &item = *m_fileitem[i];
         if (item.selected) {
-            targets.push_back(i);
+            m_targets.push_back(i);
         }
     }
 }
@@ -905,7 +905,7 @@ void Tree::debug(const nvim::Array &args)
 void Tree::yank_path(const nvim::Array &args)
 {
     vector<string> yank;
-    for (const int &pos : targets) {
+    for (const int &pos : m_targets) {
         yank.push_back(m_fileitem[pos]->p.string());
     }
     if (yank.size() == 0) {
@@ -925,7 +925,7 @@ void Tree::yank_path(const nvim::Array &args)
 void Tree::pre_remove(const nvim::Array &args)
 {
     nvim::Array rmfiles;
-    for (const int pos : targets) {
+    for (const int pos : m_targets) {
         rmfiles.push_back(m_fileitem[pos]->p.string());
     }
     // if there is no selection
@@ -939,7 +939,7 @@ void Tree::remove()
 {
     // TODO: cursor position after remove
     vector<string> rmfiles;
-    for (const int &pos : targets) {
+    for (const int &pos : m_targets) {
         rmfiles.push_back(m_fileitem[pos]->p.string());
     }
     if (rmfiles.size() == 0) {
@@ -948,8 +948,8 @@ void Tree::remove()
     }
     // Find the parent of first selection
     int parent = 0;
-    if (targets.size() > 0)
-        parent = find_parent(*targets.begin());
+    if (m_targets.size() > 0)
+        parent = find_parent(*m_targets.begin());
     else
         parent = find_parent(ctx.cursor - 1);
     for (const string &f : rmfiles) {
@@ -995,11 +995,11 @@ void Tree::_toggle_select(const int pos)
     if (item.selected) {
         cur.text = mark_indicators["selected_icon"];
         cur.color = BLUE;
-        targets.push_back(pos);
+        m_targets.push_back(pos);
     } else {
         cur.text = " ";
         cur.color = WHITE;
-        targets.remove(pos);
+        m_targets.remove(pos);
     }
 
     redraw_line(pos, pos + 1);
@@ -1025,7 +1025,7 @@ void Tree::_copy_or_move(const nvim::Array &args)
 {
     Tree::clipboard.clear();
 
-    for (const int &pos : targets) {
+    for (const int &pos : m_targets) {
         const FileItem *p = m_fileitem[pos]->parent;
         // NOTE: root item or parent selected
         if (p == nullptr || !p->selected)
