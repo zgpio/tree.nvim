@@ -485,6 +485,7 @@ end
 
 
 -------------------- start of init.vim --------------------
+g_servername = nil
 -- cant work in lua script
 -- print(vim.fn.expand('<sfile>'))
 local function init_channel()
@@ -499,7 +500,24 @@ local function init_channel()
   if M.linux() then
     cmd = {project_root .. '/bin/tree', servername}
   elseif M.windows() then
-    cmd = {project_root .. '\\bin\\tree-nvim.exe', '--server', servername}
+    local ip = '127.0.0.1'
+    if not g_servername then
+      local port = 6666
+      while not g_servername do
+        try {
+          function()
+            vim.fn.serverstart(ip..':'..tostring(port))
+            g_servername = port
+          end,
+          catch {
+            function(error)
+              port = port + 1
+            end
+          }
+        }
+      end
+    end
+    cmd = {project_root .. '\\bin\\tree.exe', tostring(g_servername)}
   elseif M.macos() then
     cmd = {project_root .. '/bin/tree', servername}
   end
@@ -507,7 +525,7 @@ local function init_channel()
   -- print('servername:', servername)
   -- print(inspect(cmd))
   fn.jobstart(cmd)
-  local N = 15
+  local N = 250
   local i = 0
   while i < N and M.channel_id == nil do
     C('sleep 4m')

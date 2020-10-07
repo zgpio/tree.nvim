@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
     std::locale::global(std::locale(""));
     nvim::Nvim nvim;
 #if defined(OS_WIN)
-    nvim.connect_tcp("localhost", "6666");
+    nvim.connect_tcp("localhost", argv[1]);
 #else
     nvim.connect_pipe(argv[1]);
 #endif
