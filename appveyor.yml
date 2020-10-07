@@ -50,7 +50,6 @@ build_script:
 - cd build
 - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=Release -DBoost_USE_STATIC_LIBS=ON -DCMAKE_INSTALL_PREFIX=../INSTALL %EXTRA_CMAKE_ARGS% ..
 - cmake --build . --config Release --target install
-# - windeployqt ../INSTALL/bin/tree.exe --no-plugins --no-translations
 test_script:
 - set PATH=%BOOST_ROOT%;%QTPATH%;%QTPATH%/bin;%PATH%
 - echo %PATH%
@@ -63,24 +62,14 @@ artifacts:
 deploy:
   - provider: GitHub
     description: Automated builds (Appveyor)
-    # release: $(appveyor_repo_tag_name)
+    release: $(appveyor_repo_tag_name)
     auth_token: $(GITHUB_OAUTH_TOKEN)
     # auth_token:
-    #   secure: Hx2tU6GZPZNB6qGjHcIqa1tEm8fVGXZUVfXyjboVrPcmA9OWMTXhLxayDzMMl3kD
+    #   secure:
     artifact: tree-windows.zip
     prerelease: false
     force_update: true
     on:
       APPVEYOR_REPO_TAG: true  # deploy on tag push only
       configuration: RelWithDebInfo
-      release_artifact: true
-  - provider: GitHub
-    description: Automated builds (Appveyor)
-    release: nightly
-    auth_token: $(GITHUB_OAUTH_TOKEN)
-    artifact: tree-windows.zip
-    prerelease: false
-    force_update: true
-    on:
-      configuration: RelWithDebInfo
-      release_artifact: true
+      # release_artifact: true
