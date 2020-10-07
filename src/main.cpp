@@ -108,8 +108,11 @@ int main(int argc, char *argv[])
     INFO("argc: %d, argv[1]: %s\n", argc, argv[1]);
     std::locale::global(std::locale(""));
     nvim::Nvim nvim;
-    // nvim.connect_tcp("localhost", "6666");
+#if defined(OS_WIN)
+    nvim.connect_tcp("localhost", "6666");
+#else
     nvim.connect_pipe(argv[1]);
+#endif
 
     string expr = "( 3 + 2 ) * 4";
     nvim::Object rv = nvim.eval(expr);
