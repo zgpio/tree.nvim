@@ -1,6 +1,6 @@
 -- vim: set sw=2 sts=4 et tw=78 foldmethod=indent:
 -- :luafile %
-local api = vim.api
+local a = vim.api
 local inspect = vim.inspect
 local fn = vim.fn
 local eval = vim.api.nvim_eval
@@ -87,7 +87,7 @@ function M.resume(bufnrs, cfg)
   elseif cfg.split == 'horizontal' then
     resize_cmd = string.format('resize %d', cfg.winheight)
   elseif cfg.split == 'floating' then
-    local winid = api.nvim_open_win(bufnr, true, {
+    local winid = a.nvim_open_win(bufnr, true, {
       relative='editor',
       row=cfg.winrow,
       col=cfg.wincol,
@@ -116,7 +116,7 @@ function M.resume(bufnrs, cfg)
   cmd("se nornu");
   cmd("se nolist");
   cmd("se signcolumn=no");
-  api.nvim_win_set_option(winid, 'wrap', false)
+  a.nvim_win_set_option(winid, 'wrap', false)
 end
 
 --- Drop file.
@@ -200,7 +200,7 @@ function M.pre_remove(bufnr, rmfiles)
 end
 
 function M.buf_attach(buf)
-  vim.api.nvim_buf_attach(buf, false, { on_detach = function()
+  a.nvim_buf_attach(buf, false, { on_detach = function()
     rpcrequest('function', {"on_detach", buf}, true)
   end })
 end
@@ -230,7 +230,7 @@ function M.call_tree(command, args)
   }
 end
 function M.print_error(s)
-  api.nvim_command(string.format("echohl Error | echomsg '[tree] %s' | echohl None", M.string(s)))
+  a.nvim_command(string.format("echohl Error | echomsg '[tree] %s' | echohl None", M.string(s)))
 end
 
 local function __re_unquoted_match(match)
@@ -403,19 +403,19 @@ function M.rename(args)
 end
 function M.error(str)
   local cmd = string.format('echomsg "[tree] %s"', str)
-  vim.api.nvim_command('echohl Error')
-  vim.api.nvim_command(cmd)
-  vim.api.nvim_command('echohl None')
+  a.nvim_command('echohl Error')
+  a.nvim_command(cmd)
+  a.nvim_command('echohl None')
 end
 function M.warning(str)
   local cmd = string.format('echomsg "[tree] %s"', str)
-  vim.api.nvim_command('echohl WarningMsg')
-  vim.api.nvim_command(cmd)
-  vim.api.nvim_command('echohl None')
+  a.nvim_command('echohl WarningMsg')
+  a.nvim_command(cmd)
+  a.nvim_command('echohl None')
 end
 function M.print_message(str)
   local cmd = string.format('echo "[tree] %s"', str)
-  vim.api.nvim_command(cmd)
+  a.nvim_command(cmd)
 end
 
 function rpcrequest(method, args, is_async)
@@ -456,7 +456,7 @@ function M.open(filename)
     -- For URI only.
     -- Note:
     --   # and % required to be escaped (:help cmdline-special)
-    vim.api.nvim_command(
+    a.nvim_command(
       printf("silent execute '!start rundll32 url.dll,FileProtocolHandler %s'", vim.fn.escape(filename, '#%')))
   elseif vim.fn.has('win32unix')==1 then
     -- Cygwin.
@@ -542,7 +542,7 @@ local function initialize()
 
   init_channel()
   -- NOTE: Exec VimL snippets in lua.
-  vim.api.nvim_exec([[
+  a.nvim_exec([[
     augroup tree
       autocmd!
     augroup END
@@ -650,7 +650,7 @@ function M.action(action, ...)
     args = {args}
   end
   local rv = string.format([[:\<C-u>call v:lua.call_async_action(%s, %s)\<CR>]], fn.string(action), fn.string(args))
-  return vim.api.nvim_replace_termcodes(rv, true, true, true)
+  return a.nvim_replace_termcodes(rv, true, true, true)
 end
 
 function M.call_action(action, ...)
@@ -701,11 +701,6 @@ function M.get_context()
   return rpcrequest('_tree_get_context', {}, false)
 end
 -------------------- end of tree.vim --------------------
-
-function M.rrequire(module)
-  package.loaded[module] = nil
-  return require(module)
-end
 
 if _TEST then
   -- Note: we prefix it with an underscore, such that the test function and real function have
