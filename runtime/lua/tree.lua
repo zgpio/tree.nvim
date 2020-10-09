@@ -709,6 +709,8 @@ if _TEST then
   M._set_custom = set_custom
   M._init_context = init_context
   M._initialize = initialize
+  M.__expand_complete = __expand_complete
+  M.custom = custom
 end
 
 tree = M

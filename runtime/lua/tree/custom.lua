@@ -46,7 +46,7 @@ end
 function M.source(source_name, name_or_dict, ...)
   local custom = M.get().source
 
-  for i, key in ipairs(fn.split(source_name, [[\s*,\s*]])) do
+  for i, key in ipairs(vim.fn.split(source_name, [[\s*,\s*]])) do
     if not custom[key] then
       custom[key] = {}
     end

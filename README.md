@@ -10,10 +10,11 @@
 - [NeoVim nightly](https://github.com/neovim/neovim/releases/tag/nightly)
 
 ## Features
-- NeoVim line-based highlight (`conceal` free).
-- High performance.
-- Defx's UI/API (minor revision).
-- For more information refer to [doc](runtime/doc/tree.txt).
+- Support Linux/MacOS/Windows
+- NeoVim line-based highlight (`conceal` free)
+- High performance
+- Defx's UI/API (minor revision)
+- For more information refer to [doc](runtime/doc/tree.txt)
 
 ## Usage
 ![Demo](https://user-images.githubusercontent.com/19503791/86912092-f3326f00-c14e-11ea-9d98-b65563c1bd6c.png)
