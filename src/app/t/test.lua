@@ -98,6 +98,22 @@ function t_init_context()
   }
   assert(vim.deep_equal(check, ctx))
 end
+
+function t__expand_complete()
+  local rv = tree.__expand_complete('~/fool/')
+  assert(rv == (vim.fn.expand('~')..'/fool/'))
+  rv = tree.__expand_complete('$HOME/fool/bar/')
+  print(rv)
+  assert(rv == (vim.fn.expand('~')..'/fool/bar/'))
+end
+function t__substitute_path_separator()
+  local rv = tree.__substitute_path_separator('a\\b\\c')
+  if tree._is_windows then
+    assert(rv == 'a/b/c')
+  end
+end
+
+t__expand_complete()
 t_custom_column()
 t_custom_option()
 t_custom_source()
@@ -106,3 +122,8 @@ t_init_context()
 tree._initialize()
 tree.error('test error function')
 tree.warning('test error function')
+tree.print_error('server dead')
+assert(type(tree.string(12)) == 'string')
+assert(type(tree.string('fool bar')) == 'string')
+-- How to reproduce swap file error
+vim.fn['tree#util#execute_path']('fool', 'bar')
