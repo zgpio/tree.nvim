@@ -222,8 +222,8 @@ function M.keymap(lhs, ...)
   local action_set = {
     copy=true, call=true, cd=true, drop=true, debug=true, execute_system=true,
     ['goto']=true, multi=true, move=true, new_file=true, print=true, paste=true,
-    open_or_close_tree=true, open_tree_recursive=true, open=true, rename=true, redraw=true, toggle_select=true,
-    toggle_ignored_files=true, toggle_select_all=true, view=true, yank_path=true
+    open_or_close_tree=true, open_tree_recursive=true, open=true, rename=true, redraw=true, remove=true,
+    toggle_select=true, toggle_ignored_files=true, toggle_select_all=true, view=true, yank_path=true
   }
   local action_list = {...}
   local autocmd = [[augroup tree_keymap
