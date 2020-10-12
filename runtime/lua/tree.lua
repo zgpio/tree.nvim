@@ -66,7 +66,7 @@ function M.resume(bufnrs, cfg)
       print('goto winid', winid)
       call('win_gotoid', {winid})
       find = true
-      break
+      return
     end
   end
 
@@ -205,7 +205,64 @@ function M.buf_attach(buf)
   end })
 end
 
+-- [first, last]
+function table.slice(tbl, first, last, step)
+  local sliced = {}
+  for i = first or 1, last or #tbl, step or 1 do
+    sliced[#sliced+1] = tbl[i]
+  end
+  return sliced
+end
 -------------------- start of util.vim --------------------
+--- keymap is shared for all tree buffer
+-- `:map <buffer>` to show keymap
+keymap = ''
+function M.keymap(lhs, ...)
+  -- TODO: call directly uses lua callback
+  local action_set = {
+    copy=true, call=true, cd=true, drop=true, debug=true, execute_system=true,
+    ['goto']=true, multi=true, move=true, new_file=true, print=true, paste=true,
+    open_or_close_tree=true, open_tree_recursive=true, open=true, rename=true, redraw=true, toggle_select=true,
+    toggle_ignored_files=true, toggle_select_all=true, view=true, yank_path=true
+  }
+  local action_list = {...}
+  local autocmd = [[augroup tree_keymap
+autocmd!
+autocmd FileType tree call Tree_set_keymap()
+augroup END
+func! Tree_set_keymap() abort
+]]
+  local head = [[nnoremap <silent><buffer> ]]..lhs..' '
+  local str = ''
+  for i, action in ipairs(action_list) do
+    local op, args
+    if type(action) == 'table' then
+      op = action[1]
+      args = table.slice(action, 2)
+    else
+      op = action
+      args = {}
+    end
+    for i, arg in ipairs(args) do
+      if type(arg) == 'function' then
+        -- NOTE: When the parameter of action is function, it should be evaluated every time
+        -- print(string.format('arg: %s is function', vim.inspect(arg)))
+      end
+    end
+    -- print(i, vim.inspect(action))
+    if action_set[op] then
+      str = str .. string.format([[:<C-u>call v:lua.call_async_action(%s, %s)<CR>]], fn.string(op), fn.string(args))
+    elseif vim.fn.exists(':'..op)==2 then
+      str = str .. ':'..op..'<CR>'
+    else
+      -- TODO: Support vim action parameters
+      str = str .. op
+    end
+  end
+  keymap = keymap .. head .. str .. "\n"
+  autocmd = autocmd .. keymap .. "\nendf"
+  vim.api.nvim_exec(autocmd, false)
+end
 function M.string(expr)
   if type(expr)=='string' then
     return expr
@@ -229,6 +286,12 @@ function M.call_tree(command, args)
     }
   }
 end
+
+function M.call(f)
+  local ctx = M.get_candidate()
+  a.nvim_call_function(f, {ctx})
+end
+
 function M.print_error(s)
   a.nvim_command(string.format("echohl Error | echomsg '[tree] %s' | echohl None", M.string(s)))
 end
@@ -672,7 +735,7 @@ function call_async_action(action, ...)
 
   local context = action_context()
   local args = ...
-  if type(args) ~= type({}) then
+  if type(args) ~= 'table' then
     args = {...}
   end
   rpcrequest('_tree_async_action', {action, args, context}, true)

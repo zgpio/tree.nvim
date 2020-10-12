@@ -662,7 +662,6 @@ std::unordered_map<string, Action> action_map{
     {"execute_system", &Tree::execute_system},
     {"rename", &Tree::rename},
     {"drop", &Tree::drop},
-    {"call", &Tree::call},
     {"view", &Tree::view},
     {"open_tree_recursive", &Tree::open_or_close_tree_recursively},
 };
@@ -832,13 +831,6 @@ void Tree::cd(const nvim::Array &args)
     } else {
         // changeRoot(QDir::home().absolutePath());
     }
-}
-void Tree::call(const nvim::Array &args)
-{
-    string func = args.at(0).as_string();
-    FileItem &cur = *m_fileitem[ctx.cursor - 1];
-    Map ctx = {{"targets", cur.p.string()}};
-    api->async_call_function(func, {ctx});
 }
 
 void Tree::print(const nvim::Array &args)

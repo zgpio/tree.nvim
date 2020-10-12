@@ -55,7 +55,6 @@ class Tree
     void open_or_close_tree_recursively(const ArgType &args);
     void open(const ArgType &args);
     void drop(const ArgType &args);
-    void call(const ArgType &args);
     void copy_(const ArgType &args);
     void _copy_or_move(const ArgType &args);
     void rename(const ArgType &args);
