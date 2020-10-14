@@ -945,11 +945,11 @@ void Tree::remove()
         rmfiles.push_back(cur.p.string());
     }
     // Find the parent of first selection
-    int parent = 0;
+    int pos = 0;
     if (m_targets.size() > 0)
-        parent = find_parent(*m_targets.begin());
+        pos = *m_targets.begin() - 1;
     else
-        parent = find_parent(ctx.cursor - 1);
+        pos = (ctx.cursor - 1) - 1;
     for (const string &f : rmfiles) {
         cout << f << endl;
         if (is_directory(f))
@@ -959,7 +959,7 @@ void Tree::remove()
     }
     FileItem &root = *m_fileitem[0];
     changeRoot(root.p.string());
-    api->async_win_set_cursor(0, {parent + 1, 0});
+    api->async_win_set_cursor(0, {pos + 1, 0});
 }
 void Tree::redraw(const nvim::Array &args)
 {
