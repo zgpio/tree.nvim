@@ -16,7 +16,12 @@ App::App(nvim::Nvim *nvim, int chan_id) : m_nvim(nvim), chan_id(chan_id)
     // NOTE: 必须同步调用
     a.execute_lua("require('tree').channel_id = ...", {chan_id});
     Tree::api = m_nvim;
+    init_highlight();
+}
 
+void App::init_highlight()
+{
+    auto &a = *m_nvim;
     // init highlight
     char name[40];
     char cmd[80];

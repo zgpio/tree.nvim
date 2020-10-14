@@ -15,6 +15,7 @@ class App
     void createTree(string &path);
     void handleNvimNotification(const string &method, const vector<nvim::Object> &args);
     void handleRequest(nvim::NvimRPC &rpc, uint64_t msgid, const string &method, const vector<nvim::Object> &args);
+    void init_highlight();
 
    private:
     nvim::Nvim *m_nvim;
