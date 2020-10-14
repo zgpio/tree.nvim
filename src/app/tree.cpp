@@ -136,7 +136,8 @@ void Tree::changeRoot(const string &root)
         FileItem::update_gmap(root);
     }
     m_targets.clear();
-    erase_entrylist(0, m_fileitem.size());
+    const auto old_size = m_fileitem.size();
+    erase_entrylist(0, old_size);
 
     FileItem *fileitem = new FileItem(dir);
     fileitem->level = -1;
@@ -159,6 +160,11 @@ void Tree::changeRoot(const string &root)
 
     insert_entrylist(child_fileitem, 1, ret);
 
+    // NOTE: The cursor will jump when replacing text with unequal lines
+    const auto new_size = m_fileitem.size();
+    if (new_size < old_size) {
+        buf_set_lines(new_size, old_size, true, {});
+    }
     buf_set_lines(0, -1, true, ret);
 
     hline(0, m_fileitem.size());
