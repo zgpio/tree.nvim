@@ -427,9 +427,9 @@ function complete(arglead, cmdline, cursorpos)
     local al = __expand_complete(arglead)
     -- Path names completion.
     local files = vim.tbl_filter(function(v) return vim.fn.stridx(v:lower(), al:lower()) == 0 end,
-      vim.tbl_map(function(v) return __substitute_path_separator(v) end, vim.fn.glob(arglead .. '*', true, true)))
+      vim.tbl_map(__substitute_path_separator, vim.fn.glob(arglead .. '*', true, true)))
     files = vim.tbl_map(
-      function(v) return __expand_complete(v) end,
+      __expand_complete,
       vim.tbl_filter(function(v) return vim.fn.isdirectory(v)==1 end, files))
     if arglead:find('^~') then
       local home_pattern = '^'.. __expand_complete('~')
@@ -563,8 +563,6 @@ end
 
 -------------------- start of init.vim --------------------
 g_servername = nil
--- cant work in lua script
--- print(vim.fn.expand('<sfile>'))
 local function init_channel()
   if fn.has('nvim-0.5') == 0 then
     print('tree requires nvim 0.5+.')
