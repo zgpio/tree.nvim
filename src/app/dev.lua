@@ -35,7 +35,6 @@ tree.keymap('x', 'execute_system')
 tree.keymap('<CR>', 'drop')
 tree.keymap('<C-l>', 'redraw')
 tree.keymap('<C-g>', 'print')
--- tree.keymap('cD', {'call', vim.fn.CallDemo})
 tree.keymap('>', 'toggle_ignored_files')
 tree.keymap('*', 'toggle_select_all')
 -- deprecated: multi
@@ -49,7 +48,9 @@ tree.keymap('~', 'cd')
 -- tree action and vim action
 tree.keymap('<Tab>', 'toggle_select', 'j')
 -- callable need to be evaluated every time
--- tree.keymap([[\]], {'cd', vim.fn.getcwd})
+tree.keymap([[\]], {'cd', vim.fn.getcwd})
+tree.keymap('cD', {'call', function(context) print(vim.inspect(context)) end})
+-- tree.keymap('cD', {'call', vim.fn.CallDemo})
 tree.keymap('l', 'open')
 tree.keymap('yy', 'yank_path')
 tree.keymap('D', 'debug')

@@ -13,20 +13,3 @@ nnoremap <silent> <Space>xdf :Tree -new -split=vertical -winwidth=20
 
 let spath = expand('<sfile>:h') .'/dev.lua'
 exe 'luafile ' . spath
-
-autocmd FileType tree call s:set_tree()
-
-function! CallDemo(context) abort
-  echom string(a:context)
-endfunction
-
-func! s:set_tree() abort
-  " Define mappings
-  " nnoremap <silent><buffer><expr> <Tab> winnr('$') != 1 ? ':<C-u>wincmd w<CR>' : ':<C-u>tree -buffer-name=temp -split=vertical<CR>'
-
-  nnoremap <silent><buffer> cD :<C-U>lua tree.call('CallDemo')<CR>
-  nnoremap <silent><buffer><expr> \ tree#action('cd', getcwd())
-
-  "nnoremap <silent><buffer><expr> j line('.') == line('$') ? 'gg' : 'j'
-  "nnoremap <silent><buffer><expr> k line('.') == 1 ? 'G' : 'k'
-endf

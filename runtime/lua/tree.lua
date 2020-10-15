@@ -79,7 +79,7 @@ function M.resume(bufnrs, cfg)
   local vertical = ''
   local command = 'sbuffer'
   if cfg.split == 'tab' then
-    cmd('tabnew')
+    cmd 'tabnew'
   end
   if cfg.split == 'vertical' then
     vertical = 'vertical'
@@ -112,10 +112,10 @@ function M.resume(bufnrs, cfg)
     cmd(resize_cmd)
   end
 
-  cmd("se nonu");
-  cmd("se nornu");
-  cmd("se nolist");
-  cmd("se signcolumn=no");
+  cmd "se nonu"
+  cmd "se nornu"
+  cmd "se nolist"
+  cmd "se signcolumn=no"
   a.nvim_win_set_option(winid, 'wrap', false)
 end
 
@@ -217,6 +217,7 @@ end
 --- keymap is shared for all tree buffer
 -- `:map <buffer>` to show keymap
 keymap = ''
+M.callback = {}
 function M.keymap(lhs, ...)
   -- TODO: call directly uses lua callback
   local action_set = {
@@ -234,6 +235,7 @@ func! Tree_set_keymap() abort
 ]]
   local head = [[nnoremap <silent><buffer> ]]..lhs..' '
   local str = ''
+  local expr = false
   for i, action in ipairs(action_list) do
     local op, args
     if type(action) == 'table' then
@@ -245,13 +247,23 @@ func! Tree_set_keymap() abort
     end
     for i, arg in ipairs(args) do
       if type(arg) == 'function' then
+        M.callback[lhs] = arg
+        expr = true
         -- NOTE: When the parameter of action is function, it should be evaluated every time
         -- print(string.format('arg: %s is function', vim.inspect(arg)))
       end
     end
     -- print(i, vim.inspect(action))
     if action_set[op] then
-      str = str .. string.format([[:<C-u>call v:lua.call_async_action(%s, %s)<CR>]], fn.string(op), fn.string(args))
+      if op == 'call' then
+          str = str .. string.format([[:<C-U>lua tree.call(tree.callback["%s"])<CR>]], vim.fn.escape(lhs, '\\'))
+      else
+        if expr then
+          str = str .. string.format([[:<C-u>call v:lua.call_async_action(%s, luaeval('tree.callback["%s"]()'))<CR>]], fn.string(op), vim.fn.escape(lhs, '\\'))
+        else
+          str = str .. string.format([[:<C-u>call v:lua.call_async_action(%s, %s)<CR>]], fn.string(op), fn.string(args))
+        end
+      end
     elseif vim.fn.exists(':'..op)==2 then
       str = str .. ':'..op..'<CR>'
     else
@@ -287,9 +299,11 @@ function M.call_tree(command, args)
   }
 end
 
+--@param f function
 function M.call(f)
   local ctx = M.get_candidate()
-  a.nvim_call_function(f, {ctx})
+  -- a.nvim_call_function(f, {ctx})
+  f(ctx)
 end
 
 function M.print_error(s)
