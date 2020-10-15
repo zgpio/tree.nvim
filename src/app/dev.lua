@@ -1,3 +1,6 @@
+vim.o.termguicolors = true
+vim.api.nvim_set_keymap('n', '<Space>z', ":<C-u>Tree -columns=mark:indent:git:icon:filename:size:time"..
+      " -split=vertical -direction=topleft -winwidth=40 -listed `expand('%:p:h')`<CR>", {noremap=true, silent=true})
 local custom = require 'tree/custom'
 custom.option('_', {root_marker='[in]:', })
 custom.column('filename', {

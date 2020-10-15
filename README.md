@@ -35,7 +35,7 @@ set rtp+=/path/to/tree.nvim/
 " Start user configuration
 " ...
 ```
-User configuration ref to [config.vim](src/app/dev.vim).
+User configuration ref to [config.lua](src/app/dev.lua).
 
 ## Build
 ### macos
