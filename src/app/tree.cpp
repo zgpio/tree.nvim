@@ -785,6 +785,17 @@ void Tree::open(const nvim::Array &args)
 
 void Tree::rename(const nvim::Array &args)
 {
+    collect_targets();
+    if (m_targets.size() > 1) {
+        nvim::Array items;
+        for (auto i : m_targets) {
+            const FileItem &fi = *m_fileitem[i];
+            nvim::Map item = {{"action__path", fi.p.string()}};
+            items.push_back(item);
+        }
+        api->async_call_function("tree#exrename#create_buffer", {items, nvim::Map{{"buffer_name", "defx"}}});
+        return;
+    }
     FileItem &cur = *m_fileitem[ctx.cursor - 1];
     string info = cur.p.string();
     nvim::Dictionary cfg{{"prompt", "Rename: " + info + " -> "},
@@ -902,6 +913,7 @@ void Tree::debug(const nvim::Array &args)
 }
 void Tree::yank_path(const nvim::Array &args)
 {
+    collect_targets();
     vector<string> yank;
     for (const int &pos : m_targets) {
         yank.push_back(m_fileitem[pos]->p.string());
@@ -922,6 +934,7 @@ void Tree::yank_path(const nvim::Array &args)
 }
 void Tree::pre_remove(const nvim::Array &args)
 {
+    collect_targets();
     nvim::Array rmfiles;
     for (const int pos : m_targets) {
         rmfiles.push_back(m_fileitem[pos]->p.string());
@@ -935,6 +948,7 @@ void Tree::pre_remove(const nvim::Array &args)
 }
 void Tree::remove()
 {
+    collect_targets();
     // TODO: cursor position after remove
     vector<string> rmfiles;
     for (const int &pos : m_targets) {
@@ -1021,6 +1035,7 @@ void Tree::toggle_select_all(const nvim::Array &args)
 }
 void Tree::_copy_or_move(const nvim::Array &args)
 {
+    collect_targets();
     Tree::clipboard.clear();
 
     for (const int &pos : m_targets) {
