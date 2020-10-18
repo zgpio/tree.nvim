@@ -63,17 +63,9 @@ void App::init_highlight()
     }
 }
 
-void App::createTree(string &path)
+void App::createTree(int bufnr, string &path)
 {
-    static int count = 0;
     auto &b = m_nvim;
-
-    int bufnr = b->create_buf(false, true);
-    char name[64];
-    sprintf(name, "Tree-%d", count);
-    string bufname(name);
-    b->async_buf_set_name(bufnr, bufname);
-    count++;
 
     int ns_id = b->create_namespace("tree_icon");
     if (path.back() == '/')  // path("/foo/bar/").parent_path();    // "/foo/bar"
@@ -90,9 +82,7 @@ void App::createTree(string &path)
 
     b->async_buf_set_option(bufnr, "buflisted", tree.cfg.listed);
     nvim::Dictionary tree_cfg{
-        {"winwidth", tree.cfg.winwidth}, {"winheight", tree.cfg.winheight}, {"split", tree.cfg.split.c_str()},
-        {"new", tree.cfg.new_},          {"toggle", tree.cfg.toggle},       {"direction", tree.cfg.direction.c_str()},
-        {"winrow", tree.cfg.winrow},     {"wincol", tree.cfg.wincol},
+        {"toggle", tree.cfg.toggle},
     };
     b->execute_lua("tree.resume(...)", {m_ctx.prev_bufnr, tree_cfg});
 }
@@ -171,10 +161,10 @@ void App::handleRequest(nvim::NvimRPC &rpc, uint64_t msgid, const string &method
         m_cfgmap = args[1].as_multimap();
         auto *b = m_nvim;
 
-        auto search = m_cfgmap.find("new");
-        if (trees.size() < 1 || (search != m_cfgmap.end() && search->second.as_bool())) {
+        auto search = m_cfgmap.find("bufnr");
+        if (search != m_cfgmap.end()) {
             // TODO: createTree时存在request和此处的response好像产生冲突
-            createTree(path);
+            createTree(search->second.as_uint64_t(), path);
         } else {
             // NOTE: Resume tree buffer by default.
             // TODO: consider to use treebufs[0]
@@ -197,10 +187,7 @@ void App::handleRequest(nvim::NvimRPC &rpc, uint64_t msgid, const string &method
                 bufnrs.push_back(item);
 
             Map tree_cfg = {
-                {"winwidth", tree.cfg.winwidth},   {"winheight", tree.cfg.winheight},
-                {"split", tree.cfg.split.c_str()}, {"new", tree.cfg.new_},
-                {"toggle", tree.cfg.toggle},       {"direction", tree.cfg.direction.c_str()},
-                {"winrow", tree.cfg.winrow},       {"wincol", tree.cfg.wincol},
+                {"toggle", tree.cfg.toggle},
             };
 
             b->async_execute_lua("tree.resume(...)", {bufnrs, tree_cfg});

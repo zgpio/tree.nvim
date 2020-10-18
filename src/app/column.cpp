@@ -367,20 +367,10 @@ void Config::update(const Map &ctx)
         // cout << __FUNCTION__ << k << " type: "<< type_name(v)<< endl;
         if (k == "auto_recursive_level") {
             auto_recursive_level = v.as_int64_t();
-        } else if (k == "wincol") {
-            wincol = v.as_uint64_t();
-        } else if (k == "winheight") {
-            winheight = v.as_int64_t();
-        } else if (k == "winrow") {
-            winrow = v.as_uint64_t();
-        } else if (k == "winwidth") {
-            winwidth = v.as_uint64_t();
         } else if (k == "auto_cd") {
             auto_cd = v.as_bool();
         } else if (k == "listed") {
             listed = v.as_bool();
-        } else if (k == "new") {
-            new_ = v.as_bool();
         } else if (k == "profile") {
             profile = v.as_bool();
         } else if (k == "show_ignored_files") {
@@ -389,10 +379,6 @@ void Config::update(const Map &ctx)
             toggle = v.as_bool();
         } else if (k == "root_marker") {
             root_marker = v.as_string();
-        } else if (k == "buffer_name") {
-            buffer_name = v.as_string();
-        } else if (k == "direction") {
-            direction = v.as_string();
         } else if (k == "ignored_files") {
             ignored_files = v.as_string();
         } else if (k == "search") {
@@ -401,10 +387,6 @@ void Config::update(const Map &ctx)
             session_file = v.as_string();
         } else if (k == "sort") {
             sort = v.as_string();
-        } else if (k == "winrelative") {
-            winrelative = v.as_string();
-        } else if (k == "split") {
-            split = v.as_string();
         } else if (k == "columns") {
             vector<string> tokens;
             ssplit(v.as_string(), tokens, ":");

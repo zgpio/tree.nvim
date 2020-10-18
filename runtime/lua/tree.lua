@@ -32,6 +32,16 @@ end
 
 local M = {}
 
+local default_etc_options = {
+  winheight=30,
+  winwidth=50,
+  split='no', -- {"vertical", "horizontal", "no", "tab", "floating"}
+  winrelative='editor',
+  buffer_name='default',
+  direction='',
+  search='',
+  new=false,
+}
 --- Resume tree window.
 -- If the window corresponding to bufnrs is available, goto it;
 -- otherwise, create a new window.
@@ -71,6 +81,7 @@ function M.resume(bufnrs, cfg)
   end
 
   local bufnr = treebufs[1]
+  local etc = M.etc_options[bufnr]
   local resize_cmd, str
   -- local no_split = false
   -- if cfg.split == 'no' or cfg.split == 'tab' or cfg.split == 'floating' then
@@ -78,29 +89,30 @@ function M.resume(bufnrs, cfg)
   -- end
   local vertical = ''
   local command = 'sbuffer'
-  if cfg.split == 'tab' then
+  if etc.split == 'tab' then
     cmd 'tabnew'
   end
-  if cfg.split == 'vertical' then
+  if etc.split == 'vertical' then
     vertical = 'vertical'
-    resize_cmd = string.format('vertical resize %d', cfg['winwidth'])
-  elseif cfg.split == 'horizontal' then
-    resize_cmd = string.format('resize %d', cfg.winheight)
-  elseif cfg.split == 'floating' then
+    resize_cmd = string.format('vertical resize %d', etc.winwidth)
+  elseif etc.split == 'horizontal' then
+    resize_cmd = string.format('resize %d', etc.winheight)
+  elseif etc.split == 'floating' then
     local winid = a.nvim_open_win(bufnr, true, {
       relative='editor',
-      row=cfg.winrow,
-      col=cfg.wincol,
-      width=cfg.winwidth,
-      height=cfg.winheight,
+      anchor='NW',
+      row=0,  -- etc.winrow
+      col=0,  -- etc.wincol
+      width=etc.winwidth,
+      height=etc.winheight,
     })
   else
     command = 'buffer'
   end
 
-  if cfg.split ~= 'floating' then
+  if etc.split ~= 'floating' then
     local direction = 'topleft'
-    if cfg.direction == 'botright' then
+    if etc.direction == 'botright' then
       direction = 'botright'
     end
     str = string.format("silent keepalt %s %s %s %d", direction, vertical, command, bufnr)
@@ -202,6 +214,8 @@ end
 function M.buf_attach(buf)
   a.nvim_buf_attach(buf, false, { on_detach = function()
     rpcrequest('function', {"on_detach", buf}, true)
+    M.alive_buf_cnt = M.alive_buf_cnt - 1
+    M.etc_options[buf] = nil
   end })
 end
 
@@ -627,6 +641,7 @@ local function initialize()
   M.tree_histories = {}
 end
 
+-- options = core + etc
 local function user_var_options()
   return {
     wincol=math.modf(vim.o.columns/4),
@@ -637,25 +652,17 @@ function user_options()
   return vim.tbl_extend('force', {
     auto_cd=false,
     auto_recursive_level=0,
-    buffer_name='default',
     columns='mark:indent:icon:filename:size',
-    direction='',
     ignored_files='.*',
     listed=false,
-    new=false,
     profile=false,
     resume=false,
     root_marker='[in]: ',
-    search='',
     session_file='',
     show_ignored_files=false,
-    split='no',
     sort='filename',
     toggle=false,
-    winheight=30,
-    winrelative='editor',
-    winwidth=90,
-  }, user_var_options())
+  }, user_var_options(), default_etc_options)
 end
 
 local function internal_options()
@@ -665,17 +672,18 @@ local function internal_options()
   cmd('delmarks >')
   return {
     cursor=fn.line('.'),
-    drives={},
+    -- drives={},
     prev_bufnr=fn.bufnr('%'),
     prev_winid=fn.win_getid(),
     visual_start=s,
     visual_end=e,
   }
 end
--- 一些设置没有必要传输, action_ctx/setting_ctx
+-- Transfer action context to server when perform action
+-- Transfer core options when _tree_start
 local function init_context(user_context)
   local buffer_name = user_context.buffer_name or 'default'
-  local context = user_var_options()
+  local context = {}  -- TODO: move user_var_options to etc options
   local custom = vim.deepcopy(custom.get())
   -- NOTE: Avoid empty custom.column being converted to vector
   if vim.tbl_isempty(custom.column) then
@@ -702,12 +710,31 @@ end
 -------------------- end of init.vim --------------------
 
 -------------------- start of tree.vim --------------------
+-- NOTE: The buffer creation is done by the lua side
+M.alive_buf_cnt = 0
+M.etc_options = {}
+local count = 0
 function start(paths, user_context)
   initialize()
   local context = init_context(user_context)
   local paths = fn.map(paths, "fnamemodify(v:val, ':p')")
   if #paths == 0 then
     paths = {fn.expand('%:p:h')}
+  end
+  if M.alive_buf_cnt < 1 or user_context.new then
+    local buf = a.nvim_create_buf(false, true)
+    local bufname = "Tree-" .. tostring(count)
+    a.nvim_buf_set_name(buf, bufname);
+    count = count + 1
+    M.alive_buf_cnt = M.alive_buf_cnt + 1
+    local etc_opts = vim.deepcopy(default_etc_options)
+    for k, v in pairs(default_etc_options) do
+      if context[k] then
+        etc_opts[k] = context[k]
+      end
+    end
+    M.etc_options[buf] = etc_opts
+    context.bufnr = buf
   end
   rpcrequest('_tree_start', {paths, context}, false)
   -- TODO: 检查 search 是否存在

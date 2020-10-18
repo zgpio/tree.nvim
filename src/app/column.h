@@ -132,16 +132,7 @@ class Config
     string sort = "";
 
     bool listed = false;
-    string buffer_name = "default";
 
-    string direction = "";
-    string split = "no";  // {"vertical", "horizontal", "no", "tab", "floating"}
-    string winrelative = "editor";
-    int winheight = 30;
-    int winwidth = 50;
-    int wincol = 0;
-    int winrow = 0;
-    bool new_ = false;
     bool toggle = false;
 
     int filename_colstop = 40;
