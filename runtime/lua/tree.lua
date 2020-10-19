@@ -32,16 +32,20 @@ end
 
 local M = {}
 
-local default_etc_options = {
-  winheight=30,
-  winwidth=50,
-  split='no', -- {"vertical", "horizontal", "no", "tab", "floating"}
-  winrelative='editor',
-  buffer_name='default',
-  direction='',
-  search='',
-  new=false,
-}
+local function default_etc_options()
+  return {
+    winheight=30,
+    winwidth=50,
+    split='no', -- {"vertical", "horizontal", "no", "tab", "floating"}
+    winrelative='editor',
+    buffer_name='default',
+    direction='',
+    search='',
+    new=false,
+    wincol=math.modf(vim.o.columns/4),
+    winrow=math.modf(vim.o.lines/3)
+  }
+end
 --- Resume tree window.
 -- If the window corresponding to bufnrs is available, goto it;
 -- otherwise, create a new window.
@@ -301,13 +305,13 @@ function M.call_tree(command, args)
   try {
     function()
       call_async_action('redraw', {})  -- trigger exception when server dead
-      start(paths, context)
+      M.start(paths, context)
     end,
     catch {
       function(error)
         print('restart tree.nvim server')
         M.channel_id = nil
-        start(paths, context)
+        M.start(paths, context)
       end
     }
   }
@@ -430,7 +434,7 @@ function complete(arglead, cmdline, cursorpos)
     local bt = vim.tbl_map(function(v) return '-' .. vim.fn.tr(v, '_', '-') end, copy(bool_options))
     vim.list_extend(_, bt)
     local string_options = vim.tbl_keys(map_filter(
-      function(k, v) return type(v) ~= type(true) end, copy(user_options())))
+      function(k, v) return type(v) ~= 'boolean' end, copy(user_options())))
     local st = vim.tbl_map(function(v) return '-' .. vim.fn.tr(v, '_', '-') .. '=' end, copy(string_options))
     vim.list_extend(_, st)
 
@@ -576,7 +580,7 @@ end
 
 
 -------------------- start of init.vim --------------------
-g_servername = nil
+M.servername = nil
 local function init_channel()
   if fn.has('nvim-0.5') == 0 then
     print('tree requires nvim 0.5+.')
@@ -590,13 +594,13 @@ local function init_channel()
     cmd = {project_root .. '/bin/tree', servername}
   elseif M.windows() then
     local ip = '127.0.0.1'
-    if not g_servername then
+    if not M.servername then
       local port = 6666
-      while not g_servername do
+      while not M.servername do
         try {
           function()
             vim.fn.serverstart(ip..':'..tostring(port))
-            g_servername = port
+            M.servername = port
           end,
           catch {
             function(error)
@@ -606,7 +610,7 @@ local function init_channel()
         }
       end
     end
-    cmd = {project_root .. '\\bin\\tree.exe', tostring(g_servername)}
+    cmd = {project_root .. '\\bin\\tree.exe', tostring(M.servername)}
   elseif M.macos() then
     cmd = {project_root .. '/bin/tree', servername}
   end
@@ -642,12 +646,6 @@ local function initialize()
 end
 
 -- options = core + etc
-local function user_var_options()
-  return {
-    wincol=math.modf(vim.o.columns/4),
-    winrow=math.modf(vim.o.lines/3)
-  }
-end
 function user_options()
   return vim.tbl_extend('force', {
     auto_cd=false,
@@ -662,14 +660,14 @@ function user_options()
     show_ignored_files=false,
     sort='filename',
     toggle=false,
-  }, user_var_options(), default_etc_options)
+  }, default_etc_options())
 end
 
 local function internal_options()
   local s = fn.getpos("'<")[2]
   local e = fn.getpos("'>")[2]
-  cmd('delmarks <')
-  cmd('delmarks >')
+  cmd 'delmarks <'
+  cmd 'delmarks >'
   return {
     cursor=fn.line('.'),
     -- drives={},
@@ -682,24 +680,22 @@ end
 -- Transfer action context to server when perform action
 -- Transfer core options when _tree_start
 local function init_context(user_context)
-  local buffer_name = user_context.buffer_name or 'default'
-  local context = {}  -- TODO: move user_var_options to etc options
+  local ctx = {}
   local custom = vim.deepcopy(custom.get())
   -- NOTE: Avoid empty custom.column being converted to vector
   if vim.tbl_isempty(custom.column) then
     custom.column = nil
   end
   if custom.option._ then
-    context = vim.tbl_extend('force', context, custom.option._)
+    ctx = vim.tbl_extend('force', ctx, custom.option._)
     custom.option._ = nil
   end
   if custom.option.buffer_name then
-    context = vim.tbl_extend('force', context, custom.option.buffer_name)
+    ctx = vim.tbl_extend('force', ctx, custom.option.buffer_name)
   end
-  context = vim.tbl_extend('force', context, user_context)
-  -- TODO: support custom#column
-  context.custom = custom
-  return context
+  ctx = vim.tbl_extend('force', ctx, user_context)
+  ctx.custom = custom
+  return ctx
 end
 
 local function action_context()
@@ -714,47 +710,35 @@ end
 M.alive_buf_cnt = 0
 M.etc_options = {}
 local count = 0
-function start(paths, user_context)
+function M.start(paths, user_ctx)
   initialize()
-  local context = init_context(user_context)
+  local ctx = init_context(user_ctx)
   local paths = fn.map(paths, "fnamemodify(v:val, ':p')")
   if #paths == 0 then
     paths = {fn.expand('%:p:h')}
   end
-  if M.alive_buf_cnt < 1 or user_context.new then
+  if M.alive_buf_cnt < 1 or user_ctx.new then
     local buf = a.nvim_create_buf(false, true)
     local bufname = "Tree-" .. tostring(count)
     a.nvim_buf_set_name(buf, bufname);
     count = count + 1
     M.alive_buf_cnt = M.alive_buf_cnt + 1
-    local etc_opts = vim.deepcopy(default_etc_options)
-    for k, v in pairs(default_etc_options) do
-      if context[k] then
-        etc_opts[k] = context[k]
+    local etc = default_etc_options()
+    for k, v in pairs(etc) do
+      if ctx[k] then
+        etc[k] = ctx[k]
       end
     end
-    M.etc_options[buf] = etc_opts
-    context.bufnr = buf
+    M.etc_options[buf] = etc
+    ctx.bufnr = buf
   end
-  rpcrequest('_tree_start', {paths, context}, false)
-  -- TODO: 检查 search 是否存在
+  rpcrequest('_tree_start', {paths, ctx}, false)
+  -- TODO: search path
   -- if context['search'] !=# ''
   --   call tree#call_action('search', [context['search']])
   -- endif
 end
 
-function M.call_action(action, ...)
-  if vim.bo.filetype ~= 'tree' then
-    return
-  end
-
-  local context = action_context()
-  local args = ...
-  if type(args) ~= type({}) then
-    args = {...}
-  end
-  rpcrequest('_tree_do_action', {action, args, context}, false)
-end
 function call_async_action(action, ...)
   if vim.bo.filetype ~= 'tree' then
     return
