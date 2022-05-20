@@ -105,3 +105,8 @@ mkdir build && cd build
 cmake -DCMAKE_INSTALL_PREFIX=./INSTALL -DBoost_USE_STATIC_LIBS=ON -DCMAKE_BUILD_TYPE=Release  ..
 make install
 ```
+### Windows
+```sh
+cmake -DCMAKE_BUILD_TYPE=Release -DBoost_USE_STATIC_LIBS=ON -DCMAKE_INSTALL_PREFIX="C:/Users/xxx/tree.nvim/INSTALL" ..
+cmake --build . --config Release --target install
+```

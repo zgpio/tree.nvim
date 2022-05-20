@@ -18,6 +18,9 @@ else()
     add_subdirectory(external)
 endif()
 
+# https://stackoverflow.com/questions/47690822/possible-to-force-cmake-msvc-to-use-utf-8-encoding-for-source-files-without-a-bo
+# https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html#manual:cmake-generator-expressions(7)
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 include_directories(
     include
     gen

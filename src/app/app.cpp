@@ -48,7 +48,7 @@ void App::init_highlight()
 
     for (int i = 0; i < 83; ++i) {
         sprintf(name, "tree_%d_%d", ICON, i);
-        sprintf(cmd, "hi %s guifg=%s", name, icons[i].second.data());
+        sprintf(cmd, "hi %s guifg=#%s", name, icons[i].second.data());
         a.command(cmd);
     }
     for (int i = 0; i < 16; ++i) {

@@ -21,6 +21,7 @@ with open(f"{self_dir}/transform.cpp", "w") as f:
             f.write('pair<string, string> icons[] = {\n')
             for k, v in val.items():
                 code = v['code']
+                # TODO: remove #
                 color = v['color']
                 print(k, code, color)
                 line = f'    {{"{code}", "{color}"}},\n'
