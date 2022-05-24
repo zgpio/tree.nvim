@@ -547,7 +547,7 @@ function M.open(filename)
   local printf = string.format
 
   -- Detect desktop environment.
-  if tree.windows() then
+  if M.windows() then
     -- For URI only.
     -- Note:
     --   # and % required to be escaped (:help cmdline-special)
@@ -568,9 +568,12 @@ function M.open(filename)
   elseif executable('exo-open')==1 then
     -- Xfce.
     system(printf('exo-open %s &', shellescape(filename)))
-  elseif tree.macos() and executable('open')==1 then
+  elseif M.macos() and executable('open')==1 then
     -- Mac OS.
     system(printf('open %s &', shellescape(filename)))
+  elseif executable('explorer.exe') then
+    -- https://superuser.com/questions/1338991/how-to-open-windows-explorer-from-current-working-directory-of-wsl-shell
+    system('explorer.exe `wslpath -w "$PWD"`')
   else
     -- Give up.
     M.print_error('Not supported.')
