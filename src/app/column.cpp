@@ -192,7 +192,7 @@ void Cell::update_size(const FileItem &fi)
     if (is_regular_file(fi.p)) {
         auto sz = boost::filesystem::file_size(fi.p);
 
-        char text[8];
+        char text[32] = "\0";
         if (0 <= sz && sz < 1024) {
             sprintf(text, "%4lu  B", sz);
         } else if (1024 <= sz && sz < (2 << 20)) {

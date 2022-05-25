@@ -460,6 +460,7 @@ void Tree::entryInfoListRecursively(const FileItem &item, vector<FileItem *> &fi
             } else
                 fileitem_lst.push_back(fileitem);
         } catch (std::exception &e) {
+            INFO("-------> %s\n", e.what());
             continue;
         }
     }
