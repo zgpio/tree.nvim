@@ -620,7 +620,13 @@ local function init_channel()
   -- print('bin:', bin)
   -- print('servername:', servername)
   -- print(inspect(cmd))
-  fn.jobstart(cmd)
+  if M.DEBUG then
+    if M.linux() then
+      vim.api.nvim_command(':terminal '..project_root..'/bin/tree '..servername)
+    end
+  else
+    fn.jobstart(cmd)
+  end
   local N = 250
   local i = 0
   while i < N and M.channel_id == nil do
