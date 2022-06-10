@@ -623,6 +623,8 @@ local function init_channel()
   if M.DEBUG then
     if M.linux() then
       vim.api.nvim_command(':terminal '..project_root..'/bin/tree '..servername)
+    elseif M.windows() then
+      vim.api.nvim_command(':terminal '..project_root..'\\bin\\tree.exe '..tostring(M.servername))
     end
   else
     fn.jobstart(cmd)
