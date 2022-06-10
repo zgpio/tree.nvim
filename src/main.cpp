@@ -1,3 +1,4 @@
+#include <string.h>
 #include "nvim.hpp"
 #include "app/app.h"
 #include "util.h"
@@ -103,10 +104,27 @@ void eventloop(nvim::Nvim &nvim) {
     }
 }
 
+bool is_gbk()
+{
+    char gbk[] = ".936";
+    char* lc = setlocale(LC_ALL, NULL);
+    if (strlen(lc) < strlen(gbk)) {
+        return false;
+    }
+    else if (strstr(lc, gbk)) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 int main(int argc, char *argv[])
 {
     INFO("argc: %d, argv[1]: %s\n", argc, argv[1]);
     std::locale::global(std::locale(""));
+    IS_GBK = is_gbk();
+    INFO("IS_GBK: %d\n", IS_GBK);
     nvim::Nvim nvim;
 #if defined(OS_WIN)
     nvim.connect_tcp("localhost", argv[1]);
